@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Cisco – CCS</title>
+  <!-- Estilo do Relatorio CCO -->
+  <link rel="icon" type="image/png" href="https://i.imgur.com/8qVGalo.png">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+        font-family: 'Inter', sans-serif;
+        background-image: url('https://images.unsplash.com/photo-1749150270018-1dee5a5e4b88?q=80&w=1170&auto=format&fit=crop&ixlibrb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');
+        background-size: cover;
+        background-repeat: no-repeat;
+        background-position: center;
+        background-attachment: fixed;
+    }
+    .content-box {
+        background-color: rgba(30, 41, 59, 0.75); /* bg-slate-800 bg-opacity-75 */
+        backdrop-filter: blur(4px); /* backdrop-blur-sm */
+        border-radius: 0.75rem; /* rounded-xl */
+        padding: 2rem; /* p-8 */
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); /* shadow-2xl */
+        color: white;
+        width: 90%;
+        max-width: 900px;
+        margin: 2rem auto; /* center it */
+    }
+    input, select, button, textarea {
+        background-color: #E5E7EB; /* bg-gray-200 */
+        color: #111827; /* text-gray-900 */
+        border-radius: 0.375rem; /* rounded-md */
+        padding: 0.5rem 0.75rem; /* px-3 py-2 */
+        border: 1px solid #D1D5DB; /* border-gray-300 */
+        width: 100%;
+    }
+    input::placeholder, textarea::placeholder { color: #9ca3af; /* placeholder-gray-400 */ }
+    input:focus, select:focus, textarea:focus {
+        outline: 2px solid transparent;
+        outline-offset: 2px;
+        border-color: #4F46E5; /* ring-indigo-500 */
+        box-shadow: 0 0 0 2px #4F46E5;
+        background-color: #F9FAFB; /* bg-gray-50 */
+    }
+    label {
+        display: block;
+        margin-bottom: 0.5rem; /* mb-2 */
+        font-weight: 500; /* font-medium */
+        color: #D1D5DB; /* text-gray-300 */
+    }
+    button {
+        background-color: #3B82F6; /* bg-blue-600 */
+        color: white;
+        font-weight: 600; /* font-semibold */
+        transition: background-color 0.2s ease-in-out;
+        cursor: pointer;
+    }
+    button:hover { background-color: #2563EB; /* hover:bg-blue-700 */ }
+    .btn-voltar {
+        background-color: #4B5563; /* bg-gray-600 */
+        color: white;
+        text-decoration: none;
+        padding: 0.5rem 1rem;
+        border-radius: 0.375rem;
+        display: inline-block;
+        transition: background-color 0.2s ease-in-out;
+        font-weight: 500;
+        font-size: 0.875rem; /* text-sm */
+        line-height: 1.25rem;
+    }
+    .btn-voltar:hover { background-color: #6B7280; /* hover:bg-gray-500 */ }
+    pre {
+        background-color: #1F2937; /* bg-gray-800 */
+        border: 1px solid #4B5563; /* border-gray-600 */
+        padding: 1rem;
+        border-radius: 0.5rem; /* rounded-lg */
+        overflow-x: auto;
+        color: #E5E7EB; /* text-gray-200 */
+    }
+    /* Estilos para os botões do result.js */
+    #result-buttons button {
+        background-color: #10B981; /* bg-emerald-500 */
+        font-size: 0.875rem;
+        padding: 0.5rem 1rem;
+    }
+    #result-buttons button:hover {
+        background-color: #059669; /* hover:bg-emerald-600 */
+    }
+    #result-buttons button:last-child {
+        background-color: #0EA5E9; /* bg-sky-500 */
+    }
+    #result-buttons button:last-child:hover {
+        background-color: #0284C7; /* hover:bg-sky-600 */
+    }
+
+
+     /*balao de instruções*/
+
+    .help-fab {
+    position: fixed; right: 24px; bottom: 24px;
+    width: 44px; height: 44px; border-radius: 999px;
+    border: 1px solid #3a3a3a; background:#1a1a1d; color:#eee;
+    font-weight: 700; cursor: pointer;
+    display:flex; align-items:center; justify-content:center;
+    box-shadow: 0 6px 20px rgba(0,0,0,.35); z-index: 1000;
+  }
+  .help-fab:focus { outline: 2px solid #3a3a3a; outline-offset: 2px; }
+
+  .help-bubble {
+    position: fixed; right: 24px; bottom: 84px; /* acima do FAB */
+    max-width: 420px; padding: 14px 16px;
+    border-radius: 14px; background:#101014; color:#eee;
+    border:1px solid #2a2a2a; box-shadow: 0 14px 40px rgba(0,0,0,.5);
+    z-index: 1000; display:none;
+  }
+  .help-bubble::after {
+    content: ""; position:absolute; right: 18px; bottom:-10px;
+    border-width:10px; border-style:solid;
+    border-color:#101014 transparent transparent transparent; /* seta */
+    filter: drop-shadow(0 -2px 0 #2a2a2a);
+  }
+  .help-bubble h4 { margin: 0 0 8px 0; font-size: 16px; }
+  .help-bubble p  { margin: 6px 0; color:#ccc; line-height:1.35; }
+  .help-bubble code { background:#0b0b0c; border:1px solid #222; padding:2px 6px; border-radius:6px; }
+  .help-bubble .close {
+    position:absolute; top:8px; right:10px; border:0; background:transparent; color:#aaa; cursor:pointer;
+    font-size:18px; line-height:1;
+  }
+  .help-bubble .close:hover { color:#fff; }
+
+  </style>
+</head>
+<body class="p-4 sm:p-6 lg:p-8">
+  
+  <div class="content-box">
+    <div class="flex justify-between items-start mb-4">
+      <div>
+        <h1 class="text-3xl font-bold mb-1">Script CCS - Cisco</h1>
+        <h2 class="text-xl text-gray-300 mb-2">Versão: 17.9</h2>
+      </div>
+      <a href="/home" class="btn-voltar">Voltar</a>
+    </div>
+
+    <p class="text-gray-400 mb-1">Substitua os campos com os dados referentes</p>
+    <p class="text-gray-400 mb-6">Para gerar o arquivo txt com o padrão CCS</p>
+
+    <form id="form" class="grid grid-cols-1 gap-4">
+      <label>IDENTIFICACAO
+        <input name="IDENTIFICACAO" placeholder="Ex: CREDIDOCE" required />
+      </label>
+
+      <label>VRF:
+        <select name="VRF" required>
+          <option value="">Exemplo: MPLS</option>
+          <option value="MPLS">MPLS</option>
+          <option value="INTERNET">INTERNET</option>
+        </select>
+      </label>  
+
+      <label>Numero da PA
+        <input name="NUM_PA" placeholder="Ex: 58" required />
+      </label>
+
+      <label>SENHA do Router
+        <input name="SENHA_ROUTER" placeholder="Senha do equipamento" required />
+      </label>
+
+      <label>IP da Unidade
+        <input name="IP_UNIDADE" placeholder="ex: 192.168.10.1/30" />
+      </label>
+
+      <label>IP Valido
+      <input name="IP_VALIDO"  placeholder="ex: 191.5.132.18/31" />
+      </label>
+
+      <button type="submit" class="mt-2 py-3">Gerar (Cisco)</button>
+    </form>
+
+    <h3 class="text-2xl font-semibold mt-8 mb-4">Preview</h3>
+    <pre id="out">—</pre>
+  </div>
+
+<script type="module">
+  import { renderResult } from "/result.js";
+
+  const form = document.getElementById("form"); // id do seu <form>
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const data = Object.fromEntries(new FormData(form).entries());
+
+    const r = await fetch("/run/cisco", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ data })
+    });
+
+    const j = await r.json();   
+    renderResult(j);           
+  });
+
+
+  // --- HELP BALLOON ---
+    const helpFab    = document.getElementById("helpFab");
+    const helpBubble = document.getElementById("helpBubble");
+    const helpClose  = document.getElementById("helpClose");
+
+    if (helpFab && helpBubble && helpClose) {
+      const setBubble = (show) => {
+        helpBubble.style.display = show ? "block" : "none";
+        helpFab.setAttribute("aria-expanded", String(show));
+      };
+
+      helpFab.addEventListener("click", () => {
+        const open = helpBubble.style.display !== "block";
+        setBubble(open);
+      });
+
+      helpClose.addEventListener("click", () => setBubble(false));
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") setBubble(false);
+      });
+    }
+
+    
+</script>
+
+<button class="help-fab" id="helpFab" aria-controls="helpBubble" aria-expanded="false" title="Instruções">?</button>
+
+  <div class="help-bubble" id="helpBubble" role="dialog" aria-labelledby="helpTitle" aria-modal="false">
+    <button class="close" id="helpClose" aria-label="Fechar">×</button>
+    <h4 id="helpTitle">Instruções rápidas</h4>
+    <p>• Utilize <code>IP-Valido</code> Com o barramento desejado, para que a aplicação ja calcule o barramento no script</p>
+    <p>• <code>IP_UNIDADE</code> Não é necessário utilizar barramento <code>"/"</code> </p>
+    <p>• Escolha a <code>VRF</code> de acordo com seu caso: <strong>MPLS</strong> ou <strong>INTERNET</strong>.</p>
+    <p>• O campo <strong>IDENTIFICACÂO</strong> se refere ao singular da Unidade. EX: <strong>CREDIVALE</strong></p>
+    <p>• Utilize sempre <code>IP_UNIDADE</code> sem barramento, esta sendo considerado um  <strong>/30</strong> para todos os casos. </p>
+    <p>•Em caso de mal funcionamento ou sugestão acionar o <strong>ZIBRINIX </strong></p>
+
+  </div>
+
+</body>
+</html>

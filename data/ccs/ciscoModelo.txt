@@ -1,0 +1,216 @@
+version 17.9
+service nagle
+service tcp-keepalives-in
+service timestamps debug datetime msec
+service timestamps log datetime msec
+service password-encryption
+no service call-home
+platform qfp utilization monitor load 80
+platform punt-keepalive disable-kernel-core
+platform hardware throughput crypto 50000
+!
+hostname CPE-SICOOB-{IDENTIFICACAO}-{VRF}-PA{NUM_PA}
+!
+boot-start-marker
+boot system bootflash:c1100-universalk9.17.09.05a.SPA.bin
+boot-end-marker
+!
+!
+logging buffered 16384
+no logging console
+aaa new-model
+!
+!
+aaa group server tacacs+ GRUPO_TACACS
+ server name TACACS1
+ server name TACACS2
+!
+aaa authentication login CONSOLE_LOGIN local
+aaa authentication login PADRAO_AUTH group GRUPO_TACACS local
+aaa authentication enable default group GRUPO_TACACS enable
+aaa authorization config-commands
+aaa authorization exec PADRAO_AUTH group GRUPO_TACACS local
+aaa authorization commands 0 PADRAO_AUTH group GRUPO_TACACS local
+aaa authorization commands 1 PADRAO_AUTH group GRUPO_TACACS local
+aaa authorization commands 15 PADRAO_AUTH group GRUPO_TACACS local
+aaa accounting exec PADRAO_ACCT start-stop group GRUPO_TACACS
+aaa accounting commands 0 PADRAO_ACCT start-stop group GRUPO_TACACS
+aaa accounting commands 1 PADRAO_ACCT start-stop group GRUPO_TACACS
+aaa accounting commands 15 PADRAO_ACCT start-stop group GRUPO_TACACS
+!
+!
+aaa session-id common
+clock timezone BRT -3 0
+!
+!
+!
+!
+!
+!
+!
+no ip domain lookup
+ip domain name microset.com.br
+!
+!
+!
+login on-success log
+!
+!
+!
+!
+!
+!
+!
+subscriber templating
+vtp mode transparent
+vtp version 1
+multilink bundle-name authenticated
+!
+!
+!
+!
+!
+license udi pid C1111-4P sn FGL231812M2
+memory free low-watermark processor 65995
+file privilege 1
+!
+diagnostic bootup level minimal
+!
+spanning-tree extend system-id
+!
+!
+enable secret 0 {SENHA_ROUTER}
+enable password 0 {SENHA_ROUTER}
+!
+username admin privilege 15 password 0 {SENHA_ROUTER}
+!
+redundancy
+ mode none
+!
+!
+vlan internal allocation policy ascending
+!
+!
+lldp run
+!
+!
+!
+!
+!
+interface GigabitEthernet0/0/0
+ description WAN
+ ip address {IP_UNIDADE} 255.255.255.252
+ negotiation auto
+!
+interface GigabitEthernet0/0/1
+ description LAN
+ ip address {IP_VALIDO} {MASCARA_EXTENSO}
+ media-type rj45
+ negotiation auto
+!
+interface GigabitEthernet0/1/0
+ description VAGO-DESATIVADO
+ switchport mode access
+ shutdown
+!
+interface GigabitEthernet0/1/1
+!
+interface GigabitEthernet0/1/2
+!
+interface GigabitEthernet0/1/3
+!
+interface Vlan1
+ no ip address
+!
+no ip http server
+ip http authentication local
+no ip http secure-server
+ip http client source-interface GigabitEthernet0/0/0
+ip forward-protocol nd
+ip route 0.0.0.0 0.0.0.0 {IP_UNIDADE_M1}
+ip ssh time-out 60
+ip ssh version 2
+!
+!
+ip access-list standard SNMP_ALLOWED
+ 10 permit 191.5.128.0 0.0.15.255
+ 20 permit 192.168.254.0 0.0.0.255
+ 30 permit 10.0.0.0 0.255.255.255
+!
+ip access-list extended ACL_SSH_ONLY
+ 10 permit tcp 191.5.128.0 0.0.15.255 any eq 22
+ 20 permit tcp 192.168.254.0 0.0.0.255 any eq 22
+ 30 permit tcp 10.0.0.0 0.255.255.255 any eq 22
+ 40 deny ip any any
+!
+logging trap debugging
+!
+snmp-server community microset RO SNMP_ALLOWED
+!
+tacacs server TACACS1
+ address ipv4 192.168.254.9
+ key 0 {SENHA_ROUTER}
+tacacs server TACACS2
+ address ipv4 192.168.255.9
+ key 0 {SENHA_ROUTER}
+!
+!
+!
+control-plane
+!
+privilege exec level 1 show startup-config
+privilege exec level 1 show running-config view full
+privilege exec level 1 show running-config view
+privilege exec level 1 show running-config
+privilege exec level 1 show
+privilege exec level 1 clear ip accounting
+privilege exec level 1 clear ip
+privilege exec level 1 clear arp-cache
+privilege exec level 1 clear counters
+privilege exec level 1 clear
+!
+banner login ^C
+
+========================================================
+
+UNAUTHORIZED ACCESS TO THIS DEVICE IS PROHIBITED.
+
+This device is managed by MICROSET.
+
+All activities may be logged and monitored.
+
+========================================================
+
+^C
+!
+line con 0
+ exec-timeout 5 0
+ logging synchronous
+ login authentication CONSOLE_LOGIN
+ transport input none
+ stopbits 1
+line vty 0 4
+ access-class ACL_SSH_ONLY in
+ privilege level 15
+ login authentication PADRAO_AUTH
+ transport input ssh
+line vty 5 14
+ access-class ACL_SSH_ONLY in
+ authorization commands 0 PADRAO_AUTH
+ authorization commands 1 PADRAO_AUTH
+ authorization commands 15 PADRAO_AUTH
+ authorization exec PADRAO_AUTH
+ login authentication PADRAO_AUTH
+ transport input ssh
+!
+no call-home
+!
+!
+!
+do terminal length 0
+file privilege 1
+no ip scp server enable
+ip ssh time-out 60
+ip ssh authentication-retries 3
+!
+end

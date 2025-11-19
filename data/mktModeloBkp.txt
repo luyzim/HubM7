@@ -1,0 +1,156 @@
+/interface bridge add name={IDENTIFICACAO} protocol-mode=none
+/system scheduler
+add interval=1d name=schedule-bkp-diario on-event=bkp-diario policy=\
+    ftp,reboot,read,write,policy,test,password,sniff,sensitive start-time=\
+    startup
+add interval=1w name=schedule-bkp-semanal on-event=bkp-semanal policy=\
+    ftp,reboot,read,write,policy,test,password,sniff,sensitive start-time=\
+    startup
+/system script
+add dont-require-permissions=no name=bkp-diario owner=admin policy=\
+    ftp,reboot,read,write,policy,test,password,sniff,sensitive source="# ftp s\
+    erver\r\
+    \n:local ftphost \"192.168.254.9\"\r\
+    \n:local ftpuser \"engftp\"\r\
+    \n:local ftppassword \"Eng3v0p33vt\"\r\
+    \n:local ftppath \"/backup/Router/Mikrotik/CPE/Diario\"\r\
+    \n\r\
+    \n#GetDate\r\
+    \n:local GDate [/system clock get date]\r\
+    \n:local GDay [ :pick \$GDate 4 6 ]\r\
+    \n:local GMonth [ :pick \$GDate 0 3 ]\r\
+    \n:local GYear [ :pick \$GDate 7 11 ]\r\
+    \n:local GResult \"\$GDay \$GMonth \$GYear\"\r\
+    \n\r\
+    \n\r\
+    \n# file name for system backup\r\
+    \n:local BackupConf ([/interface bridge get {IDENTIFICACAO} name].\".backup\")\r\
+    \n:log info \$BackupConf\r\
+    \n\r\
+    \n# file name for config export\r\
+    \n:local ExportConf ([/interface bridge get {IDENTIFICACAO} name].\".rsc\")\r\
+    \n:log info \$ExportConf\r\
+    \n\r\
+    \n# backup the data\r\
+    \n/system backup save name=\$BackupConf\r\
+    \n:log info message=\"System backup finished (1/2).\";\r\
+    \n/export compact file=\$ExportConf\r\
+    \n:log info message=\"Config export finished (2/2).\"\r\
+    \n\r\
+    \n# upload the system backup\r\
+    \n:log info message=\"Uploading system backup (1/2).\"\r\
+    \n/tool fetch address=\"\$ftphost\" src-path=\$BackupConf user=\"\$ftpuser\
+    \" mode=ftp password=\"\$ftppassword\" dst-path=\"\$ftppath/\$BackupConf\"\
+    \_upload=yes\r\
+    \n\r\
+    \n# upload the config export\r\
+    \n:log info message=\"Uploading config export (2/2).\"\r\
+    \n/tool fetch address=\"\$ftphost\" src-path=\$ExportConf user=\"\$ftpuser\
+    \" mode=ftp password=\"\$ftppassword\" dst-path=\"\$ftppath/\$ExportConf\"\
+    \_upload=yes\r\
+    \n\r\
+    \n# delay time to finish the upload - increase it if your backup file is b\
+    ig\r\
+    \n:delay 3s;\r\
+    \n\r\
+    \n:log info message=\"Configuration backup finished.\";"
+add dont-require-permissions=no name=bkp-semanal owner=admin policy=\
+    ftp,reboot,read,write,policy,test,password,sniff,sensitive source="# ftp s\
+    erver\r\
+    \n:local ftphost \"192.168.254.9\"\r\
+    \n:local ftpuser \"engftp\"\r\
+    \n:local ftppassword \"Eng3v0p33vt\"\r\
+    \n:local ftppath \"/backup/Router/Mikrotik/CPE/Semanal\"\r\
+    \n\r\
+    \n#GetDate\r\
+    \n:local GDate [/system clock get date]\r\
+    \n:local GDay [ :pick \$GDate 4 6 ]\r\
+    \n:local GMonth [ :pick \$GDate 0 3 ]\r\
+    \n:local GYear [ :pick \$GDate 7 11 ]\r\
+    \n:local GResult \"\$GDay \$GMonth \$GYear\"\r\
+    \n\r\
+    \n\r\
+    \n# file name for system backup\r\
+    \n:local BackupConf ([/interface bridge get {IDENTIFICACAO} name].\".backup\")\r\
+    \n:log info \$BackupConf\r\
+    \n\r\
+    \n# file name for config export\r\
+    \n:local ExportConf ([/interface bridge get {IDENTIFICACAO} name].\".rsc\")\r\
+    \n:log info \$ExportConf\r\
+    \n\r\
+    \n# backup the data\r\
+    \n/system backup save name=\$BackupConf\r\
+    \n:log info message=\"System backup finished (1/2).\";\r\
+    \n/export compact file=\$ExportConf\r\
+    \n:log info message=\"Config export finished (2/2).\"\r\
+    \n\r\
+    \n# upload the system backup\r\
+    \n:log info message=\"Uploading system backup (1/2).\"\r\
+    \n/tool fetch address=\"\$ftphost\" src-path=\$BackupConf user=\"\$ftpuser\
+    \" mode=ftp password=\"\$ftppassword\" dst-path=\"\$ftppath/\$BackupConf\"\
+    \_upload=yes\r\
+    \n\r\
+    \n# upload the config export\r\
+    \n:log info message=\"Uploading config export (2/2).\"\r\
+    \n/tool fetch address=\"\$ftphost\" src-path=\$ExportConf user=\"\$ftpuser\
+    \" mode=ftp password=\"\$ftppassword\" dst-path=\"\$ftppath/\$ExportConf\"\
+    \_upload=yes\r\
+    \n\r\
+    \n# delay time to finish the upload - increase it if your backup file is b\
+    ig\r\
+    \n:delay 3s;\r\
+    \n\r\
+    \n:log info message=\"Configuration backup finished.\";"
+
+/ip firewall service-port
+set ftp disabled=yes
+set tftp disabled=yes
+set irc disabled=yes
+set h323 disabled=yes
+set sip disabled=yes
+set pptp disabled=yes
+set udplite disabled=yes
+set dccp disabled=yes
+set sctp disabled=yes
+
+/queue type
+set 0 pfifo-limit=500
+set 1 pfifo-limit=500
+set 9 pfifo-limit=500
+
+/ip firewall connection tracking
+set tcp-established-timeout=10m
+
+/ip settings
+set route-cache=no
+
+
+/ip service
+set telnet disabled=yes
+set www disabled=yes
+set api disabled=yes
+set api-ssl disabled=yes
+set ftp address=191.5.128.0/20,192.168.254.0/24,10.22.0.0/16
+set ssh address=191.5.128.0/20,192.168.254.0/24,10.22.0.0/16
+set winbox address=191.5.128.0/20,192.168.254.0/24,10.22.0.0/16
+
+
+/snmp community
+set [ find default=yes ] addresses=191.5.128.0/20,192.168.254.0/27 name=microset
+/snmp
+set contact=microset enabled=yes trap-version=2
+
+/system clock
+set time-zone-name=America/Sao_Paulo
+/system ntp client
+set enabled=yes primary-ntp=192.168.254.18
+
+/radius
+add address=192.168.254.12 secret=M1cr0S3t602626 service=login timeout=1s
+/radius incoming
+set accept=yes
+/user aaa
+set use-radius=yes
+
+/ip firewall mangle
+add action=change-mss chain=postrouting new-mss=1360 passthrough=yes protocol=tcp tcp-flags=syn

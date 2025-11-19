@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Automação SonicWall</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-image: url('https://images.unsplash.com/photo-1749150270018-1dee5a5e4b88?q=80&w=1170&auto=format&fit=crop');
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-position: center;
+      background-attachment: fixed;
+      margin: 0;
+      padding: 40px 20px;
+      height: 100%;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+
+    .container {
+      background-color: rgba(31, 41, 55, 0.9);
+      padding: 30px;
+      max-width: 600px;
+      margin: auto;
+      border-radius: 12px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+      transition: box-shadow 0.3s ease;
+    }
+
+    .container:hover {
+      box-shadow: 0 10px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    h1 {
+      text-align: center;
+      color: #e5e7eb;
+      font-weight: 600;
+      margin-bottom: 24px;
+      letter-spacing: 1px;
+    }
+
+    h2 {
+      color: #d1d5db;
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    label {
+      display: block;
+      color: #d1d5db;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+
+    input, select, button {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 20px;
+      font-size: 14px;
+      border-radius: 8px;
+      border: 1px solid #4b5563;
+      background-color: #1f2937;
+      color: #f3f4f6;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    input::placeholder {
+      color: #9ca3af;
+    }
+
+
+    button {
+      background-color: #3b82f6;
+      color: #fff;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      text-transform: uppercase;
+      transition: background-color 0.3s ease, transform 0.2s ease-in-out;
+    }
+
+    button:hover { background-color: #2563eb; /* hover:bg-blue-700 */ }
+    .btn-voltar {
+        background-color: #4B5563; /* bg-gray-600 */
+        color: white;
+        text-decoration: none;
+        padding: 0.5rem 1rem;
+        border-radius: 0.375rem;
+        display: inline-block;
+        transition: background-color 0.2s ease-in-out;
+        font-weight: 500;
+        font-size: 0.875rem; /* text-sm */
+        line-height: 1.25rem;
+    }
+    .btn-voltar:hover { background-color: #6B7280; /* hover:bg-gray-500 */ }
+    pre {
+        background-color: #1F2937; /* bg-gray-800 */
+        border: 1px solid #4B5563; /* border-gray-600 */
+        padding: 1rem;
+        border-radius: 0.5rem; /* rounded-lg */
+        overflow-x: auto;
+        color: #E5E7EB; /* text-gray-200 */
+    }
+
+    button:hover {
+      background-color: #2563eb;
+      transform: translateY(-2px);
+    }
+
+    #resultado {
+      padding: 15px;
+      border-left-width: 5px;
+      border-style: solid;
+      margin-top: 20px;
+      border-radius: 8px;
+      white-space: pre-wrap;
+      word-break: break-word;
+      background-color: rgba(34, 197, 94, 0.08);
+      border-left-color: #22c55e; /* verde padrão */
+      color: #d1fae5;
+      font-family: 'Inter', monospace;
+      font-size: 15px;
+      font-weight: 500;
+      transition: background 0.3s, color 0.3s, border-color 0.3s;
+    }
+
+    .resultado-erro {
+      background-color: rgba(239, 68, 68, 0.12); /* vermelho suave */
+      color: #fff;
+      border-left-color: #dc2626; /* vermelho escuro */
+    }
+
+    .logo {
+      display: block;
+      margin: 0 auto 18px auto;
+      max-height: 90px;
+    }
+
+    @media (max-width: 600px) {
+      body {
+        padding: 20px 10px;
+      }
+
+      .container {
+        padding: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+      <a href="/home" class="btn-voltar">Voltar</a>
+  <div class="container">
+        <img src="https://i.ibb.co/xtJg72tV/EDCURuB.png" alt="Logo" class="logo">
+        <h1>UNIMED</h1>                              
+        <h2>Liberação de IP para Navegação Padrão.</h2> 
+    <input type="text" id="ip" placeholder="Digite o IP">
+    <button onclick="executar()">Executar</button>
+    <pre id="resultado"></pre>
+    <button onclick="verificarStatus()">Verificar Servidor</button>
+  </div>
+
+  <script>
+  let eventSource = null; // para reaproveitar/fechar entre execuções
+
+  async function executar() {
+    const ip = document.getElementById("ip").value;
+    const resultado = document.getElementById("resultado");
+
+    // Feedback imediato
+    resultado.textContent = "Iniciando automação, por favor aguarde...";
+    resultado.classList.remove("resultado-erro");
+    resultado.style.borderLeftColor = "#3b82f6"; // Azul para "em progresso"
+
+    // Se já existir um SSE aberto, fecha antes de abrir outro
+    if (eventSource) {
+      eventSource.close();
+      eventSource = null;
+    }
+
+    try {
+      const res = await fetch("/api/unimed/run", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ip })
+      });
+
+      const data = await res.json().catch(() => ({}));
+
+      // Se a API já respondeu erro na largada, nem abre SSE
+      if (!res.ok || !data.success) {
+        resultado.textContent = `❌ Erro: ${
+          data.error || data.message || "Ocorreu um erro desconhecido ao iniciar a automação."
+        }`;
+        resultado.classList.add("resultado-erro");
+        resultado.style.borderLeftColor = "#dc2626"; // Vermelho
+        return;
+      }
+
+      // Aqui a automação foi iniciada com sucesso (HTTP 202)
+      resultado.textContent = "Automação iniciada. Acompanhe o progresso...";
+      resultado.classList.remove("resultado-erro");
+      resultado.style.borderLeftColor = "#3b82f6"; // Azul
+
+      // Abre conexão SSE para receber updates da automação
+      eventSource = new EventSource("/api/unimed/events");
+
+      // Evento de conexão
+      eventSource.addEventListener("connected", (event) => {
+        // se quiser debugar:
+        // console.log("SSE conectado:", event.data);
+      });
+
+      // Evento de automação (enviado pelo backend: sendSseEvent('automation', {...}))
+      eventSource.addEventListener("automation", (event) => {
+        const payload = JSON.parse(event.data || "{}");
+        const { status, success, message } = payload;
+
+        // Atualiza o painel conforme o status que veio do backend
+        if (status === "started") {
+          resultado.textContent = message || "Automação em andamento...";
+          resultado.classList.remove("resultado-erro");
+          resultado.style.borderLeftColor = "#3b82f6"; // Azul
+        } else if (status === "finished") {
+          if (success) {
+            resultado.textContent = `✅ ${message || "Automação concluída com sucesso."}`;
+            resultado.classList.remove("resultado-erro");
+            resultado.style.borderLeftColor = "#22c55e"; // Verde
+          } else {
+            resultado.textContent = `❌ Erro: ${
+              message || "A automação finalizou com erro."
+            }`;
+            resultado.classList.add("resultado-erro");
+            resultado.style.borderLeftColor = "#dc2626"; // Vermelho
+          }
+
+          // Terminou, pode fechar o SSE
+          eventSource.close();
+          eventSource = null;
+        } else {
+          // fallback pra caso apareça algum status estranho
+          resultado.textContent = message || "Atualização recebida da automação.";
+        }
+      });
+
+      // Erro na conexão SSE
+      eventSource.onerror = (err) => {
+        console.error("Erro no SSE:", err);
+        // Não derruba a interface, só informa
+        resultado.textContent = "⚠ Erro ao receber atualizações em tempo real. Verifique o servidor.";
+        resultado.classList.add("resultado-erro");
+        resultado.style.borderLeftColor = "#f97316"; // Laranja
+      };
+    } catch (e) {
+      resultado.textContent = `❌ Erro de conexão com o servidor. Verifique se o servidor está online.`;
+      resultado.classList.add("resultado-erro");
+      resultado.style.borderLeftColor = "#dc2626"; // Vermelho
+    }
+  }
+
+  async function verificarStatus() {
+    const resposta = document.getElementById("resultado");
+    resposta.textContent = "Verificando...";
+    resposta.classList.remove("resultado-erro");
+    resposta.style.borderLeftColor = "#22c55e"; // verde
+
+    try {
+      const res = await fetch("/api/unimed/status");
+      const data = await res.json();
+      resposta.textContent = JSON.stringify(data, null, 2);
+      resposta.classList.remove("resultado-erro");
+      resposta.style.borderLeftColor = "#22c55e"; // verde
+    } catch (err) {
+      resposta.textContent = "❌ Erro ao verificar status do servidor.";
+      resposta.classList.add("resultado-erro");
+      resposta.style.borderLeftColor = "#dc2626"; // vermelho escuro
+    }
+  }
+</script>
+</body>
+</html>

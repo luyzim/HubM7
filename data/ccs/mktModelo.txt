@@ -1,0 +1,236 @@
+/interface ethernet set [ find default-name=ether1 ] comment="WAN - {PARCEIRO}"
+/interface ethernet set [ find default-name=ether5 ] comment="LAN - Roteador Cisco\
+    \- SICOOB {IDENTIFICACAO} - PA {NUM_PA} - {NOME_PA}"
+/interface l2tp-client add connect-to=191.5.128.105 disabled=no name=l2tp-to-gary user={GARY_USER} password={GARY_USER}
+/interface l2tp-client add connect-to=45.160.230.105 disabled=no name=l2tp-to-plankton user={PLANKTON_USER} password={PLANKTON_USER}
+/interface pppoe-client add disabled=no interface=ether1 name=pppoe-{PARCEIRO} user={PPPOE_USER} password={PPPOE_PASS}
+/interface list add name=VCN
+/queue simple add max-limit={VELOCIDADE}/{VELOCIDADE} name=QUEUE target=ether5
+/queue type set 0 pfifo-limit=500
+/queue type set 1 pfifo-limit=500
+/queue type set 9 pfifo-limit=500
+/routing bgp template set default as={AS_LOCAL} disabled=no router-id={IP_UNIDADE} routing-table=main
+/routing bgp instance add as={AS_LOCAL} disabled=no name=default
+/snmp community 
+set [ find default=yes ] addresses=191.5.128.0/20,192.168.254.0/27 name=microset
+/snmp
+set contact=microset enabled=yes trap-version=2
+/ip firewall connection tracking set tcp-established-timeout=10m
+/ip neighbor discovery-settings set discover-interface-list=!dynamic
+/interface ovpn-server server add mac-address=FE:69:A3:6B:02:76 name=ovpn-server1
+/ip address add address={IP_UNIDADE}/30 interface=ether5 network={IP_UNIDADE_M1}
+/ip dhcp-server network add address=192.168.1.0/24 gateway=192.168.1.10
+/ip firewall mangle add action=change-mss chain=postrouting new-mss=1360 protocol=tcp tcp-flags=syn
+/ip firewall service-port set ftp disabled=yes
+/ip firewall service-port set tftp disabled=yes
+/ip firewall service-port set h323 disabled=yes
+/ip firewall service-port set sip disabled=yes
+/ip firewall service-port set pptp disabled=yes
+
+/ip ipsec profile set [ find default=yes ] dpd-interval=2m dpd-maximum-failures=5
+/ip route add comment="ROTA GARY" disabled=no distance=1 dst-address=191.5.128.105/32 gateway=pppoe-{PARCEIRO} routing-table=main scope=30 suppress-hw-offload=no target-scope=10
+/ip route add comment="ROTA PLANKTON" disabled=no distance=1 dst-address=45.160.230.105/32 gateway=pppoe-{PARCEIRO} routing-table=main scope=30 suppress-hw-offload=no target-scope=10
+/ip route add comment="ROTA IP VALIDO" disabled=no distance=1 dst-address={IP_VALIDO} gateway={IP_UNIDADE_P1} routing-table=main scope=30 suppress-hw-offload=no target-scope=10
+/ip service set ftp address=191.5.128.0/20,192.168.254.0/24,10.22.0.0/16 disabled=yes
+/ip service set ssh address=191.5.128.0/20,192.168.254.0/24,10.22.0.0/16
+/ip service set telnet disabled=yes
+/ip service set www disabled=yes
+/ip service set winbox address=191.5.128.0/20,192.168.254.0/24,10.22.0.0/16,192.168.0.0/16,179.191.12.118/32
+/ip service set api disabled=yes
+/ip service set api-ssl disabled=yes
+
+/ppp l2tp-secret add address=45.160.230.105/32 secret=12345
+/ppp l2tp-secret add address=191.5.128.105/32 secret=12345
+/radius add address=192.168.254.12 service=login timeout=1s
+/radius incoming set accept=yes
+/routing bgp connection add as={AS_LOCAL} disabled=no input.filter=bgp-to-gary-in instance=default local.role=ebgp multihop=yes name=peer-to-gary output.filter-chain=bgp-to-gary-out .redistribute=connected,static remote.address={IP_GARY}/32 .as=41392 routing-table=main
+/routing bgp connection add as={AS_LOCAL} disabled=no input.filter=bgp-to-plankton-in instance=default local.role=ebgp multihop=yes name=peer-to-plankton output.filter-chain=bgp-to-plankton-out .redistribute=connected,static remote.address={IP_PLANKTON}/32 .as=41392 routing-table=main
+/routing filter rule add chain=bgp-to-gary-in rule="if (dst in 0.0.0.0/0) {accept}
+    
+"
+/routing filter rule add chain=bgp-to-gary-in disabled=no rule="if (dst in 172.16.0.0/16) {accept}
+    
+"
+/routing filter rule add chain=bgp-to-gary-in rule="if (dst in 192.168.254.0/24 &&
+    
+ dst-len>=24 && dst-len<=32) {accept}"
+/routing filter rule add chain=bgp-to-gary-in rule=reject
+/routing filter rule add chain=bgp-to-gary-out rule="if (dst in {IP_VALIDO_BARRADO_M1}) 
+    
+{accept}"
+/routing filter rule add chain=bgp-to-gary-out disabled=no rule="if (dst in {IP_UNIDADE_M1}/30) 
+    
+{accept}"
+/routing filter rule add chain=bgp-to-gary-out rule=reject
+/routing filter rule add chain=bgp-to-plankton-in rule="if (dst in 0.0.0.0/0) {set
+    
+ bgp-local-pref 80; accept}"
+/routing filter rule add chain=bgp-to-plankton-in disabled=no rule="if (dst in 172.16.0.0/16) {set
+    
+ bgp-local-pref 80; accept}"
+/routing filter rule add chain=bgp-to-plankton-in disabled=no rule="if (dst in 192.168.254.0/27) {set
+    
+ bgp-local-pref 80; accept}"
+/routing filter rule add chain=bgp-to-plankton-in rule=reject
+/routing filter rule add chain=bgp-to-plankton-out disabled=no rule="if (dst in {IP_VALIDO_BARRADO}) 
+    
+{accept}"
+/routing filter rule add chain=bgp-to-plankton-out disabled=no rule="if (dst in {IP_UNIDADE_M1}/30) 
+    
+{accept}"
+
+
+
+/interface bridge add name=BKP-{IDENTIFICACAO}-PA{NUM_PA}-{VRF} protocol-mode=none
+/system scheduler
+add interval=1d name=schedule-bkp-diario on-event=bkp-diario policy=\
+    ftp,reboot,read,write,policy,test,password,sniff,sensitive start-time=\
+    startup
+add interval=1w name=schedule-bkp-semanal on-event=bkp-semanal policy=\
+    ftp,reboot,read,write,policy,test,password,sniff,sensitive start-time=\
+    startup
+/system script
+add dont-require-permissions=no name=bkp-diario owner=admin policy=\
+    ftp,reboot,read,write,policy,test,password,sniff,sensitive source="# ftp s\
+    erver\r\
+    \n:local ftphost \"192.168.254.9\"\r\
+    \n:local ftpuser \"engftp\"\r\
+    \n:local ftppassword \"Eng3v0p33vt\"\r\
+    \n:local ftppath \"/backup/Router/Mikrotik/CPE/Diario\"\r\
+    \n\r\
+    \n#GetDate\r\
+    \n:local GDate [/system clock get date]\r\
+    \n:local GDay [ :pick \$GDate 4 6 ]\r\
+    \n:local GMonth [ :pick \$GDate 0 3 ]\r\
+    \n:local GYear [ :pick \$GDate 7 11 ]\r\
+    \n:local GResult \"\$GDay \$GMonth \$GYear\"\r\
+    \n\r\
+    \n\r\
+    \n# file name for system backup\r\
+    \n:local BackupConf ([/interface bridge get {IDENTIFICACAO}-PA{NUM_PA}-{VRF} name].\".backup\")\r\
+    \n:log info \$BackupConf\r\
+    \n\r\
+    \n# file name for config export\r\
+    \n:local ExportConf ([/interface bridge get {IDENTIFICACAO}-PA{NUM_PA}-{VRF} name].\".rsc\")\r\
+    \n:log info \$ExportConf\r\
+    \n\r\
+    \n# backup the data\r\
+    \n/system backup save name=\$BackupConf\r\
+    \n:log info message=\"System backup finished (1/2).\";\r\
+    \n/export compact file=\$ExportConf\r\
+    \n:log info message=\"Config export finished (2/2).\"\r\
+    \n\r\
+    \n# upload the system backup\r\
+    \n:log info message=\"Uploading system backup (1/2).\"\r\
+    \n/tool fetch address=\"\$ftphost\" src-path=\$BackupConf user=\"\$ftpuser\
+    \" mode=ftp password=\"\$ftppassword\" dst-path=\"\$ftppath/\$BackupConf\"\
+    \_upload=yes\r\
+    \n\r\
+    \n# upload the config export\r\
+    \n:log info message=\"Uploading config export (2/2).\"\r\
+    \n/tool fetch address=\"\$ftphost\" src-path=\$ExportConf user=\"\$ftpuser\
+    \" mode=ftp password=\"\$ftppassword\" dst-path=\"\$ftppath/\$ExportConf\"\
+    \_upload=yes\r\
+    \n\r\
+    \n# delay time to finish the upload - increase it if your backup file is b\
+    ig\r\
+    \n:delay 3s;\r\
+    \n\r\
+    \n:log info message=\"Configuration backup finished.\";"
+add dont-require-permissions=no name=bkp-semanal owner=admin policy=\
+    ftp,reboot,read,write,policy,test,password,sniff,sensitive source="# ftp s\
+    erver\r\
+    \n:local ftphost \"192.168.254.9\"\r\
+    \n:local ftpuser \"engftp\"\r\
+    \n:local ftppassword \"Eng3v0p33vt\"\r\
+    \n:local ftppath \"/backup/Router/Mikrotik/CPE/Semanal\"\r\
+    \n\r\
+    \n#GetDate\r\
+    \n:local GDate [/system clock get date]\r\
+    \n:local GDay [ :pick \$GDate 4 6 ]\r\
+    \n:local GMonth [ :pick \$GDate 0 3 ]\r\
+    \n:local GYear [ :pick \$GDate 7 11 ]\r\
+    \n:local GResult \"\$GDay \$GMonth \$GYear\"\r\
+    \n\r\
+    \n\r\
+    \n# file name for system backup\r\
+    \n:local BackupConf ([/interface bridge get {IDENTIFICACAO}-PA{NUM_PA}-{VRF} name].\".backup\")\r\
+    \n:log info \$BackupConf\r\
+    \n\r\
+    \n# file name for config export\r\
+    \n:local ExportConf ([/interface bridge get {IDENTIFICACAO}-PA{NUM_PA}-{VRF} name].\".rsc\")\r\
+    \n:log info \$ExportConf\r\
+    \n\r\
+    \n# backup the data\r\
+    \n/system backup save name=\$BackupConf\r\
+    \n:log info message=\"System backup finished (1/2).\";\r\
+    \n/export compact file=\$ExportConf\r\
+    \n:log info message=\"Config export finished (2/2).\"\r\
+    \n\r\
+    \n# upload the system backup\r\
+    \n:log info message=\"Uploading system backup (1/2).\"\r\
+    \n/tool fetch address=\"\$ftphost\" src-path=\$BackupConf user=\"\$ftpuser\
+    \" mode=ftp password=\"\$ftppassword\" dst-path=\"\$ftppath/\$BackupConf\"\
+    \_upload=yes\r\
+    \n\r\
+    \n# upload the config export\r\
+    \n:log info message=\"Uploading config export (2/2).\"\r\
+    \n/tool fetch address=\"\$ftphost\" src-path=\$ExportConf user=\"\$ftpuser\
+    \" mode=ftp password=\"\$ftppassword\" dst-path=\"\$ftppath/\$ExportConf\"\
+    \_upload=yes\r\
+    \n\r\
+    \n# delay time to finish the upload - increase it if your backup file is b\
+    ig\r\
+    \n:delay 3s;\r\
+    \n\r\
+    \n:log info message=\"Configuration backup finished.\";"
+
+
+
+/routing filter rule add chain=bgp-to-plankton-out rule=reject
+/snmp set contact=microset enabled=yes trap-version=2
+/system clock set time-zone-name=America/Sao_Paulo
+/system identity set name=SICOOB-{IDENTIFICACAO}-CCS-{VRF}
+/system note set show-at-login=no
+/system scheduler add interval=1d name=schedule-bkp-diario on-event=bkp-diario policy=ftp,reboot,read,write,policy,test,password,sniff,sensitive start-time=startup
+/system scheduler add interval=1w name=schedule-bkp-semanal on-event=bkp-semanal policy=ftp,reboot,read,write,policy,test,password,sniff,sensitive start-time=startup
+/system script add dont-require-permissions=no name=bkp-diario owner=admin policy=ftp,reboot,read,write,policy,test,password,sniff,sensitive source="# ftp server\r\n:local ftphost \"192.168.254.9\"\r\n:local ftpuser \"engftp\"\r\n:local ftppassword \"Eng3v0p33vt\"\r\n:local ftppath \"/backup/Router/Mikrotik/CPE/Diario\"\r\n\r\n#GetDate\r\n:local GDate [/system clock get date]\r\n:local GDay [ :pick \$GDate 4 6 ]\r\n:local GMonth [ :pick \$GDate 0 3 ]\r\n:local GYear [ :pick \$GDate 7 11 ]\r\n:local GResult \"\$GDay \$GMonth \$GYear\"\r\n\r\n\r\n# file name for system backup\r\n:local BackupConf ([/system identity get name].\".backup\")\r\n:log info \$BackupConf\r\n\r\n# file name for config export\r\n:local ExportConf ([/system identity get name].\".rsc\")\r\n:log info \$ExportConf\r\n\r\n# backup the data\r\n/system backup save name=\\$BackupConf\r\n:log info message=\"System backup finished (1/2).\"\r\n/export compact file=\\$ExportConf\r\n:log info message=\"Config export finished (2/2).\"\r\n\r\n# upload the system backup\r\n:log info message=\"Uploading system backup (1/2).\"\r\n/tool fetch address=\"\$ftphost\" src-path=\\$BackupConf user=\"\$ftpuser\" mode=ftp password=\"\$ftppassword\" dst-path=\"\$ftppath/\"\$BackupConf\" upload=yes\r\n\r\n# upload the config export\r\n:log info message=\"Uploading config export (2/2).\"\r\n/tool fetch address=\"\$ftphost\" src-path=\\$ExportConf user=\"\$ftpuser\" mode=ftp password=\"\$ftppassword\" dst-path=\"\$ftppath/\"\$ExportConf\" upload=yes\r\n\r\n# delay time to finish the upload - increase it if your backup file is big\r\n:delay 3s;\r\n\r\n:log info message=\"Configuration backup finished.\";"
+/system script add dont-require-permissions=no name=bkp-semanal owner=admin policy=ftp,reboot,read,write,policy,test,password,sniff,sensitive source="# ftp server\r\n:local ftphost \"192.168.254.9\"\r\n:local ftpuser \"engftp\"\r\n:local ftppassword \"Eng3v0p33vt\"\r\n:local ftppath \"/backup/Router/Mikrotik/CPE/Semanal\"\r\n\r\n#GetDate\r\n:local GDate [/system clock get date]\r\n:local GDay [ :pick \$GDate 4 6 ]\r\n:local GMonth [ :pick \$GDate 0 3 ]\r\n:local GYear [ :pick \$GDate 7 11 ]\r\n:local GResult \"\$GDay \$GMonth \$GYear\"\r\n\r\n\r\n# file name for system backup\r\n:local BackupConf ([/system identity get name].\".backup\")\r\n:log info \$BackupConf\r\n\r\n# file name for config export\r\n:local ExportConf ([/system identity get name].\".rsc\")\r\n:log info \$ExportConf\r\n\r\n# backup the data\r\n/system backup save name=\\$BackupConf\r\n:log info message=\"System backup finished (1/2).\"\r\n/export compact file=\\$ExportConf\r\n:log info message=\"Config export finished (2/2).\"\r\n\r\n# upload the system backup\r\n:log info message=\"Uploading system backup (1/2).\"\r\n/tool fetch address=\"\$ftphost\" src-path=\\$BackupConf user=\"\$ftpuser\" mode=ftp password=\"\$ftppassword\" dst-path=\"\$ftppath/\"\$BackupConf\" upload=yes\r\n\r\n# upload the config export\r\n:log info message=\"Uploading config export (2/2).\"\r\n/tool fetch address=\"\$ftphost\" src-path=\\$ExportConf user=\"\$ftpuser\" mode=ftp password=\"\$ftppassword\" dst-path=\"\$ftppath/\"\$ExportConf\" upload=yes\r\n\r\n# delay time to finish the upload - increase it if your backup file is big\r\n:delay 3s;\r\n\r\n:log info message=\"Configuration backup finished.\";"
+/user aaa set use-radius=yes
+
+
+/system clock
+system ntp client
+set enabled=yes primary-ntp=192.168.254.18
+
+
+/ip firewall mangle
+add action=change-mss chain=postrouting new-mss=1360 passthrough=yes protocol=tcp tcp-flags=syn
+
+/ipv6 firewall mangle
+add action=change-mss chain=forward new-mss=clamp-to-pmtu passthrough=yes protocol=tcp tcp-flags=syn
+
+
+/ip firewall service-port
+set ftp disabled=yes
+set tftp disabled=yes
+set irc disabled=yes
+set h323 disabled=yes
+set sip disabled=yes
+set pptp disabled=yes
+set udplite disabled=yes
+set dccp disabled=yes
+set sctp disabled=yes
+
+/ip firewall connection tracking
+set tcp-established-timeout=10m
+
+
+/ip service
+set telnet disabled=yes
+set www disabled=yes
+set api disabled=yes
+set api-ssl disabled=yes
+set ftp address=191.5.128.0/20,192.168.254.0/24,10.22.0.0/16
+set ssh address=191.5.128.0/20,192.168.254.0/24,10.22.0.0/16
+set winbox address=191.5.128.0/20,192.168.254.0/24,10.22.0.0/16
