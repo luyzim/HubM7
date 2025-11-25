@@ -1,3 +1,6 @@
+require("dotenv").config();
+const ensureAuth = require("./middleware/ensureAuth");
+const session = require("express-session");
 const express = require("express");
 const morgan = require("morgan");
 const path = require("path");
@@ -6,6 +9,21 @@ const app = express();
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
 app.set("trust proxy", true);
+
+
+
+app.use(session({
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: process.env.NODE_ENV === 'production',
+    httpOnly: true,
+    sameSite: 'lax'
+  }
+}));
+
+
 
 // Logger no formato Flask
 morgan.token("date_flask", () => {
@@ -21,7 +39,15 @@ app.use(morgan(flaskFormat));
 
 
 // Frontend Routes
-app.get("/", (req, res) => res.redirect("/home"));
+app.get("/", (req, res) => res.redirect("/guest"));
+
+app.get("/guest", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "guest.html"));
+});
+
+app.get("/login", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "login.html"));
+});
 app.get("/home", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "home.html"));
 });
@@ -33,6 +59,7 @@ app.get("/about", (req, res) => {
 
 
 
+const loginRouter = require("./routes/loginRoute.js");
 const aboutRouter = require("./routes/aboutRoute.js");
 const unimedRouter = require("./routes/unimedRoute.js");
 const bkpMktRouter = require("./routes/bkpMktRoute.js");
@@ -40,15 +67,18 @@ const ficRouter = require("./routes/ficRoute.js");
 const ccsMktRouter = require("./routes/MktCcsInternet.js");
 const ccsCiscoRouter = require("./routes/MktCcsInternet.js");
 const ccsStatusRouter = require("./routes/statusRoutes.js");
+const mensagemRouter = require("./routes/mensagemRoute.js");
 
+app.use("/api/login", loginRouter);
 app.use("/api/about", aboutRouter);
-app.use("/api/unimed", unimedRouter);
-app.use("/api/bkpMkt", bkpMktRouter);
-app.use("/api/4g", ficRouter);
-app.use("/api/template", require("./routes/templateRoute.js"));
-app.use("/api/mkt", require("./routes/MktCcsInternet.js"));
-app.use("/api/cisco", require("./routes/CiscoCcsInternet.js"));
-app.use("/api/status", require("./routes/statusRoutes"));
+app.use("/api/unimed", ensureAuth, unimedRouter);
+app.use("/api/bkpMkt", ensureAuth, bkpMktRouter);
+app.use("/api/4g", ensureAuth, ficRouter);
+app.use("/api/template",ensureAuth, require("./routes/templateRoute.js"));
+app.use("/api/mkt",ensureAuth, require("./routes/MktCcsInternet.js"));
+app.use("/api/cisco",ensureAuth, require("./routes/CiscoCcsInternet.js"));
+app.use("/api/status",ensureAuth, require("./routes/statusRoutes"));
+app.use("/api/tabela",ensureAuth, mensagemRouter);
 
 const PORT = process.env.PORT || 3210;
 const HOST = "0.0.0.0";

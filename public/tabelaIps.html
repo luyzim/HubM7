@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Tabela de IPs e ASN</title>
+<link rel="icon" type="image/png" href="https://i.imgur.com/8qVGalo.png">
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    body {
+        font-family: 'Inter', sans-serif;
+        background-image: url('https://images.unsplash.com/photo-1749150270018-1dee5a5e4b88?q=80&w=1170&auto=format&fit=crop&ixlibrb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');
+        background-size: cover;
+        background-repeat: no-repeat;
+        background-position: center;
+        background-attachment: fixed;
+    }
+    .content-box {
+        background-color: rgba(30, 41, 59, 0.75);
+        backdrop-filter: blur(4px);
+        border-radius: 0.75rem;
+        padding: 2rem;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        color: white;
+        width: 90%;
+        max-width: 900px;
+        margin: 2rem auto;
+    }
+    .btn-voltar {
+        background-color: #4B5563;
+        color: white;
+        text-decoration: none;
+        padding: 0.5rem 1rem;
+        border-radius: 0.375rem;
+        display: inline-block;
+        transition: background-color 0.2s ease-in-out;
+        font-weight: 500;
+        font-size: 0.875rem;
+        line-height: 1.25rem;
+    }
+    .btn-voltar:hover { background-color: #6B7280; }
+</style>
+</head>
+<body class="p-4 sm:p-6 lg:p-8">
+
+  <div class="content-box">
+    <div class="flex justify-between items-start mb-4">
+      <div>
+        <h1 class="text-3xl font-bold mb-1">Tabela de IPs e ASN</h1>
+        <h2 class="text-xl text-gray-300 mb-2">Referência CCS</h2>
+      </div>
+      <a href="/api/mkt" class="btn-voltar">Voltar</a>
+    </div>
+
+    <p class="text-gray-300 mb-4">Exibição fiel ao arquivo <code>data/ccs/tabelaIps.txt</code>.</p>
+    <span id="feedback" class="text-sm text-gray-300 block mb-3"></span>
+
+    <div class="overflow-x-auto rounded-xl border border-slate-700/70 bg-slate-900/50">
+      <table class="min-w-full text-sm">
+        <thead class="bg-slate-800/70 text-gray-200 uppercase tracking-wide">
+          <tr>
+            <th class="px-4 py-3 text-left">P /32</th>
+            <th class="px-4 py-3 text-left">Bloco /30</th>
+            <th class="px-4 py-3 text-left">ASN</th>
+          </tr>
+        </thead>
+        <tbody id="ips-body" class="divide-y divide-slate-800 text-gray-100"></tbody>
+      </table>
+    </div>
+  </div>
+
+<script type="module">
+  const tbody = document.getElementById("ips-body");
+  const feedback = document.getElementById("feedback");
+
+  function render(list) {
+    tbody.innerHTML = "";
+    if (!list.length) {
+      feedback.textContent = "Nenhum registro encontrado.";
+      return;
+    }
+    feedback.textContent = `Exibindo ${list.length} registros`;
+    list.forEach(({ p32, bloco30, asn }) => {
+      const tr = document.createElement("tr");
+      [p32, bloco30, asn].forEach((value) => {
+        const td = document.createElement("td");
+        td.className = "px-4 py-2";
+        td.textContent = value;
+        tr.appendChild(td);
+      });
+      tbody.appendChild(tr);
+    });
+  }
+
+  async function loadData() {
+    feedback.textContent = "Carregando...";
+    try {
+      const res = await fetch("/api/tabela/ips");
+      if (!res.ok) throw new Error("Erro ao buscar tabela");
+      const data = await res.json();
+      render(data.rows || []);
+    } catch (e) {
+      feedback.textContent = "Falha ao carregar tabela.";
+      tbody.innerHTML = "";
+    }
+  }
+
+  loadData();
+</script>
+</body>
+</html>

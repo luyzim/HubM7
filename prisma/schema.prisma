@@ -14,9 +14,23 @@ datasource db {
 }
 
 model admins {
-  id                   Int                    @id @default(autoincrement())
-  email                String                 @unique
-  pass_hash            String
-  created_at           DateTime               @default(now()) @db.Timestamptz(6)
-  order_status_history order_status_history[]
+  id         Int      @id @default(autoincrement())
+  email      String   @unique
+  pass_hash  String
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model users {
+  id         Int      @id @default(autoincrement())
+  email      String   @unique
+  pass_hash  String
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model itens{
+  id          Int      @id @default(autoincrement())
+  nome        String
+  descricao   String
+  quantidade  Int
+  created_at  DateTime @default(now()) @db.Timestamptz(6)
 }

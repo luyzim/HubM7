@@ -191,7 +191,7 @@
 
     const data = Object.fromEntries(new FormData(form).entries());
 
-    const r = await fetch("/run/cisco", {
+    const r = await fetch("/api/cisco", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ data })

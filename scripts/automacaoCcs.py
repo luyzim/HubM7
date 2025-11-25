@@ -110,16 +110,19 @@ def derivar_ip_p1_m1(campo_ip: str, prefixo_saida: str, dados: dict):
 
 
 def derivar_ipBarrado_p1_m1(campo_ip: str, prefixo_saida: str, dados: dict):
-    """Preenche {prefixo}_P1 e {prefixo}_M1 a partir do dados[campo_ip]."""
-    raw = (dados.get(campo_ip) or "").split("/")[0].strip()
-    if not raw:
+    """Preenche {prefixo}_P1 e {prefixo}_M1 preservando o prefixo (ex.: /30) se houver."""
+    valor = (dados.get(campo_ip) or "").strip()
+    if not valor:
         return
     try:
-        base = ipaddress.IPv4Address(raw)
-        dados[f"{prefixo_saida}_P1"] = str(base + 1)
-        dados[f"{prefixo_saida}_M1"] = str(base - 1)
+        ip_str, prefix = (valor.split("/", 1) + [""])[:2]
+        base = ipaddress.IPv4Address(ip_str.strip())
+        sufixo = f"/{prefix}" if prefix else ""
+        dados[f"{prefixo_saida}_P1"] = f"{base + 1}{sufixo}"
+        dados[f"{prefixo_saida}_M1"] = f"{base - 1}{sufixo}"
     except Exception as e:
-        print(f"[WARN] IP inválido para derivação em {campo_ip}: {e}", file=sys.stderr)
+        print(f"[WARN] IP invalido para derivacao em {campo_ip}: {e}", file=sys.stderr)
+
 
 
 def derivar_ip_gary_plankton(campo_ip: str, prefixo_saida: str, dados: dict):

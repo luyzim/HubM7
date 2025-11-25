@@ -4,7 +4,7 @@ paulinia - 02,172.17.2.1,/23,Lan Local;
 cuiaba - 04,172.17.4.1,/24,Lan Local;
 betim - 06,172.17.6.1,/24,Lan Local;
 campo grande - 08,172.17.8.1,/24,Lan Local;
-sao goncalo do sapucai - 10,172.17.10.1,,;
+sao goncalo do sapucai - 10,172.17.10.1;
 tatuape - 12,172.17.12.1,/24,Lan Local;
 araucaria - 14,172.17.14.1,/24,Lan Local;
 uberlandia - 16,172.17.16.1,/24,Lan Local;
