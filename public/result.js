@@ -1,23 +1,25 @@
-export function renderResult(j) {
-  const out = document.getElementById("out");
-  out.textContent = ""; // Clear previous results
+﻿export function renderResult(j, opts = {}) {
+  const outId = opts.outId || "out";
+  const defaultContainer = outId === "out" ? "result-buttons" : `${outId}-buttons`;
+  const containerId = opts.containerId || defaultContainer;
+  const previewLabel = opts.previewLabel || "Pre-visualizar";
+  const downloadLabel = opts.downloadLabel || `Baixar ${j.filename || "arquivo"}`;
 
-  // Remove existing buttons if they exist
-  const existingContainer = document.getElementById("result-buttons");
-  if (existingContainer) {
-    existingContainer.remove();
-  }
+  const out = document.getElementById(outId);
+  if (!out) return;
+  out.textContent = "";
 
-  // Preview button
+  const existingContainer = document.getElementById(containerId);
+  if (existingContainer) existingContainer.remove();
+
   const previewButton = document.createElement("button");
-  previewButton.textContent = "Pré-visualizar";
+  previewButton.textContent = previewLabel;
   previewButton.onclick = () => {
     out.textContent = j.preview || j.raw || JSON.stringify(j, null, 2);
   };
 
-  // Download button
   const downloadButton = document.createElement("button");
-  downloadButton.textContent = `Baixar ${j.filename || "arquivo"}`;
+  downloadButton.textContent = downloadLabel;
   downloadButton.onclick = () => {
     const content = j.preview || j.raw || JSON.stringify(j, null, 2);
     const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
@@ -31,16 +33,13 @@ export function renderResult(j) {
     URL.revokeObjectURL(url);
   };
 
-  // Add buttons to the page
   const container = document.createElement("div");
-  container.id = "result-buttons";
+  container.id = containerId;
   container.style.display = "flex";
   container.style.gap = "10px";
   container.style.marginBottom = "10px";
   container.appendChild(previewButton);
-  if (j.preview || j.raw) {
-    container.appendChild(downloadButton);
-  }
+  if (j.preview || j.raw) container.appendChild(downloadButton);
 
   out.before(container);
 }

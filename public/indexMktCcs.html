@@ -1,10 +1,9 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>MKT - CCS</title>
-<!-- Estilo do Relatorio CCO -->
 <link rel="icon" type="image/png" href="https://i.imgur.com/8qVGalo.png">
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -18,48 +17,48 @@
         background-attachment: fixed;
     }
     .content-box {
-        background-color: rgba(30, 41, 59, 0.75); /* bg-slate-800 bg-opacity-75 */
-        backdrop-filter: blur(4px); /* backdrop-blur-sm */
-        border-radius: 0.75rem; /* rounded-xl */
-        padding: 2rem; /* p-8 */
-        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); /* shadow-2xl */
+        background-color: rgba(30, 41, 59, 0.75);
+        backdrop-filter: blur(4px);
+        border-radius: 0.75rem;
+        padding: 2rem;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
         color: white;
         width: 90%;
         max-width: 900px;
-        margin: 2rem auto; /* center it */
+        margin: 2rem auto;
     }
     input, select, button, textarea {
-        background-color: #E5E7EB; /* bg-gray-200 */
-        color: #111827; /* text-gray-900 */
-        border-radius: 0.375rem; /* rounded-md */
-        padding: 0.5rem 0.75rem; /* px-3 py-2 */
-        border: 1px solid #D1D5DB; /* border-gray-300 */
+        background-color: #E5E7EB;
+        color: #111827;
+        border-radius: 0.375rem;
+        padding: 0.5rem 0.75rem;
+        border: 1px solid #D1D5DB;
         width: 100%;
     }
-    input::placeholder, textarea::placeholder { color: #9ca3af; /* placeholder-gray-400 */ }
+    input::placeholder, textarea::placeholder { color: #9ca3af; }
     input:focus, select:focus, textarea:focus {
         outline: 2px solid transparent;
         outline-offset: 2px;
-        border-color: #4F46E5; /* ring-indigo-500 */
+        border-color: #4F46E5;
         box-shadow: 0 0 0 2px #4F46E5;
-        background-color: #F9FAFB; /* bg-gray-50 */
+        background-color: #F9FAFB;
     }
     label {
         display: block;
-        margin-bottom: 0.5rem; /* mb-2 */
-        font-weight: 500; /* font-medium */
-        color: #D1D5DB; /* text-gray-300 */
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        color: #D1D5DB;
     }
     button {
-        background-color: #3B82F6; /* bg-blue-600 */
+        background-color: #3B82F6;
         color: white;
-        font-weight: 600; /* font-semibold */
+        font-weight: 600;
         transition: background-color 0.2s ease-in-out;
         cursor: pointer;
     }
-    button:hover { background-color: #2563EB; /* hover:bg-blue-700 */ }
+    button:hover { background-color: #2563EB; }
     .btn-voltar {
-        background-color: #4B5563; /* bg-gray-600 */
+        background-color: #4B5563;
         color: white;
         text-decoration: none;
         padding: 0.5rem 1rem;
@@ -67,68 +66,69 @@
         display: inline-block;
         transition: background-color 0.2s ease-in-out;
         font-weight: 500;
-        font-size: 0.875rem; /* text-sm */
+        font-size: 0.875rem;
         line-height: 1.25rem;
     }
-    .btn-voltar:hover { background-color: #6B7280; /* hover:bg-gray-500 */ }
+    .btn-voltar:hover { background-color: #6B7280; }
     pre {
-        background-color: #1F2937; /* bg-gray-800 */
-        border: 1px solid #4B5563; /* border-gray-600 */
-        padding: 0.2rem;
-        border-radius: 0.5rem; /* rounded-lg */
+        background-color: #1F2937;
+        border: 1px solid #4B5563;
+        padding: 0.75rem;
+        border-radius: 0.5rem;
         overflow-x: auto;
-        color: #E5E7EB; /* text-gray-200 */
+        color: #E5E7EB;
+        min-height: 80px;
     }
-     /* Estilos para os botões do result.js */
-    #result-buttons button {
-        background-color: #10B981; /* bg-emerald-500 */
+    #result-buttons button,
+    #out-buttons button,
+    #msg-out-buttons button {
+        background-color: #10B981;
         font-size: 0.875rem;
         padding: 0.5rem 1rem;
     }
-    #result-buttons button:hover {
-        background-color: #059669; /* hover:bg-emerald-600 */
+    #result-buttons button:hover,
+    #out-buttons button:hover,
+    #msg-out-buttons button:hover { background-color: #059669; }
+    #result-buttons button:last-child,
+    #out-buttons button:last-child,
+    #msg-out-buttons button:last-child {
+        background-color: #0EA5E9;
     }
-    #result-buttons button:last-child {
-        background-color: #0EA5E9; /* bg-sky-500 */
+    #result-buttons button:last-child:hover,
+    #out-buttons button:last-child:hover,
+    #msg-out-buttons button:last-child:hover { background-color: #0284C7; }
+
+    .help-fab {
+      position: fixed; right: 24px; bottom: 24px;
+      width: 44px; height: 44px; border-radius: 999px;
+      border: 1px solid #3a3a3a; background:#1a1a1d; color:#eee;
+      font-weight: 700; cursor: pointer;
+      display:flex; align-items:center; justify-content:center;
+      box-shadow: 0 6px 20px rgba(0,0,0,.35); z-index: 1000;
     }
-    #result-buttons button:last-child:hover {
-        background-color: #0284C7; /* hover:bg-sky-600 */
+    .help-fab:focus { outline: 2px solid #3a3a3a; outline-offset: 2px; }
+
+    .help-bubble {
+      position: fixed; right: 24px; bottom: 84px;
+      max-width: 420px; padding: 14px 16px;
+      border-radius: 14px; background:#101014; color:#eee;
+      border:1px solid #2a2a2a; box-shadow: 0 14px 40px rgba(0,0,0,.5);
+      z-index: 1000; display:none;
     }
-
-
-    /* Balão de instruções */
-  .help-fab {
-    position: fixed; right: 24px; bottom: 24px;
-    width: 44px; height: 44px; border-radius: 999px;
-    border: 1px solid #3a3a3a; background:#1a1a1d; color:#eee;
-    font-weight: 700; cursor: pointer;
-    display:flex; align-items:center; justify-content:center;
-    box-shadow: 0 6px 20px rgba(0,0,0,.35); z-index: 1000;
-  }
-  .help-fab:focus { outline: 2px solid #3a3a3a; outline-offset: 2px; }
-
-  .help-bubble {
-    position: fixed; right: 24px; bottom: 84px; /* acima do FAB */
-    max-width: 420px; padding: 14px 16px;
-    border-radius: 14px; background:#101014; color:#eee;
-    border:1px solid #2a2a2a; box-shadow: 0 14px 40px rgba(0,0,0,.5);
-    z-index: 1000; display:none;
-  }
-  .help-bubble::after {
-    content: ""; position:absolute; right: 18px; bottom:-10px;
-    border-width:10px; border-style:solid;
-    border-color:#101014 transparent transparent transparent; /* seta */
-    filter: drop-shadow(0 -2px 0 #2a2a2a);
-  }
-  .help-bubble h4 { margin: 0 0 8px 0; font-size: 16px; }
-  .help-bubble p  { margin: 6px 0; color:#ccc; line-height:1.35; }
-  .help-bubble code { background:#0b0b0c; border:1px solid #222; padding:2px 6px; border-radius:6px; }
-  .help-bubble .close {
-    position:absolute; top:8px; right:10px; border:0; background:transparent; color:#aaa; cursor:pointer;
-    font-size:18px; line-height:1;
-  }
-  .help-bubble .close:hover { color:#fff; }
-
+    .help-bubble::after {
+      content: ""; position:absolute; right: 18px; bottom:-10px;
+      border-width:10px; border-style:solid;
+      border-color:#101014 transparent transparent transparent;
+      filter: drop-shadow(0 -2px 0 #2a2a2a);
+    }
+    .help-bubble h4 { margin: 0 0 8px 0; font-size: 16px; }
+    .help-bubble p  { margin: 6px 0; color:#ccc; line-height:1.35; }
+    .help-bubble code { background:#0b0b0c; border:1px solid #222; padding:2px 6px; border-radius:6px; }
+    .help-bubble .close {
+      position:absolute; top:8px; right:10px; border:0; background:transparent; color:#aaa; cursor:pointer;
+      font-size:18px; line-height:1;
+    }
+    .help-bubble .close:hover { color:#fff; }
 </style>
 </head>
 <body class="p-4 sm:p-6 lg:p-8">
@@ -137,20 +137,22 @@
     <div class="flex justify-between items-start mb-4">
       <div>
         <h1 class="text-3xl font-bold mb-1">Script CCS - Mikrotik</h1>
-        <h2 class="text-xl text-gray-300 mb-2">Versão: 7.20</h2>
+        <h2 class="text-xl text-gray-300 mb-2">Versao: 7.20</h2>
       </div>
-      <a href="/api/tabela" class="btn-voltar">Tabela</a>
-      <a href="/home" class="btn-voltar">Voltar</a>
+      <div class="flex gap-2">
+        <a href="/api/tabela" class="btn-voltar">Tabela</a>
+        <a href="/home" class="btn-voltar">Voltar</a>
+      </div>
     </div>
       
     <p class="text-gray-400 mb-1">Substitua os campos com os dados referentes</p>
-    <p class="text-gray-400 mb-6">Para gerar o arquivo txt com o padrão CCS</p>
+    <p class="text-gray-400 mb-6">Para gerar o arquivo txt com o padrao CCS</p>
 
 
     <form id="form" class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
       <label>PA-: <input name="NUM_PA" required placeholder="07" /></label>
       <label>Cidade: <input name="NOME_PA" required placeholder="ex: Jardinopolis" /></label>
-      <label>Identificação <input name="IDENTIFICACAO" placeholder="ex: CREDIVALE" /></label>
+      <label>Identificacao <input name="IDENTIFICACAO" placeholder="ex: CREDIVALE" /></label>
       <label>Parceiro: <input name="PARCEIRO" /></label>
       <label>Ip da Unidade: <input name="IP_UNIDADE" placeholder="ex: 192.168.10.1" /></label>
       <label>Ip Valido:  <input name="IP_VALIDO"  placeholder="ex: 191.5.132.18/31" /></label>
@@ -170,71 +172,89 @@
       <label>AS LOCAL: <input name="AS_LOCAL" placeholder="AS Local" /></label>
       <label>AS REMOTO: <input name="AS_REMOTO" placeholder="AS Remoto"/></label>
 
-      <button type="submit" class="md:col-span-2 mt-2 py-3">Gerar</button>
+      <div class="md:col-span-2 flex flex-wrap gap-3 mt-2">
+        <button id="btn-config" type="submit" class="py-3 px-4">Gerar Configuracao</button>
+        <button id="btn-mensagem" type="button" class="py-3 px-4">Gerar Mensagem (Internet)</button>
+      </div>
     </form>
 
-    <h3 class="text-2xl font-semibold mt-8 mb-4">Preview</h3>
-    <pre id="out" class="full">—</pre>
+    <h3 class="text-2xl font-semibold mt-8 mb-3">Preview Configuracao</h3>
+    <pre id="out" class="full">Nenhum arquivo gerado.</pre>
+
+    <h3 class="text-2xl font-semibold mt-6 mb-3">Mensagem Internet</h3>
+    <pre id="msg-out" class="full">Nenhuma mensagem gerada.</pre>
   </div>
 
 <script type="module">
   import { renderResult } from "/result.js";
   const form = document.getElementById("form");
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const data = Object.fromEntries(new FormData(form).entries());
+  const btnMensagem = document.getElementById("btn-mensagem");
 
-    const r = await fetch("/api/mkt", {
+  const collectData = () => Object.fromEntries(new FormData(form).entries());
+
+  const callApi = async (url, outId, labels = {}) => {
+    const data = collectData();
+    const response = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ data })
     });
+    const payload = await response.json();
+    renderResult(payload, { outId, containerId: `${outId}-buttons`, ...labels });
+  };
 
-    const j = await r.json();
-    renderResult(j);
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    await callApi("/api/mkt", "out", { downloadLabel: "Baixar configuracao" });
   });
 
+  btnMensagem.addEventListener("click", async (e) => {
+    e.preventDefault();
+    await callApi("/api/mkt/mensagem", "msg-out", {
+      previewLabel: "Pre-visualizar mensagem",
+      downloadLabel: "Baixar mensagem",
+    });
+  });
 
-  
-    // --- HELP BALLOON ---
-    const helpFab    = document.getElementById("helpFab");
-    const helpBubble = document.getElementById("helpBubble");
-    const helpClose  = document.getElementById("helpClose");
+  const helpFab    = document.getElementById("helpFab");
+  const helpBubble = document.getElementById("helpBubble");
+  const helpClose  = document.getElementById("helpClose");
 
-    if (helpFab && helpBubble && helpClose) {
-      const setBubble = (show) => {
-        helpBubble.style.display = show ? "block" : "none";
-        helpFab.setAttribute("aria-expanded", String(show));
-      };
+  if (helpFab && helpBubble && helpClose) {
+    const setBubble = (show) => {
+      helpBubble.style.display = show ? "block" : "none";
+      helpFab.setAttribute("aria-expanded", String(show));
+    };
 
-      helpFab.addEventListener("click", () => {
-        const open = helpBubble.style.display !== "block";
-        setBubble(open);
-      });
+    helpFab.addEventListener("click", () => {
+      const open = helpBubble.style.display !== "block";
+      setBubble(open);
+    });
 
-      helpClose.addEventListener("click", () => setBubble(false));
+    helpClose.addEventListener("click", () => setBubble(false));
 
-      document.addEventListener("keydown", (e) => {
-        if (e.key === "Escape") setBubble(false);
-      });
-    }
-  
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") setBubble(false);
+    });
+  }
 </script>
 
 
-<button class="help-fab" id="helpFab" aria-controls="helpBubble" aria-expanded="false" title="Instruções">?</button>
+<button class="help-fab" id="helpFab" aria-controls="helpBubble" aria-expanded="false" title="Instrucoes">?</button>
 
   <div class="help-bubble" id="helpBubble" role="dialog" aria-labelledby="helpTitle" aria-modal="false">
     <button class="close" id="helpClose" aria-label="Fechar">×</button>
-    <h4 id="helpTitle">Instruções rápidas</h4>
-    <p>• Utilize <code>IP-Valido</code> Com o barramento desejado, para que a aplicação ja calcule o barramento no script</p>
-    <p>• <code>IP_UNIDADE</code> Não é necessário utilizar barramento <code>"/"</code> </p>
-    <p>• Escolha a <code>VRF</code> de acordo com seu caso: <strong>MPLS</strong> ou <strong>INTERNET</strong>.</p>
-    <p>• O campo <strong>IDENTIFICACÂO</strong> se refere ao singular da Unidade. EX: <strong>CREDIVALE</strong></p>
-    <p>• Utilize sempre <code>IP_UNIDADE</code> sem barramento, esta sendo considerado um  <strong>/30</strong> para todos os casos. </p>
-    <p>• IPs do <strong>Gary</strong> e <strong>Plankton</strong>são calculados automaticamente apartir do<code>ip da unidade</code>. </p>
-    <p>•Em caso de mal funcionamento ou sugestão acionar o <strong>ZIBRINIX </strong></p>
+    <h4 id="helpTitle">Instrucoes rapidas</h4>
+    <p>- Utilize <code>IP-Valido</code> com o barramento desejado para o calculo automatico.</p>
+    <p>- <code>IP_UNIDADE</code> nao precisa de barramento "/".</p>
+    <p>- Escolha a <code>VRF</code> conforme o caso: <strong>MPLS</strong> ou <strong>INTERNET</strong>.</p>
+    <p>- O campo <strong>IDENTIFICACAO</strong> refere-se ao nome da unidade (ex.: CREDIVALE).</p>
+    <p>- Use sempre <code>IP_UNIDADE</code> sem barramento (assumimos /30).</p>
+    <p>- IPs do <strong>Gary</strong> e <strong>Plankton</strong> sao calculados a partir do IP da unidade.</p>
+    <p>- Em caso de problema ou sugestao acione o <strong>ZIBRINIX</strong>.</p>
   </div>
 
 </body>
 </html>
+
+

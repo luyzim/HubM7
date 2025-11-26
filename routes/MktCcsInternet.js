@@ -1,28 +1,26 @@
-const express = require("express");
+﻿const express = require("express");
 const path = require("path");
 const { spawn } = require("child_process");
 const router = express.Router();
 
+const PY_CMD = process.platform === "win32" ? "python" : "python3";
+const SPAWN_OPTS = {
+  cwd: path.join(__dirname, ".."),
+  stdio: ["pipe", "pipe", "pipe"],
+  env: { ...process.env, PYTHONIOENCODING: "utf-8" },
+};
 
 router.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "..", "public", "indexMktCcs.html"));
 });
 
-
-router.post("/", (req, res) => {
-  const data = req.body?.data || req.body;
+function runTemplate(res, data, templateName, cmd) {
   if (!data || typeof data !== "object") {
-    return res.status(400).json({ error: "Body inválido" });
+    return res.status(400).json({ error: "Body invalido" });
   }
 
-  const pythonCmd = process.platform === "win32" ? "python" : "python3";
-  const child = spawn(pythonCmd, ["-u", "scripts/automacaoCcs.py", "--cmd", "mkt", "--mode", "stdin"], {
-    cwd: path.join(__dirname, ".."),
-    stdio: ["pipe", "pipe", "pipe"],
-  });
-
-  const tplName = "mktModelo.txt";
-  const payload = { ...data, TEMPLATE: tplName };
+  const child = spawn(PY_CMD, ["-u", "scripts/automacaoCcs.py", "--cmd", cmd, "--mode", "stdin"], SPAWN_OPTS);
+  const payload = { ...data, TEMPLATE: templateName };
   child.stdin.write(JSON.stringify(payload));
   child.stdin.end();
 
@@ -35,6 +33,16 @@ router.post("/", (req, res) => {
     try { res.json(JSON.parse(out)); }
     catch { res.json({ ok: true, raw: out.trim() }); }
   });
+}
+
+router.post("/", (req, res) => {
+  const data = req.body?.data || req.body;
+  runTemplate(res, data, "mktModelo.txt", "mkt");
+});
+
+router.post("/mensagem", (req, res) => {
+  const data = req.body?.data || req.body;
+  runTemplate(res, data, "mensagemInternet.txt", "mensagem");
 });
 
 module.exports = router;
