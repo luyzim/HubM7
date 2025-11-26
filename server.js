@@ -68,6 +68,8 @@ const ccsMktRouter = require("./routes/MktCcsInternet.js");
 const ccsCiscoRouter = require("./routes/MktCcsInternet.js");
 const ccsStatusRouter = require("./routes/statusRoutes.js");
 const mensagemRouter = require("./routes/mensagemRoute.js");
+const hostCcsRouter = require("./routes/hostCcsRoute.js");
+
 
 app.use("/api/login", loginRouter);
 app.use("/api/about", aboutRouter);
@@ -79,6 +81,7 @@ app.use("/api/mkt",ensureAuth, require("./routes/MktCcsInternet.js"));
 app.use("/api/cisco",ensureAuth, require("./routes/CiscoCcsInternet.js"));
 app.use("/api/status",ensureAuth, require("./routes/statusRoutes"));
 app.use("/api/tabela",ensureAuth, mensagemRouter);
+app.use("/api/hostCcs",ensureAuth, hostCcsRouter);
 
 const PORT = process.env.PORT || 3210;
 const HOST = "0.0.0.0";

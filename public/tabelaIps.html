@@ -53,7 +53,7 @@
       <a href="/api/mkt" class="btn-voltar">Voltar</a>
     </div>
 
-    <p class="text-gray-300 mb-4">Exibição fiel ao arquivo <code>data/ccs/tabelaIps.txt</code>.</p>
+    <p class="text-gray-300 mb-4">Tabela generica de ips.</p>
     <span id="feedback" class="text-sm text-gray-300 block mb-3"></span>
 
     <div class="overflow-x-auto rounded-xl border border-slate-700/70 bg-slate-900/50">
@@ -80,7 +80,7 @@
       feedback.textContent = "Nenhum registro encontrado.";
       return;
     }
-    feedback.textContent = `Exibindo ${list.length} registros`;
+    feedback.textContent = ` ${list.length} registros`;
     list.forEach(({ p32, bloco30, asn }) => {
       const tr = document.createElement("tr");
       [p32, bloco30, asn].forEach((value) => {
