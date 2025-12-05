@@ -1,0 +1,3 @@
+MKT-SUP-DELTA-{UNIDADE}-{OBS}:{IP}:routeros:SUP-DELTA:22:admin:M1cr0S3t
+
+

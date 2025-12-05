@@ -5,8 +5,8 @@ require('dotenv').config({ path: '../.env' });
 const prisma = new PrismaClient();
 
 async function createUser() {
-  const email = 'user@exemplo.com'; // Change this email for different users
-  const password = '123456'; // *** CHANGE THIS PASSWORD ***
+  const email = 'noc@microset.com'; 
+  const password = 'M1cr0S3t'; 
 
   try {
     const salt = await bcrypt.genSalt(10);

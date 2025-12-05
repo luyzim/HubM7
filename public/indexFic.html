@@ -26,7 +26,7 @@
             border: 1px solid #4b5563; background-color: #1f2937; color: #f3f4f6;
             transition: border-color .3s ease, box-shadow .3s ease;
         }
-        input::placeholder { color: #9ca3af; }
+        input::placeholder { color: #1F2937; }
         input:focus, select:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 2px rgba(59,130,246,.3); }
         button {
             background-color: #3b82f6; color: #fff; font-weight: 600; cursor: pointer; border: none; text-transform: uppercase;
@@ -49,7 +49,7 @@
 
         <label for="unidade">Escolha a unidade:</label>
         <input type="text" id="pesquisa" placeholder="Pesquisar unidade...">
-        <select id="unidadeSelect" size="8"></select>
+        <select id="unidadeSelect" size="8" style="color: black;"></select>
 
         <button id="executarBtn">Executar Automação</button>
 
@@ -72,9 +72,8 @@
         function atualizarSelect(lista) {
             unidadeSelect.innerHTML = '';
             lista.forEach(u => {
-                const opt = document.createElement('option');
-                opt.value = u; opt.textContent = u;
-                unidadeSelect.appendChild(opt);
+                            const opt = document.createElement('option');
+                            opt.value = u; opt.textContent = u; opt.style.color = "black";                unidadeSelect.appendChild(opt);
             });
         }
 

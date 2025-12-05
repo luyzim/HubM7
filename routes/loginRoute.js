@@ -18,9 +18,12 @@ router.post("/", async (req, res) => {
     const user = admin
       ? null
       : await prisma.users.findUnique({ where: { email } });
-
-    const account = admin || user;
-    const role = admin ? "admin" : user ? "user" : null;
+    const monitoringUser = admin || user
+      ? null
+      : await prisma.monitoramento.findUnique({ where: { email } });
+    
+   const account = admin || user || monitoringUser;
+   const role = admin ? "admin" : user ? "user" : monitoringUser ? "monitoring" : null;
 
     if (!account || !role) {
       return res.status(401).json({ error: "Credenciais inválidas." });

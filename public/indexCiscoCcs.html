@@ -29,13 +29,13 @@
     }
     input, select, button, textarea {
         background-color: #E5E7EB;
-        color: #111827;
+        color: #000000;
         border-radius: 0.375rem;
         padding: 0.5rem 0.75rem;
         border: 1px solid #D1D5DB;
         width: 100%;
     }
-    input::placeholder, textarea::placeholder { color: #9ca3af; }
+    input::placeholder, textarea::placeholder { color: #1F2937; }
     input:focus, select:focus, textarea:focus {
         outline: 2px solid transparent;
         outline-offset: 2px;
@@ -43,7 +43,12 @@
         box-shadow: 0 0 0 2px #4F46E5;
         background-color: #F9FAFB;
     }
-    label { display: block; margin-bottom: 0.5rem; font-weight: 500; color: #D1D5DB; }
+    label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        color: #4a5b78;
+    }
     button {
         background-color: #3B82F6;
         color: white;
@@ -144,10 +149,10 @@
       </label>
 
       <label>VRF:
-        <select name="VRF" required>
-          <option value="">Exemplo: MPLS</option>
-          <option value="MPLS">MPLS</option>
-          <option value="INTERNET">INTERNET</option>
+        <select name="VRF" required style="color: black;">
+          <option value="" style="color: black;">Exemplo: MPLS</option>
+          <option value="MPLS" style="color: black;">MPLS</option>
+          <option value="INTERNET" style="color: black;">INTERNET</option>
         </select>
       </label>  
 

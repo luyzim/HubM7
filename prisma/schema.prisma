@@ -10,7 +10,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url = env("DATABASE_URL")
 }
 
 model admins {
@@ -24,6 +24,14 @@ model users {
   id         Int      @id @default(autoincrement())
   email      String   @unique
   pass_hash  String
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model monitoramento {
+  id         Int      @id @default(autoincrement())
+  email      String   @unique
+  pass_hash  String
+  name       String
   created_at DateTime @default(now()) @db.Timestamptz(6)
 }
 

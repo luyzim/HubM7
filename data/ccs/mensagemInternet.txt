@@ -11,30 +11,65 @@ pppoe-{PARCEIRO}
 Favor adicionar no monitoramento 
 
 Internet
-*Gary - IP 10.24.172.12   {IP_GARY}
-*Plankton - IP 10.24.173.13 {IP_PLANKTON}
-*IP Ether5 Mikrotik - IP 10.24.172.137   {IP_UNIDADE_P1}
+*Gary - IP   {IP_GARY}
+*Plankton - IP {IP_PLANKTON}
+*IP Ether5 Mikrotik - IP   {IP_UNIDADE_P1}
 
-*IP Gi0/0/0 - Cisco WAN - IP 10.24.172.138 {IP_UNIDADE_P2}
-*IP Gi0/0/1 - Cisco LAN - IP 191.5.133.89  {IP_VALIDO_P1}
+*IP Gi0/0/0 - Cisco WAN - IP {IP_UNIDADE_P2}
+*IP Gi0/0/1 - Cisco LAN - IP  {IP_VALIDO_P1}
 
 @adriel.giovanni
 Favor adicionar informações de escalonamento na Intranet
 
 @aloysio.rosseti @Mateus
 Homologação e rotinas de backup
- 
-
 
 ​DADOS DO LINK:
 
 SICOOB {IDENTIFICACAO} - PA {NUM_PA} - {NOME_PA}
 
 
-Dados de Endereçamento IP Lan Gateway: 191.5.133.89   {IP_VALIDO_P1}
-Inicio IP Lan Válido: 191.5.133.88  {IP_VALIDO}
-Fim IP Lan Valido: 191.5.133.89  {IP_VALIDO_P1}
-Máscara: 255.255.255.254 {MASCARA_EXTENSO}
+Dados de Endereçamento IP Lan Gateway: {IP_VALIDO_P1}
+Inicio IP Lan Válido: {IP_VALIDO}
+Fim IP Lan Valido:  {IP_VALIDO_P1}
+Máscara: {MASCARA_EXTENSO}
 DNS Primário: 191.5.128.146 DNS Secundário: 191.5.128.147 
 
 Dados de Endereçamento IP Wan IP CPE Wan: {IP_UNIDADE_P2} Máscara: 255.255.255.252
+
+
+
+========================INSERIR NO WIKI=========================================================
+
+==SICOOB-{IDENTIFICACAO}-CCS-MPLS - PA{NUM_PA} - Capitão Leônidas Marques – PR - MPLS ==
+  //BKP-MKT-\Noc\Backups\Backup Mikrotik\SICOOB-CREDICAPITAL
+  //BKP-CISCO-\Noc\Backups\Backup Cisco\SICOOB-CREDICAPITAL
+  Serviços.:
+ *Link Ip Cgnat - ampernet - via PPPoE
+ *VCN Microset  - VPN Concentrador Gary e Plankton para comunicação CCS x filial;
+ '''Roteador Mikrotik E50UG'''
+ Ether1 - WAN - Link Parceiro - ampernet
+  via PPPoE - user micriset.ltds03 senha - 28072025
+  Ether2 - Vago
+  Ether3 - Vago
+  Ether4 - Vago
+  Ether5 - LAN - Roteador Cisco - SICOOB CCS – CREDICAPITAL - PA08 - CAPITÃO LEÔNIDAS
+  Ip: 10.24.74.97/30
+  L2TP - Gary
+   *IP Servidor.: 191.5.128.105
+   *Username.: 1283_20250345_39_a / Senha.: 1283_20250345_39_a
+   *IP.: 10.24.74.2
+ L2TP - Plankton
+   *IP Servidor.: 45.160.230.105
+   *Username.: 1283_20250345_39_b / Senha.: 1283_20250345_39_b
+   *IP.: 10.24.75.2
+ '''Router Cisco C1111'''
+ interface GigabitEthernet0/0/0
+ description WAN
+ ip address 10.24.74.98/30 255.255.255.252
+ negotiation auto
+  interface GigabitEthernet0/0/1
+ description LAN
+ ip address 10.42.57.113 255.255.255.248
+ negotiation auto
+

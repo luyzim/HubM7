@@ -6,7 +6,7 @@ const prisma = new PrismaClient();
 
 async function createAdmin() {
   const email = 'admin@example.com'; // You can change this email
-  const password = 'new_admin_password'; // *** CHANGE THIS PASSWORD ***
+  const password = '123456'; // *** CHANGE THIS PASSWORD ***
 
   try {
     const salt = await bcrypt.genSalt(10);

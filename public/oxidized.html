@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Oxidized - Gerador de Config</title>
+<!-- Estilo do Relatorio CCO -->
+<link rel="icon" type="image/png" href="https://i.imgur.com/8qVGalo.png">
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    body {
+        font-family: 'Inter', sans-serif;
+        background-image: url('https://images.unsplash.com/photo-1749150270018-1dee5a5e4b88?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');
+        background-size: cover;
+        background-repeat: no-repeat;
+        background-position: center;
+        background-attachment: fixed;
+    }
+    .content-box {
+        background-color: rgba(30, 41, 59, 0.75); /* bg-slate-800 bg-opacity-75 */
+        backdrop-filter: blur(4px); /* backdrop-blur-sm */
+        border-radius: 0.75rem; /* rounded-xl */
+        padding: 2rem; /* p-8 */
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); /* shadow-2xl */
+        color: white;
+        width: 90%;
+        max-width: 900px;
+        margin: 2rem auto; /* center it */
+    }
+    input, select, button, textarea {
+        background-color: #E5E7EB; /* bg-gray-200 */
+        color: #000000; /* text-black */
+        border-radius: 0.375rem; /* rounded-md */
+        padding: 0.5rem 0.75rem; /* px-3 py-2 */
+        border: 1px solid #D1D5DB; /* border-gray-300 */
+        width: 100%;
+    }
+    input::placeholder, textarea::placeholder { color: #1F2937; /* placeholder-gray-900 */ }
+    input:focus, select:focus, textarea:focus {
+        outline: 2px solid transparent;
+        outline-offset: 2px;
+        border-color: #4F46E5; /* ring-indigo-500 */
+        box-shadow: 0 0 0 2px #4F46E5; /* ring-2 ring-offset-2 ring-indigo-500 */
+        background-color: #F9FAFB; /* bg-gray-50 */
+    }
+    label {
+        display: block;
+        margin-bottom: 0.5rem; /* mb-2 */
+        font-weight: 500; /* font-medium */
+        color: #D1D5DB; /* text-gray-300 */
+    }
+    button {
+        background-color: #3B82F6; /* bg-blue-600 */
+        color: white;
+        font-weight: 600; /* font-semibold */
+        transition: background-color 0.2s ease-in-out;
+        cursor: pointer;
+    }
+    button:hover { background-color: #2563EB; /* hover:bg-blue-700 */ }
+     .btn-add {
+        background-color: #10B981; /* bg-emerald-500 */
+        margin-top: 0.5rem;
+    }
+    .btn-add:hover { background-color: #059669; /* hover:bg-emerald-600 */ }
+    .btn-voltar {
+        background-color: #4B5563; /* bg-gray-600 */
+        color: white;
+        text-decoration: none;
+        padding: 0.5rem 1rem;
+        border-radius: 0.375rem; /* rounded-md */
+        display: inline-block;
+        transition: background-color 0.2s ease-in-out;
+        font-weight: 500;
+        font-size: 0.875rem; /* text-sm */
+        line-height: 1.25rem; /* leading-5 */
+    }
+    .btn-voltar:hover { background-color: #6B7280; /* hover:bg-gray-500 */ }
+    pre {
+        background-color: #1F2937; /* bg-gray-800 */
+        border: 1px solid #4B5563; /* border-gray-600 */
+        padding: 1rem;
+        border-radius: 0.5rem; /* rounded-lg */
+        overflow-x: auto;
+        color: #E5E7EB; /* text-gray-200 */
+        min-height: 100px;
+    }
+</style>
+</head>
+<body class="p-4 sm:p-6 lg:p-8">
+
+  <div class="content-box">
+    <div class="flex justify-between items-start mb-6">
+      <div>
+        <h1 class="text-3xl font-bold mb-1">Gerador de Config - Oxidized</h1>
+        <h2 class="text-xl text-gray-300 mb-2">Gere configurações a partir de templates</h2>
+      </div>
+      <a href="/home" class="btn-voltar">Voltar</a>
+    </div>
+
+    <form id="form">
+      <div>
+        <div>
+            <label for="template_principal">Template Principal</label>
+            <select name="template_principal" id="template_principal" required style="color: black;"></select>
+        </div>
+      </div>
+
+      <h3 class="text-2xl font-semibold mt-8 mb-4">Placeholders</h3>
+      <div id="placeholders-container" class="space-y-4">
+        <p class="text-gray-400">Selecione um template principal para ver os placeholders.</p>
+      </div>
+      
+      <button type="submit" class="w-full mt-6 py-3">Gerar Configuração</button>
+    </form>
+
+    <h3 class="text-2xl font-semibold mt-8 mb-4">Resultado</h3>
+    <pre id="out" class="full-width">—</pre>
+    <div id="result-buttons" class="mt-2 flex space-x-2"></div>
+
+  </div>
+
+<script type="module">
+  function renderResult(responseJson, template_name) {
+      const out = document.getElementById("out");
+      const resultButtons = document.getElementById("result-buttons");
+      resultButtons.innerHTML = '';
+      
+      if (responseJson.ok) {
+          out.textContent = responseJson.generated_config;
+          const uploadButton = document.createElement('button');
+          uploadButton.textContent = 'Subir para Oxidized';
+          uploadButton.onclick = async () => {
+              uploadButton.textContent = 'Subindo...';
+              uploadButton.disabled = true;
+
+              const texto_para_inserir = out.textContent;
+
+              try {
+                  const res = await fetch('/api/comandos-oxidized/run', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ template_name, texto_para_inserir })
+                  });
+                  const result = await res.json();
+                  if (result.ok) {
+                      out.textContent = result.output;
+                      uploadButton.textContent = 'Subiu com Sucesso!';
+                  } else {
+                      out.textContent = `Erro ao subir: ${result.error}\nDetalhes: ${result.details || 'N/A'}`;
+                      uploadButton.textContent = 'Erro ao Subir';
+                      console.error('Error uploading to oxidized:', result.details);
+                  }
+              } catch (error) {
+                  uploadButton.textContent = 'Erro na Requisição';
+                  console.error('Request error:', error);
+              }
+          };
+          resultButtons.appendChild(uploadButton);
+      } else {
+          out.textContent = `Erro: ${responseJson.error}\nDetalhes: ${responseJson.details || 'N/A'}`;
+      }
+  }
+
+  const form = document.getElementById("form");
+  const principalSelect = document.getElementById("template_principal");
+  const placeholdersContainer = document.getElementById("placeholders-container");
+
+  async function populateTemplateSelectors() {
+    try {
+        const response = await fetch("/api/oxidized/templates");
+        if (!response.ok) throw new Error("Não foi possível carregar templates.");
+        const templates = await response.json();
+        
+        const defaultOption = '<option value="">Selecione um template...</option>';
+        principalSelect.innerHTML = defaultOption;
+
+        templates.forEach(template => {
+            const option = `<option value="${template}" style="color: black;">${template}</option>`;
+            principalSelect.innerHTML += option;
+        });
+    } catch (error) {
+        placeholdersContainer.innerHTML = `<p class="text-red-400">${error.message}</p>`;
+    }
+  }
+
+  async function updatePlaceholders() {
+      const selectedTemplate = principalSelect.value;
+      placeholdersContainer.innerHTML = '';
+
+      if (!selectedTemplate) {
+          placeholdersContainer.innerHTML = '<p class="text-gray-400">Selecione um template principal para ver os placeholders.</p>';
+          return;
+      }
+      
+      placeholdersContainer.innerHTML = '<p class="text-gray-400">Carregando placeholders...</p>';
+
+      try {
+        const response = await fetch(`/api/oxidized/placeholders/${selectedTemplate}`);
+        if (!response.ok) throw new Error("Não foi possível carregar os placeholders.");
+        const placeholders = await response.json();
+
+        placeholdersContainer.innerHTML = '';
+        if (placeholders.length === 0) {
+            placeholdersContainer.innerHTML = '<p class="text-gray-400">Este template não possui placeholders.</p>';
+        } else {
+            placeholders.forEach(ph => {
+                const div = document.createElement("div");
+                div.innerHTML = `
+                    <label for="ph-${ph}">${ph}</label>
+                    <input name="${ph}" id="ph-${ph}" placeholder="Valor para ${ph}" required style="color: black;" />
+                `;
+                placeholdersContainer.appendChild(div);
+            });
+        }
+      } catch (error) {
+          placeholdersContainer.innerHTML = `<p class="text-red-400">${error.message}</p>`;
+      }
+  }
+
+  principalSelect.addEventListener("change", updatePlaceholders);
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    
+    const formData = new FormData(form);
+    const dados = {};
+    const template_principal = formData.get("template_principal");
+
+    for (let [key, value] of formData.entries()) {
+        if (key !== 'template_principal') {
+            dados[key] = value;
+        }
+    }
+    
+    const payload = {
+        template_principal,
+        dados
+    };
+
+    const out = document.getElementById("out");
+    out.textContent = "Gerando...";
+    document.getElementById("result-buttons").innerHTML = '';
+
+    try {
+        const response = await fetch("/api/oxidized/generate", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        });
+        const json = await response.json();
+        renderResult(json, template_principal);
+    } catch (error) {
+        renderResult({ ok: false, error: 'Falha na comunicação com a API.', details: error.message });
+    }
+  });
+
+  // Carregar os templates assim que o script for executado
+  populateTemplateSelectors();
+</script>
+
+</body>
+</html>
