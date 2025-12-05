@@ -11,9 +11,7 @@ router.get("/templates", async (req, res) => {
     try {
         console.log("Tentando ler o diretório de templates em:", TEMPLATES_DIR);
         const files = await fs.readdir(TEMPLATES_DIR);
-        console.log("Arquivos encontrados no diretório:", files);
         const txtTemplates = files.filter(file => file.endsWith('.txt'));
-        console.log("Templates .txt filtrados:", txtTemplates);
         res.json(txtTemplates);
     } catch (error) {
         console.error("Erro ao listar templates:", error);

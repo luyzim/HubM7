@@ -62,7 +62,7 @@ app.get("/home", ensureAuth, (req, res) => {
   res.sendFile(path.join(__dirname, "public", "home.html"));
 });
 
-app.get("/oxidized", ensureAuth, (req, res) => {
+app.get("/oxidized", ensureN2, (req, res) => {
   res.sendFile(path.join(__dirname, "public", "oxidized.html"));
 });
 
@@ -97,8 +97,8 @@ app.use("/api/cisco",ensureN2, require("./routes/CiscoCcsInternet.js"));
 app.use("/api/status",ensureAuth, require("./routes/statusRoutes"));
 app.use("/api/tabela",ensureN2, mensagemRouter);
 app.use("/api/hostCcs",ensureMonitoramento, hostCcsRouter);
-app.use("/api/oxidized", ensureAuth, require("./routes/oxidizedRoute.js"));
-app.use("/api/comandos-oxidized", ensureAuth, comandosOxidizedRouter);
+app.use("/api/oxidized", ensureN2, require("./routes/oxidizedRoute.js"));
+app.use("/api/comandos-oxidized", ensureN2, comandosOxidizedRouter);
 
 const PORT = process.env.PORT || 3210;
 const HOST = "0.0.0.0";
