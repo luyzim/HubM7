@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Oxidized - Gerador de Config</title>
+<title>Oxidized-API</title>
 <!-- Estilo do Relatorio CCO -->
 <link rel="icon" type="image/png" href="https://i.imgur.com/8qVGalo.png">
 <script src="https://cdn.tailwindcss.com"></script>
@@ -92,8 +92,8 @@
   <div class="content-box">
     <div class="flex justify-between items-start mb-6">
       <div>
-        <h1 class="text-3xl font-bold mb-1">Gerador de Config - Oxidized</h1>
-        <h2 class="text-xl text-gray-300 mb-2">Gere configurações a partir de templates</h2>
+        <h1 class="text-3xl font-bold mb-1">Oxidized - API</h1>
+        <h2 class="text-xl text-gray-300 mb-2">Inserção de linhas de backup no servidor Oxidized</h2>
       </div>
       <a href="/home" class="btn-voltar">Voltar</a>
     </div>
@@ -101,14 +101,16 @@
     <form id="form">
       <div>
         <div>
-            <label for="template_principal">Template Principal</label>
+            <label for="template_principal">Templates:</label>
             <select name="template_principal" id="template_principal" required style="color: black;"></select>
         </div>
       </div>
 
-      <h3 class="text-2xl font-semibold mt-8 mb-4">Placeholders</h3>
+      <h3 class="text-2xl font-semibold mt-8 mb-4">Inserção automatica:</h3>
       <div id="placeholders-container" class="space-y-4">
-        <p class="text-gray-400">Selecione um template principal para ver os placeholders.</p>
+        <p class="text-gray-400">Gere o script de bkp apartir do template desejado.</p>
+                <p class="text-gray-400">Suba para o servidor com busca e organização por grupos automatica.</p>
+
       </div>
       
       <button type="submit" class="w-full mt-6 py-3">Gerar Configuração</button>

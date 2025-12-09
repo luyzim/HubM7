@@ -3,20 +3,23 @@ const path = require('path');
 const { exec } = require('child_process');
 const morgan = require('morgan');
 const fs = require('fs');
-const { spawn } = require('child_process');
 
-const router = express.Router();
+const app = express();
+const PORT = 3000;
 
-module.exports = router;
+// --- Logging Setup ---
+// Create a write stream (in append mode)
+const accessLogStream = fs.createWriteStream(path.join(__dirname, 'access.log'), { flags: 'a' });
 
+// Log to console with the 'common' format
+app.use(morgan('common'));
+// Log to file with the 'common' format (similar to Flask/Apache)
+app.use(morgan('common', { stream: accessLogStream }));
 
-router.use(express.json());
+app.use(express.json());
+app.use(express.static(path.join(__dirname, 'public')));
 
-router.get("/", (_req, res) => {
-  res.sendFile(path.join(__dirname, "..", "public", "hostCcs.html"));
-});
-
-router.post('/', (req, res) => {
+app.post('/api/create-hosts', (req, res) => {
     const { group, identifier, ips } = req.body;
 
     if (!group || !identifier || !ips) {
@@ -36,14 +39,14 @@ router.post('/', (req, res) => {
         ips.mpls.wan,
         ips.mpls.lan,
     ];
+
     // Sanitize inputs to prevent command injection
     const sanitizedGroup = JSON.stringify(group);
     const sanitizedIdentifier = JSON.stringify(identifier);
     const sanitizedIps = ipList.map(ip => JSON.stringify(ip)).join(' ');
 
-    const scriptPath = path.join(__dirname, "..", "scripts", "createHostCcs.py");
+    const scriptPath = path.join(__dirname, 'ZabbixAPI', 'create_hots_hosts.py');
     const command = `python "${scriptPath}" ${sanitizedGroup} ${sanitizedIdentifier} ${sanitizedIps}`;
-    console.log("Feito spwan do python para criação dos hots CCS", req.body);
 
     exec(command, (error, stdout, stderr) => {
         if (error) {
@@ -66,4 +69,6 @@ router.post('/', (req, res) => {
     });
 });
 
-module.exports = router;
+app.listen(PORT, () => {
+    console.log(`Servidor rodando em http://localhost:${PORT}`);
+});

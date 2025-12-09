@@ -70,6 +70,14 @@ app.get("/about", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "about.html"));
 });
 
+app.get("/host-zema", ensureMonitoramento, (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "hostZema.html"));
+});
+
+app.get("/host-ccs", ensureMonitoramento, (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "hostCcs.html"));
+});
+
 
 
 
@@ -83,6 +91,7 @@ const ccsCiscoRouter = require("./routes/MktCcsInternet.js");
 const ccsStatusRouter = require("./routes/statusRoutes.js");
 const mensagemRouter = require("./routes/mensagemRoute.js");
 const hostCcsRouter = require("./routes/hostCcsRoute.js");
+const hostZemaRouter = require("./routes/hostZemaRoute.js");
 const comandosOxidizedRouter = require("./routes/comandosOxidizedRoute.js");
 
 
@@ -96,11 +105,13 @@ app.use("/api/mkt",ensureN2, require("./routes/MktCcsInternet.js"));
 app.use("/api/cisco",ensureN2, require("./routes/CiscoCcsInternet.js"));
 app.use("/api/status",ensureAuth, require("./routes/statusRoutes"));
 app.use("/api/tabela",ensureN2, mensagemRouter);
-app.use("/api/hostCcs",ensureMonitoramento, hostCcsRouter);
+app.use("/api/host-ccs",ensureMonitoramento, hostCcsRouter);
 app.use("/api/oxidized", ensureN2, require("./routes/oxidizedRoute.js"));
 app.use("/api/comandos-oxidized", ensureN2, comandosOxidizedRouter);
+app.use("/api/host-zema", ensureMonitoramento, hostZemaRouter);
 
-const PORT = process.env.PORT || 3210;
+
+const PORT = process.env.PORT;
 const HOST = "0.0.0.0";
 
 app.listen(PORT, HOST, () => {
