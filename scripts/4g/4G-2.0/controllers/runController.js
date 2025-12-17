@@ -1,6 +1,6 @@
 // GARANTA que está exatamente assim:
-const { runBridge } = require("../services/pythonRunner");
-const { sendResponse, normalizePythonOutput } = require("../utils/response");
+import { runBridge } from "../services/pythonRunner.js";
+import { sendResponse, normalizePythonOutput } from "../utils/response.js";
 
 async function postRun(req, res) {
   const { unidade } = req.body || {};
@@ -17,5 +17,5 @@ async function postRun(req, res) {
   return sendResponse(req, res, normalized, httpStatus, { allowHtmlObject: true });
 }
 
-module.exports = { postRun }; // <-- ESTE EXPORT É O QUE IMPORTA
+export { postRun }; // <-- ESTE EXPORT É O QUE IMPORTA
 

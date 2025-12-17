@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Comandos Mikrotik</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-image: url('https://images.unsplash.com/photo-1749150270018-1dee5a5e4b88?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0');
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-position: center;
+      background-attachment: fixed;
+    }
+    .content-box {
+      background-color: rgba(30, 41, 59, 0.75);
+      backdrop-filter: blur(4px);
+      border-radius: 0.75rem;
+      padding: 2rem;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+      color: white;
+      width: 90%;
+      max-width: 900px;
+      margin: 2rem auto;
+    }
+    input, select, button, textarea {
+      background-color: #E5E7EB;
+      color: #000000;
+      border-radius: 0.375rem;
+      padding: 0.5rem 0.75rem;
+      border: 1px solid #D1D5DB;
+      width: 100%;
+    }
+    input::placeholder, textarea::placeholder { color: #1F2937; }
+    input:focus, select:focus, textarea:focus {
+      outline: 2px solid transparent;
+      outline-offset: 2px;
+      border-color: #4F46E5;
+      box-shadow: 0 0 0 2px #4F46E5;
+      background-color: #F9FAFB;
+    }
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+      color: #D1D5DB;
+    }
+    button {
+      background-color: #3B82F6;
+      color: white;
+      font-weight: 600;
+      transition: background-color 0.2s ease-in-out;
+      cursor: pointer;
+    }
+    button:hover { background-color: #2563EB; }
+    .btn-voltar {
+      background-color: #4B5563;
+      color: white;
+      text-decoration: none;
+      padding: 0.5rem 1rem;
+      border-radius: 0.375rem;
+      display: inline-block;
+      transition: background-color 0.2s ease-in-out;
+      font-weight: 500;
+      font-size: 0.875rem;
+      line-height: 1.25rem;
+    }
+    .btn-voltar:hover { background-color: #6B7280; }
+    pre {
+      background-color: #1F2937;
+      border: 1px solid #4B5563;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      color: #E5E7EB;
+      min-height: 100px;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body class="p-4 sm:p-6 lg:p-8">
+
+  <div class="content-box">
+    <div class="flex justify-between items-start mb-4">
+      <div>
+        <h1 class="text-3xl font-bold mb-1">Triagem N1</h1>
+        <h2 class="text-xl text-gray-300 mb-2">Mikrotik</h2>
+      </div>
+      <a href="/home" class="btn-voltar">Voltar</a>
+    </div>
+
+    <form id="form" class="grid grid-cols-1 gap-4">
+      <div>
+        <label for="ipInput">Endereço IP:</label>
+        <input type="text" id="ipInput" name="ip" placeholder="Ex: 192.168.1.1" required>
+      </div>
+      <div>
+        <label for="commandSelect">Comando:</label>
+        <select name="command" id="commandSelect" required style="color: black;">
+          <option value="">Carregando comandos...</option>
+        </select>
+      </div>
+      <button id="executeBtn" type="submit" class="mt-2 py-3">Executar</button>
+    </form>
+
+    <h3 class="text-2xl font-semibold mt-8 mb-4">Resultado</h3>
+    <pre id="out">—</pre>
+  </div>
+
+  <script type="module">
+    const commandSelect = document.getElementById("commandSelect");
+    const ipInput = document.getElementById("ipInput");
+    const out = document.getElementById("out");
+    const form = document.getElementById("form");
+    const executeBtn = document.getElementById("executeBtn");
+
+    async function loadCommands() {
+      try {
+        const res = await fetch("/api/comandos-mkt/commands");
+        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+        
+        const commands = await res.json();
+        
+        commandSelect.innerHTML = '<option value="">Selecione um comando...</option>';
+        
+        // 2. Populate dropdown using the correct column names from the schema
+        commands.forEach(cmd => {
+          const option = document.createElement("option");
+          option.value = cmd.commandText; // The actual command string
+          option.textContent = cmd.descricao; // The user-friendly description
+          option.style.color = "black";
+          commandSelect.appendChild(option);
+        });
+
+      } catch (error) {
+        out.textContent = `Erro ao carregar comandos: ${error.message}`;
+        out.classList.add("text-red-400");
+        commandSelect.innerHTML = '<option value="">Erro ao carregar</option>';
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", loadCommands);
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      
+      const ip = ipInput.value;
+      const command = commandSelect.value;
+      
+      if (!ip || !command) {
+        out.textContent = "Por favor, preencha o IP e selecione um comando.";
+        return;
+      }
+
+      out.textContent = "Executando comando...";
+      out.classList.remove("text-red-400");
+      executeBtn.disabled = true;
+      executeBtn.textContent = "Executando...";
+
+      try {
+        const response = await fetch("/api/comandos-mkt/run", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ip, command })
+        });
+        
+        out.textContent = ""; 
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          out.textContent += decoder.decode(value, { stream: true });
+        }
+
+      } catch (err) {
+        out.textContent = `Erro: Falha na comunicação com o servidor.\nDetalhes: ${err.message}`;
+        out.classList.add("text-red-400");
+      } finally {
+        executeBtn.disabled = false;
+        executeBtn.textContent = "Executar";
+      }
+    });
+  </script>
+
+</body>
+</html>

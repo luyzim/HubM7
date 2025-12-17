@@ -1,10 +1,13 @@
-// routes/unimedRoute.js
-const express = require("express");
-const path = require("path");
-const { spawn } = require("child_process");
-const net = require("net");
+import express from "express";
+import path from "path";
+import { spawn } from "child_process";
+import net from "net";
+import { fileURLToPath } from "url";
 
 const router = express.Router();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // ================= SSE CLIENTS =================
 
@@ -168,4 +171,4 @@ router.get("/events", (req, res) => {
   });
 });
 
-module.exports = router;
+export default router;

@@ -1,10 +1,12 @@
-const express = require('express');
-require("dotenv").config(); // Ensure env variables are loaded
+import express from 'express';
+import 'dotenv/config'; // Ensure env variables are loaded
+import { PrismaClient } from '@prisma/client'; // Use @prisma/client directly
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+
 const router = express.Router();
-const { PrismaClient } = require('@prisma/client'); // Use @prisma/client directly
 const prisma = new PrismaClient();
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
+
 
 // Middleware to authenticate clients
 function clientAuth(req, res, next) {
@@ -117,4 +119,4 @@ router.get("/my-orders", clientAuth, async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;

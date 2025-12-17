@@ -1,7 +1,12 @@
-﻿const express = require("express");
-const path = require("path");
-const { spawn } = require("child_process");
+﻿import express from "express";
+import path from "path";
+import { spawn } from "child_process";
+import { fileURLToPath } from "url";
+
 const router = express.Router();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const PY_CMD = process.platform === "win32" ? "python" : "python3";
 const SPAWN_OPTS = {
@@ -45,4 +50,4 @@ router.post("/mensagem", (req, res) => {
   runTemplate(res, data, "mensagemInternet.txt", "mensagem");
 });
 
-module.exports = router;
+export default router;

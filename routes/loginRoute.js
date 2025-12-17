@@ -1,6 +1,6 @@
-const express = require("express");
-const { PrismaClient } = require("@prisma/client");
-const bcrypt = require("bcryptjs");
+import express from "express";
+import { PrismaClient } from "@prisma/client";
+import bcrypt from "bcryptjs";
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -44,4 +44,4 @@ router.post("/", async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;

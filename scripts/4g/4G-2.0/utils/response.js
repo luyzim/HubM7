@@ -26,7 +26,7 @@ function sendResponse(req, res, data, status = 200, options = {}) {
   res.status(status).json(data);
 }
 
-module.exports = {
+export {
   normalizePythonOutput,
   sendResponse,
 };

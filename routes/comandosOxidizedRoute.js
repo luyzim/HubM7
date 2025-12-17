@@ -1,8 +1,13 @@
-const express = require("express");
-const path = require("path");
-const { spawn } = require("child_process");
+import express from "express";
+import path from "path";
+import { spawn } from "child_process";
+import { fileURLToPath } from "url";
 
 const router = express.Router();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 
 router.post("/run", (req, res) => {
   const { template_name, texto_para_inserir } = req.body;
@@ -70,4 +75,4 @@ router.post("/run", (req, res) => {
   });
 });
 
-module.exports = router;
+export default router;

@@ -1,9 +1,11 @@
-const express = require("express");
-const path = require("path");
-const { getUnidades } = require("../scripts/4g/4G-2.0/controllers/unidadesController");
-const { postRun } = require("../scripts/4g/4G-2.0/controllers/runController");
+import express from "express";
+import path from "path";
+import { fileURLToPath } from "url";
+import { getUnidades } from "../scripts/4g/4G-2.0/controllers/unidadesController.js";
+import { postRun } from "../scripts/4g/4G-2.0/controllers/runController.js";
 
-
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Se algo não for function, para aqui com erro claro
 if (typeof getUnidades !== "function" || typeof postRun !== "function") {
@@ -23,4 +25,4 @@ router.get("/unidades", getUnidades);
 // Automação
 router.post("/run", postRun);
 
-module.exports = router;
+export default router;

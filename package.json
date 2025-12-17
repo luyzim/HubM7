@@ -1,19 +1,31 @@
 {
-  "name": "praticaexistencionista",
-  "version": "1.0.0",
-  "description": "",
+  "name": "hub",
+  "version": "2.2.0",
+  "description": "Triagem N1",
+  "keywords": [],
+  "homepage": "https://github.com/luyzim/HubM7#readme",
+  "bugs": {
+    "url": "https://github.com/luyzim/HubM7/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/luyzim/HubM7.git"
+  },
   "license": "ISC",
-  "author": "",
-  "type": "commonjs",
+  "author": "luyzim",
+  "type": "module",
   "main": "server.js",
+  "directories": {
+    "doc": "docs"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js",
     "prisma:seed": "node prisma/seed.js"
   },
   "dependencies": {
-    "@prisma/client": "^6.19.0",
-    "bcryptjs": "^3.0.3",
+    "@prisma/client": "^6.19.1",
+    "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
@@ -25,12 +37,8 @@
     "swagger-ui-express": "^5.0.1",
     "yamljs": "^0.3.0"
   },
-  "directories": {
-    "doc": "docs"
-  },
   "devDependencies": {
     "mocha": "^11.7.5",
     "prisma": "^6.19.0"
-  },
-  "keywords": []
+  }
 }

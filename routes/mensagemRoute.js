@@ -1,8 +1,13 @@
-const express = require("express");
-const path = require("path");
-const fs = require("fs");
-const { spawn } = require("child_process");
+import express from "express";
+import path from "path";
+import fs from "fs";
+import { spawn } from "child_process";
+import { fileURLToPath } from "url";
+
 const router = express.Router();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const TPL_DIR = path.join(__dirname, "..", "data");
 const TABELA_IPS_PATH = path.join(__dirname, "..", "data", "ccs", "tabelaIps.txt");
@@ -35,6 +40,5 @@ router.get("/ips", (_req, res) => {
 });
 
 
+export default router;
 
-
-module.exports = router;

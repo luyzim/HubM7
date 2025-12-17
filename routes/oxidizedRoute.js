@@ -1,10 +1,16 @@
-const express = require("express");
-const path = require("path");
-const fs = require("fs").promises;
-const { spawn } = require("child_process");
+import express from "express";
+import path from "path";
+import fs from "fs/promises";
+import { spawn } from "child_process";
+import { fileURLToPath } from "url";
 
 const router = express.Router();
-const TEMPLATES_DIR = path.join(process.cwd(), "data", "oxidized");
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+
+const TEMPLATES_DIR = path.join(__dirname, "..", "data", "oxidized");
 
 // GET /api/oxidized/templates - Listar todos os templates .txt
 router.get("/templates", async (req, res) => {
@@ -106,4 +112,4 @@ router.post("/generate", (req, res) => {
   });
 });
 
-module.exports = router;
+export default router;

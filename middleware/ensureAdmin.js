@@ -1,4 +1,4 @@
-module.exports = (req, res, next) => {
+export default (req, res, next) => {
   // 1. Verifica se está logado
   if (!req.session?.user) {
     const wantsHtml = req.accepts("html") && !req.xhr;

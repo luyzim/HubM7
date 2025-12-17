@@ -1,0 +1,1 @@
+MKT-cocred-{UNIDADE}-PA{NUM-PA}:{IP}:routeros:COCRED:22:admin:M1cr0S3t

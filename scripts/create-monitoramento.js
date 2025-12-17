@@ -1,6 +1,6 @@
-const { PrismaClient } = require('@prisma/client');
-const bcrypt = require('bcryptjs');
-require('dotenv').config({ path: '../.env' });
+import { PrismaClient } from '@prisma/client';
+import bcrypt from 'bcryptjs';
+import 'dotenv/config';
 
 const prisma = new PrismaClient();
 

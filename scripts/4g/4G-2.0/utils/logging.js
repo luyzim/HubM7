@@ -1,6 +1,10 @@
-const fs = require("fs");
-const path = require("path");
-const morgan = require("morgan");
+import fs from "fs";
+import path from "path";
+import morgan from "morgan";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 function createLogger(app) {
   const accessLogStream = fs.createWriteStream(path.join(process.cwd(), "access.log"), { flags: "a" });
@@ -16,4 +20,4 @@ function createLogger(app) {
   app.use(morgan(fmt));                             // console
   app.use(morgan(fmt, { stream: accessLogStream })); // arquivo
 }
-module.exports = { createLogger };
+export { createLogger };

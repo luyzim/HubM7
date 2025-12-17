@@ -1,8 +1,12 @@
-const express = require("express");
-const path = require("path");
-const { spawn } = require("child_process");
+import express from "express";
+import path from "path";
+import { spawn } from "child_process";
+import { fileURLToPath } from "url";
 
 const router = express.Router();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 router.use(express.json());
 
@@ -47,4 +51,4 @@ router.post('/', (req, res) => {
     console.log("Feito spawn do python para criação dos hosts Zema", req.body);
 });
 
-module.exports = router;
+export default router;

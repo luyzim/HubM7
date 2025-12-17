@@ -1,10 +1,14 @@
-const express = require("express");
-const net = require("net");
-const path = require("path");
-const { spawn } = require("child_process");
-const morgan = require("morgan");
+import express from "express";
+import net from "net";
+import path from "path";
+import { spawn } from "child_process";
+import morgan from "morgan";
+import { fileURLToPath } from "url";
 
 const router = express.Router();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // ...existing code...
 
@@ -59,4 +63,4 @@ router.post("/", (req, res) => {
   });
 });
 
-module.exports = router;
+export default router;

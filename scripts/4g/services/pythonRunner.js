@@ -1,5 +1,9 @@
-const { spawn } = require("child_process");
-const path = require("path");
+import { spawn } from "child_process";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 function runBridge(unidade, cwd) {
   const pythonCmd = process.env.PYTHON_BIN || (process.platform === "win32" ? "python" : "python3");
@@ -17,6 +21,4 @@ function runBridge(unidade, cwd) {
     py.on("close", code => resolve({ code, out, err }));
   });
 }
-module.exports = { runBridge };
-
-
+export { runBridge };

@@ -1,10 +1,7 @@
-const express = require("express");
-const path = require("path");
-const { spawn } = require("child_process");
+import express from "express";
+import path from "path";
+import { spawn } from "child_process";
 const router = express.Router();
-
-
-
 
 router.get("/", (req, res) => {
   // pode ser JSON, HTML, qualquer payload
@@ -15,5 +12,4 @@ router.get("/", (req, res) => {
   });
 });
 
-
-module.exports = router;
+export default router;

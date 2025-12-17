@@ -1,19 +1,42 @@
-require("dotenv").config();
-const ensureAuth = require("./middleware/ensureAuth");
-const ensureAdmin = require("./middleware/ensureAdmin.js");
-const ensureMonitoramento = require("./middleware/ensureMonitoramento.js");
-const ensureN2 = require("./middleware/ensureN2.js");
-const session = require("express-session");
-const express = require("express");
-const morgan = require("morgan");
-const path = require("path");
+import "dotenv/config";
+import session from "express-session";
+import express from "express";
+import morgan from "morgan";
+import path from "path";
+import { fileURLToPath } from "url";
+
+// Imports de middleware
+import ensureAuth from "./middleware/ensureAuth.js";
+import ensureAdmin from "./middleware/ensureAdmin.js";
+import ensureMonitoramento from "./middleware/ensureMonitoramento.js";
+import ensureN2 from "./middleware/ensureN2.js";
+
+// Imports de rotas
+import loginRouter from "./routes/loginRoute.js";
+import aboutRouter from "./routes/aboutRoute.js";
+import unimedRouter from "./routes/unimedRoute.js";
+import bkpMktRouter from "./routes/bkpMktRoute.js";
+import ficRouter from "./routes/ficRoute.js";
+import templateRouter from "./routes/templateRoute.js";
+import mktRouter from "./routes/MktCcsInternet.js";
+import ciscoRouter from "./routes/CiscoCcsInternet.js";
+import statusRouter from "./routes/statusRoutes.js";
+import mensagemRouter from "./routes/mensagemRoute.js";
+import hostCcsRouter from "./routes/hostCcsRoute.js";
+import oxidizedRouter from "./routes/oxidizedRoute.js";
+import comandosOxidizedRouter from "./routes/comandosOxidizedRoute.js";
+import hostZemaRouter from "./routes/hostZemaRoute.js";
+import commandMktRouter from "./routes/commandMktRoute.js";
+
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 const app = express();
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
 app.set("trust proxy", true);
-
-
 
 app.use(session({
   secret: process.env.SESSION_SECRET,
@@ -25,8 +48,6 @@ app.use(session({
     sameSite: 'lax'
   }
 }));
-
-
 
 // Logger no formato Flask
 morgan.token("date_flask", () => {
@@ -45,8 +66,6 @@ morgan.token("user-and-headers", (req, res) => {
 
 const flaskFormat = ':remote-addr - - [:date_flask] ":method :url HTTP/:http-version" :status :res[content-length] - :user-and-headers';
 app.use(morgan(flaskFormat));
-
-
 
 // Frontend Routes
 app.get("/", (req, res) => res.redirect("/guest"));
@@ -78,38 +97,22 @@ app.get("/host-ccs", ensureMonitoramento, (req, res) => {
   res.sendFile(path.join(__dirname, "public", "hostCcs.html"));
 });
 
-
-
-
-const loginRouter = require("./routes/loginRoute.js");
-const aboutRouter = require("./routes/aboutRoute.js");
-const unimedRouter = require("./routes/unimedRoute.js");
-const bkpMktRouter = require("./routes/bkpMktRoute.js");
-const ficRouter = require("./routes/ficRoute.js");
-const ccsMktRouter = require("./routes/MktCcsInternet.js");
-const ccsCiscoRouter = require("./routes/MktCcsInternet.js");
-const ccsStatusRouter = require("./routes/statusRoutes.js");
-const mensagemRouter = require("./routes/mensagemRoute.js");
-const hostCcsRouter = require("./routes/hostCcsRoute.js");
-const hostZemaRouter = require("./routes/hostZemaRoute.js");
-const comandosOxidizedRouter = require("./routes/comandosOxidizedRoute.js");
-
-
+// Backend Routes
 app.use("/api/login", loginRouter);
 app.use("/api/about", ensureAdmin, aboutRouter);
 app.use("/api/unimed", ensureAuth, unimedRouter);
 app.use("/api/bkpMkt", ensureAuth, bkpMktRouter);
 app.use("/api/4g", ensureAuth, ficRouter);
-app.use("/api/template",ensureN2, require("./routes/templateRoute.js"));
-app.use("/api/mkt",ensureN2, require("./routes/MktCcsInternet.js"));
-app.use("/api/cisco",ensureN2, require("./routes/CiscoCcsInternet.js"));
-app.use("/api/status",ensureAuth, require("./routes/statusRoutes"));
-app.use("/api/tabela",ensureN2, mensagemRouter);
-app.use("/api/host-ccs",ensureMonitoramento, hostCcsRouter);
-app.use("/api/oxidized", ensureN2, require("./routes/oxidizedRoute.js"));
+app.use("/api/template", ensureN2, templateRouter);
+app.use("/api/mkt", ensureN2, mktRouter);
+app.use("/api/cisco", ensureN2, ciscoRouter);
+app.use("/api/status", ensureAuth, statusRouter);
+app.use("/api/tabela", ensureN2, mensagemRouter);
+app.use("/api/host-ccs", ensureMonitoramento, hostCcsRouter);
+app.use("/api/oxidized", ensureN2, oxidizedRouter);
 app.use("/api/comandos-oxidized", ensureN2, comandosOxidizedRouter);
 app.use("/api/host-zema", ensureMonitoramento, hostZemaRouter);
-
+app.use("/api/comandos-mkt", ensureN2, commandMktRouter);
 
 const PORT = process.env.PORT;
 const HOST = "0.0.0.0";
