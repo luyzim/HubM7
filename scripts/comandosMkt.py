@@ -4,25 +4,27 @@
 import sys
 import logging
 import paramiko
+import os
 
-# 1. Configura o log para usar a saída padrão (stdout) para mensagens normais.
-# Erros de verdade ainda podem ser escritos em sys.stderr.
 logging.basicConfig(
     level="INFO",
     format="%(asctime)s - %(levelname)s - %(message)s",
     stream=sys.stdout,
 )
 
-logging.info("Iniciando o script comandosMkt.py...")
-def run_ssh_command(host: str, command: str, username: str, password: str, port: int = 22, timeout: int = 15):
-    """
-    Conecta a um host via SSH e executa um comando, transmitindo a saída.
-    """
+
+
+def exec_and_capture(client: paramiko.SSHClient, command: str) -> tuple[str, str]:
+    stdin, stdout, stderr = client.exec_command(command)
+    out = stdout.read().decode("utf-8", "ignore")
+    err = stderr.read().decode("utf-8", "ignore")
+    return out, err
+
+def run_ssh_command(host, command, username, password, port=22, timeout=15):
     client = paramiko.SSHClient()
     client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
     try:
-        logging.info("Conectando a %s:%s ...", host, port)
         client.connect(
             hostname=host,
             port=port,
@@ -33,56 +35,38 @@ def run_ssh_command(host: str, command: str, username: str, password: str, port:
             allow_agent=False,
         )
 
-        logging.info("Executando comando: %s", command)
-        # O print() vai para stdout, que é transmitido para o frontend.
-        print("-" * 30)
+        # força sem paginação e evita quebra por terminal
+        exec_and_capture(client, "/terminal length 0")
+        exec_and_capture(client, "/terminal width 200")
 
-        stdin, stdout, stderr = client.exec_command(command)
-
-        # Transmite a saída padrão do comando
-        for line in iter(stdout.readline, ""):
-            print(line, end="")
-
-        # Transmite a saída de erro do comando para o stderr do script
-        for line in iter(stderr.readline, ""):
-            sys.stderr.write(line)
+        out, err = exec_and_capture(client, command)
+        sys.stdout.write(out)
+        if err.strip():
+            sys.stderr.write(err)
 
     except Exception as e:
-        # Escreve exceções reais no stderr para o Node.js capturar como erro
-        error_message = f"Falha ao executar o comando em {host}: {e}\n"
-        sys.stderr.write(error_message)
-        logging.error(error_message) # Também loga no stdout
-        
+        sys.stderr.write(f"Erro ao executar comando em {host}: {e}\n")
+        sys.exit(1)
     finally:
-        if client.get_transport() and client.get_transport().is_active():
-            client.close()
-            logging.info("Conexão com %s encerrada.", host)
-
+        try:
+            if client.get_transport() and client.get_transport().is_active():
+                client.close()
+        except Exception:
+            pass
 
 def main():
-    """
-    Função principal que lê os argumentos da linha de comando.
-    """
-
-    # 2. Verifica se os argumentos corretos (IP e comando) foram passados
-    if len(sys.argv) != 3:
-        msg = "Erro: Uso incorreto. Esperado: python comandosMkt.py <ip_do_host> <comando_para_executar>\n"
-        sys.stderr.write(msg)
+    if len(sys.argv) < 3:
+        sys.stderr.write("Erro: Uso incorreto. Esperado: python comandosMkt.py <ip_do_host> <comando>\n")
         sys.exit(1)
 
     host_ip = sys.argv[1]
     command_to_run = sys.argv[2]
-    
-    # ATENÇÃO: Credenciais fixas. Idealmente, usar variáveis de ambiente.
-    username = "admin"
-    password = "M1cr0S3t"
+
+    username = os.getenv("MKT_USERNAME")
+    password = os.getenv("MKT_M1_PASSWORD")
     port = 22
 
-    # 3. Executa o comando com os argumentos recebidos
     run_ssh_command(host_ip, command_to_run, username, password, port)
-    
-    logging.info("Script comandosMkt.py finalizado.")
-
 
 if __name__ == "__main__":
     main()

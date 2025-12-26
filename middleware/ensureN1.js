@@ -8,7 +8,7 @@ export default (req, res, next) => {
 
   // 2. Se estiver logado, verifica a role
   const { role } = req.session.user;
-  if ( role === 'admin' || role === 'monitoring' || role === 'n1' || role === 'n2') {
+  if (role === 'n1' || role === 'admin' || role === 'n2' ) {
     return next(); // Permissão concedida
   }
 

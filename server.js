@@ -10,7 +10,7 @@ import ensureAuth from "./middleware/ensureAuth.js";
 import ensureAdmin from "./middleware/ensureAdmin.js";
 import ensureMonitoramento from "./middleware/ensureMonitoramento.js";
 import ensureN2 from "./middleware/ensureN2.js";
-
+import ensureN1 from "./middleware/ensureN1.js";
 // Imports de rotas
 import loginRouter from "./routes/loginRoute.js";
 import aboutRouter from "./routes/aboutRoute.js";
@@ -100,9 +100,9 @@ app.get("/host-ccs", ensureMonitoramento, (req, res) => {
 // Backend Routes
 app.use("/api/login", loginRouter);
 app.use("/api/about", ensureAdmin, aboutRouter);
-app.use("/api/unimed", ensureAuth, unimedRouter);
-app.use("/api/bkpMkt", ensureAuth, bkpMktRouter);
-app.use("/api/4g", ensureAuth, ficRouter);
+app.use("/api/unimed", ensureN2, unimedRouter);
+app.use("/api/bkpMkt", ensureN2, bkpMktRouter);
+app.use("/api/4g", ensureN1, ficRouter);
 app.use("/api/template", ensureN2, templateRouter);
 app.use("/api/mkt", ensureN2, mktRouter);
 app.use("/api/cisco", ensureN2, ciscoRouter);
@@ -112,7 +112,7 @@ app.use("/api/host-ccs", ensureMonitoramento, hostCcsRouter);
 app.use("/api/oxidized", ensureN2, oxidizedRouter);
 app.use("/api/comandos-oxidized", ensureN2, comandosOxidizedRouter);
 app.use("/api/host-zema", ensureMonitoramento, hostZemaRouter);
-app.use("/api/comandos-mkt", ensureN2, commandMktRouter);
+app.use("/api/comandos-mkt", ensureN1, commandMktRouter);
 
 const PORT = process.env.PORT;
 const HOST = "0.0.0.0";

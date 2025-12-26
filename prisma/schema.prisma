@@ -10,14 +10,24 @@ datasource db {
 model admins {
   id         Int      @id @default(autoincrement())
   email      String   @unique
+  name       String
   pass_hash  String
   created_at DateTime @default(now()) @db.Timestamptz(6)
 }
 
-model users {
+model n2 {
   id         Int      @id @default(autoincrement())
   email      String   @unique
   pass_hash  String
+  name       String
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model n1 {
+  id         Int      @id @default(autoincrement())
+  email      String   @unique
+  pass_hash  String
+  name       String
   created_at DateTime @default(now()) @db.Timestamptz(6)
 }
 
@@ -48,12 +58,45 @@ model commands_mkt {
   name        String?  @unique
 }
 
-model comments_mkt {
-  id         Int      @id @default(autoincrement())
-  interfaceName  String
-  ip         String
-  comentario String?
-  created_at DateTime @default(now()) @db.Timestamptz(6)
-  updatedAt  DateTime @updatedAt
-  @@unique([ip, interfaceName])
+model interfaces_mkt {
+  id            Int       @id @default(autoincrement())
+  interfaceName String
+  ip            String
+  comentario    String?
+  created_at    DateTime  @default(now()) @db.Timestamptz(6)
+  updatedAt     DateTime  @updatedAt
+  scanId        Int?
+  scan          mkt_scan? @relation(fields: [scanId], references: [id])
+
+  @@unique([ip, interfaceName], name: "ip_interfaceName")
+  @@index([scanId])
+}
+
+model vcn_mkt {
+  id            Int       @id @default(autoincrement())
+  vcn           String
+  ip            String
+  gateway       String
+  gatewayStatus String?
+  distance      String
+  comentario    String?
+  active        Boolean
+  created_at    DateTime  @default(now()) @db.Timestamptz(6)
+  updatedAt     DateTime  @updatedAt
+  scanId        Int?
+  dstAddress    String
+  mkt_scanId    Int?
+  mktScan       mkt_scan? @relation(fields: [mkt_scanId], references: [id])
+
+  @@unique([ip, vcn, dstAddress, gateway, distance], name: "ip_vcn_dst_gateway_distance")
+}
+
+model mkt_scan {
+  id         Int              @id @default(autoincrement())
+  parceiro_gary String
+  parceiro_plakton String
+  routerIp   String
+  created_at DateTime         @default(now()) @db.Timestamptz(6)
+  interfaces interfaces_mkt[]
+  routes     vcn_mkt[]
 }

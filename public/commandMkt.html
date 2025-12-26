@@ -56,6 +56,12 @@
       cursor: pointer;
     }
     button:hover { background-color: #2563EB; }
+    .btn-save {
+      background-color: #10B981;
+    }
+    .btn-save:hover {
+      background-color: #059669;
+    }
     .btn-voltar {
       background-color: #4B5563;
       color: white;
@@ -103,7 +109,10 @@
           <option value="">Carregando comandos...</option>
         </select>
       </div>
-      <button id="executeBtn" type="submit" class="mt-2 py-3">Executar</button>
+      <div id="button-container" class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
+        <button id="executeBtn" type="button" class="py-3">Executar</button>
+        <button id="saveBtn" type="button" class="py-3 btn-save" style="display: none;">Descobrir Gary/Plankton</button>
+      </div>
     </form>
 
     <h3 class="text-2xl font-semibold mt-8 mb-4">Resultado</h3>
@@ -116,6 +125,8 @@
     const out = document.getElementById("out");
     const form = document.getElementById("form");
     const executeBtn = document.getElementById("executeBtn");
+    const saveBtn = document.getElementById("saveBtn");
+    const buttonContainer = document.getElementById("button-container");
 
     async function loadCommands() {
       try {
@@ -126,11 +137,10 @@
         
         commandSelect.innerHTML = '<option value="">Selecione um comando...</option>';
         
-        // 2. Populate dropdown using the correct column names from the schema
         commands.forEach(cmd => {
           const option = document.createElement("option");
-          option.value = cmd.commandText; // The actual command string
-          option.textContent = cmd.descricao; // The user-friendly description
+          option.value = cmd.commandText;
+          option.textContent = cmd.descricao;
           option.style.color = "black";
           commandSelect.appendChild(option);
         });
@@ -142,39 +152,67 @@
       }
     }
 
-    document.addEventListener("DOMContentLoaded", loadCommands);
+    function handleCommandChange() {
+      const selectedCommand = commandSelect.value;
+      if (selectedCommand === "/interface print detail terse without-paging; /ip route print detail terse without-paging where dst-address=191.5.128.105/32; /ip route print detail terse without-paging where dst-address=191.5.128.106/32; /ip route print detail terse without-paging where dst-address=191.5.128.107/32; /ip route print detail terse without-paging where dst-address =45.160.230.105/32 ; /ip route print detail terse without-paging where dst-address =45.160.230.106/32; /ip route print detail terse without-paging where dst-address =45.160.228.0/22; /ip route print detail terse without-paging where dst-address =189.51.32.250/32") {
+        saveBtn.style.display = "block";
+        executeBtn.style.display = "none";
+        buttonContainer.classList.remove("sm:grid-cols-2");
+        buttonContainer.classList.add("sm:grid-cols-1");
 
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      
+      } else {
+        saveBtn.style.display = "none";
+        executeBtn.style.display = "block";
+        buttonContainer.classList.remove("sm:grid-cols-2");
+        buttonContainer.classList.add("sm:grid-cols-1");
+      }
+    }
+    
+    document.addEventListener("DOMContentLoaded", loadCommands);
+    commandSelect.addEventListener("change", handleCommandChange);
+    // Trigger the change handler on load in case the initial value is the one.
+    loadCommands().then(handleCommandChange);
+
+
+    async function runCommand(endpoint) {
       const ip = ipInput.value;
       const command = commandSelect.value;
       
       if (!ip || !command) {
-        out.textContent = "Por favor, preencha o IP e selecione um comando.";
+        out.textContent = "Insira o IP(operante) do equipamento.";
         return;
       }
 
-      out.textContent = "Executando comando...";
+      out.textContent = "Buscando no equipamento...";
       out.classList.remove("text-red-400");
       executeBtn.disabled = true;
-      executeBtn.textContent = "Executando...";
-
+      saveBtn.disabled = true;
+      executeBtn.textContent = "Buscando no equipamento...";
+      saveBtn.textContent = "Buscando no equipamento...";
+      
       try {
-        const response = await fetch("/api/comandos-mkt/run", {
+        const response = await fetch(endpoint, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ ip, command })
         });
         
-        out.textContent = ""; 
-        const reader = response.body.getReader();
-        const decoder = new TextDecoder();
+        out.textContent = "";
 
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          out.textContent += decoder.decode(value, { stream: true });
+        if (endpoint.includes('scan-super')) {
+            const result = await response.json();
+            if (!response.ok) {
+                throw new Error(result.error || `HTTP error! status: ${response.status}`);
+            }
+            out.textContent = `Sucesso!\nParceiro Gary: ${result.garyPartner || 'Não encontrado'}\nParceiro Plankton: ${result.planktonPartner || 'Não encontrado'}`;
+          } else {
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            while (true) {
+              const { done, value } = await reader.read();
+              if (done) break;
+              out.textContent += decoder.decode(value, { stream: true });
+            }
         }
 
       } catch (err) {
@@ -182,9 +220,18 @@
         out.classList.add("text-red-400");
       } finally {
         executeBtn.disabled = false;
+        saveBtn.disabled = false;
         executeBtn.textContent = "Executar";
+        saveBtn.textContent = "Descobrir Gary/Plankton";
       }
-    });
+    }
+
+    executeBtn.addEventListener("click", () => runCommand("/api/comandos-mkt/run"));
+    saveBtn.addEventListener("click", () => runCommand("/api/comandos-mkt/scan-super"));
+    
+    // Prevent default form submission
+    form.addEventListener("submit", (e) => e.preventDefault());
+
   </script>
 
 </body>

@@ -136,16 +136,20 @@ ip access-list standard SNMP_ALLOWED
  10 permit 191.5.128.0 0.0.15.255
  20 permit 192.168.254.0 0.0.0.255
  30 permit 10.0.0.0 0.255.255.255
+ 40 permit 172.16.0.0 0.15.255.255
 !
 ip access-list extended ACL_SSH_ONLY
  10 permit tcp 191.5.128.0 0.0.15.255 any eq 22
  20 permit tcp 192.168.254.0 0.0.0.255 any eq 22
  30 permit tcp 10.0.0.0 0.255.255.255 any eq 22
- 40 deny ip any any
+ 40 permit tcp 172.16.0.0 0.15.255.255 any eq 22
+ 50 deny ip any any
 !
 logging trap debugging
 !
 snmp-server community microset RO SNMP_ALLOWED
+snmp-server community "S!c00b" RO SNMP_ALLOWED
+
 !
 tacacs server TACACS1
  address ipv4 192.168.254.9

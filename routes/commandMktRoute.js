@@ -3,6 +3,12 @@ import path from "path";
 import { spawn } from "child_process";
 import { PrismaClient } from "@prisma/client";
 import { fileURLToPath } from "url";
+import {
+  findPartners,
+  splitSuperOutput,
+  parseInterfaceOutputTerse,
+  parseRouteOutputTerse,
+} from "../scripts/trataSaidaInterfaces.js";
 
 const prisma = new PrismaClient();
 const router = express.Router();
@@ -17,65 +23,166 @@ const SPAWN_OPTS = {
   env: { ...process.env, PYTHONIOENCODING: "utf-8" },
 };
 
-// <--- COLOQUE A FUNÇÃO parseInterfaceOutput AQUI --- >
-// (Copie a função parseInterfaceOutput definida no Passo 2 para cá)
+// ======================================================
+// Constantes de validação do endpoint scan-super
+// ======================================================
+const SUPER_SCAN_CMD =
+  "/interface print detail terse without-paging; /ip route print detail terse without-paging where dst-address=191.5.128.105/32; /ip route print detail terse without-paging where dst-address=191.5.128.106/32; /ip route print detail terse without-paging where dst-address=191.5.128.107/32; /ip route print detail terse without-paging where dst-address =45.160.230.105/32 ; /ip route print detail terse without-paging where dst-address =45.160.230.106/32; /ip route print detail terse without-paging where dst-address =45.160.228.0/22; /ip route print detail terse without-paging where dst-address =189.51.32.250/32";
 
-
-router.post("/run-and-save-interfaces", async (req, res) => {
+// ======================================================
+// Endpoint: scan-super (captura stdout completo, parseia, salva e retorna JSON)
+// ======================================================
+router.post("/scan-super", async (req, res) => {
   const { ip, command } = req.body;
 
   if (!ip || !command) {
-    return res.status(400).send("IP e Comando são obrigatórios");
+    return res.status(400).json({ ok: false, error: "IP e command são obrigatórios" });
   }
 
-  const scriptPath = path.join(__dirname, "..", "scripts", "comandosMkt.py"); // Ou o script Python relevante
-  const args = [scriptPath, ip, command];
+  if (command !== SUPER_SCAN_CMD) {
+    return res.status(400).json({ ok: false, error: "Comando inválido para este endpoint" });
+  }
 
-  const py = spawn(PY_CMD, args, SPAWN_OPTS);
+  const scriptPath = path.join(__dirname, "..", "scripts", "comandosMkt.py");
+  const py = spawn(PY_CMD, [scriptPath, ip, command], SPAWN_OPTS);
 
   let fullStdout = "";
   let fullStderr = "";
 
-  py.stdout.on("data", (data) => { fullStdout += data.toString("utf-8"); });
-  py.stderr.on("data", (data) => { fullStderr += data.toString("utf-8"); });
+  py.stdout.on("data", (d) => (fullStdout += d.toString("utf-8")));
+  py.stderr.on("data", (d) => (fullStderr += d.toString("utf-8")));
 
   py.on("close", async (code) => {
     if (code !== 0) {
-      console.error("Script python falhou com código ${code}: ${fullStderr}");
-      return res.status(500).json({ error: "Script Python falhou", details: fullStderr });
+      return res.status(500).json({ ok: false, error: "Python falhou", details: fullStderr });
     }
 
     try {
-      // 1. Analisar a saída
-      const parsedData = parseInterfaceOutput(fullStdout, ip, command);
+      const { interfacesText, routesText } = splitSuperOutput(fullStdout);
 
-      if (parsedData.length === 0) {
-        return res.status(404).json({ message: "Nenhuma informação de interface encontrada na saída do comando." });
+      const parsedIfaces = parseInterfaceOutputTerse(interfacesText, ip);
+      const ifaceByName = new Map(
+        parsedIfaces.map((i) => [String(i.interfaceName || "").toLowerCase(), i])
+      );
+      const parsedRoutes = parseRouteOutputTerse(routesText, ip, ifaceByName);
+
+      // Enrich routes with interface comments based on gatewayStatus (robust version)
+      for (const r of parsedRoutes) {
+        if (typeof r.gatewayStatus === "string" && r.gatewayStatus) {
+          const parts = r.gatewayStatus.split(" ");
+          const potentialIfaceName = parts[parts.length - 1];
+          const iface = ifaceByName.get(potentialIfaceName.toLowerCase());
+          
+          if (iface && iface.comentario) {
+            r.comentario = iface.comentario;
+          }
+        }
       }
 
-      // 2. Salvar no banco de dados
-      const result = await prisma.interfaceData.createMany({
-       data: parsedData,
-        // skipDuplicates: true, // Adicione se quiser ignorar entradas duplicadas (pode precisar de um campo único) 
+      if (!parsedIfaces.length && !parsedRoutes.length) {
+        return res.status(404).json({ ok: false, error: "Nada parseável no stdout (interfaces/rotas vazias)" });
+      }
+
+      const { garyPartner, planktonPartner } = findPartners(parsedIfaces, parsedRoutes);
+
+      const result = await prisma.$transaction(async (tx) => {
+        const scan = await tx.mkt_scan.create({
+          data: {
+            routerIp: ip,
+            parceiro_gary: garyPartner,
+            parceiro_plakton: planktonPartner,
+          },
+        });
+        const scanId = scan.id;
+
+        // 1) salva interfaces em interfaces_mkt
+        const savedIfaces = [];
+        for (const iface of parsedIfaces) {
+          if (!iface.interfaceName) continue;
+
+          const row = await tx.interfaces_mkt.upsert({
+            where: { ip_interfaceName: { ip: iface.ip, interfaceName: iface.interfaceName } },
+            update: { comentario: iface.comentario ?? null, scanId },
+            create: { ip: iface.ip, interfaceName: iface.interfaceName, comentario: iface.comentario ?? null, scanId },
+          });
+
+          savedIfaces.push(row);
+        }
+
+        // 2) salva rotas em vcn_mkt (schema exige tudo obrigatório)
+        const savedRoutes = [];
+        for (const r of parsedRoutes) {
+          // sem campos obrigatórios, não persiste (mas segue o baile)
+          if (!r.dstAddress || !r.gateway || !r.distance) continue;
+
+          const row = await tx.vcn_mkt.upsert({
+            where: {
+              ip_vcn_dst_gateway_distance: {
+                ip: r.ip,
+                vcn: r.vcn,
+                dstAddress: r.dstAddress,
+                gateway: r.gateway,
+                distance: String(r.distance),
+              },
+            },
+            update: {
+              gatewayStatus: r.gatewayStatus ?? null,
+              comentario: r.comentario ?? null,
+              active: Boolean(r.active),
+              scanId,
+            },
+            create: {
+              vcn: r.vcn,
+              ip: r.ip,
+              dstAddress: r.dstAddress,
+              gateway: r.gateway,
+              gatewayStatus: r.gatewayStatus ?? null,
+              distance: String(r.distance),
+              comentario: r.comentario ?? null,
+              active: Boolean(r.active),
+              scanId,
+            },
+          });
+
+          savedRoutes.push(row);
+        }
+
+        return {
+          scanId,
+          interfacesParsed: parsedIfaces.length,
+          routesParsed: parsedRoutes.length,
+          interfacesSaved: savedIfaces.length,
+          routesSaved: savedRoutes.length,
+        };
       });
 
-      // 3. Enviar resposta de sucesso
-      res.json({ message: `${result.count} registros de interface salvos com sucesso.`, data: parsedData });
+      const finalResult = {
+        ok: true,
+        ...result,
+        garyPartner,
+        planktonPartner,
+      };
 
-     } 
-        
-      catch (error) {
-          res.status(500).json({ error: "Falha ao salvar os dados no banco.", details: error.message });
-        }
+      console.log("Scan successful:", JSON.stringify(finalResult, null, 2));
+
+      return res.json(finalResult);
+    } catch (e) {
+      console.error("Scan failed:", e);
+      return res.status(500).json({ ok: false, error: e.message, details: fullStderr });
+    }
+  });
 });
-    }); 
 
-
-
+// ======================================================
+// Página principal (front)
+// ======================================================
 router.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "..", "public", "commandMkt.html"));
 });
 
+// ======================================================
+// Lista de comandos (DB)
+// ======================================================
 router.get("/commands", async (req, res) => {
   try {
     const commands = await prisma.commands_mkt.findMany();
@@ -86,7 +193,10 @@ router.get("/commands", async (req, res) => {
   }
 });
 
-
+// ======================================================
+// Endpoint: run (stream em tempo real pro front)
+// - Filtra logs python pelo regex de nível
+// ======================================================
 router.post("/run", (req, res) => {
   const { ip, command } = req.body;
 
@@ -96,18 +206,16 @@ router.post("/run", (req, res) => {
 
   const scriptPath = path.join(__dirname, "..", "scripts", "comandosMkt.py");
   const args = [scriptPath, ip, command];
-
   const py = spawn(PY_CMD, args, SPAWN_OPTS);
 
   res.setHeader("Content-Type", "text/plain; charset=utf-8");
 
-  let stdoutBuf = ""; // buffer para stdout
-  let stderrBuf = ""; // buffer para stderr
+  let stdoutBuf = "";
+  let stderrBuf = "";
 
-  // Expressão Regular para detectar logs do Python (ex: " - INFO - ", " - WARNING - ")
+  // logs “padrão” do python
   const logRegex = /\s-\s(INFO|ERROR|DEBUG|WARNING)\s-\s/;
 
-  // Filtra o stdout: logs vão pro servidor, resto vai pro front
   py.stdout.on("data", (data) => {
     stdoutBuf += data.toString("utf-8");
     let idx;
@@ -116,14 +224,13 @@ router.post("/run", (req, res) => {
       stdoutBuf = stdoutBuf.slice(idx + 1);
 
       if (logRegex.test(line)) {
-        console.log(`[Python LOG] ${line}`); // Logs só no servidor
+        console.log(`[Python LOG] ${line}`);
       } else {
-        res.write(line + "\n"); // Envia o resto para o front
+        res.write(line + "\n");
       }
     }
   });
 
-  // Filtra o stderr: logs vão pro servidor, resto (erros) vai pro front
   py.stderr.on("data", (data) => {
     stderrBuf += data.toString("utf-8");
     let idx;
@@ -132,33 +239,29 @@ router.post("/run", (req, res) => {
       stderrBuf = stderrBuf.slice(idx + 1);
 
       if (logRegex.test(line)) {
-        console.log(`[Python LOG] ${line}`); // Logs só no servidor
+        console.log(`[Python LOG] ${line}`);
       } else {
-        console.error(`[Python STDERR] ${line}`); // Loga erro no servidor
-        res.write(`[ERRO] ${line}\n`);      // Envia erro para o front
+        console.error(`[Python STDERR] ${line}`);
+        res.write(`[ERRO] ${line}\n`);
       }
     }
   });
 
   py.on("close", (code) => {
-    // Processa o resto do buffer de stdout
+    // flush buffers
     if (stdoutBuf.trim()) {
       const line = stdoutBuf.trim();
-       if (!logRegex.test(line)) {
-        res.write(line + "\n");
-      } else {
-        console.log(`[Python LOG] ${line}`);
-      }
+      if (!logRegex.test(line)) res.write(line + "\n");
+      else console.log(`[Python LOG] ${line}`);
     }
 
-    // Processa o resto do buffer de stderr
     if (stderrBuf.trim()) {
       const line = stderrBuf.trim();
       if (!logRegex.test(line)) {
-          console.error(`[Python STDERR] ${line}`);
-          res.write(`[ERRO] ${line}\n`);
+        console.error(`[Python STDERR] ${line}`);
+        res.write(`[ERRO] ${line}\n`);
       } else {
-          console.log(`[Python LOG] ${line}`);
+        console.log(`[Python LOG] ${line}`);
       }
     }
 
@@ -171,6 +274,5 @@ router.post("/run", (req, res) => {
     res.end();
   });
 });
-
 
 export default router;

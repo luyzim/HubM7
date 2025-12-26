@@ -5,19 +5,21 @@ import 'dotenv/config';
 const prisma = new PrismaClient();
 
 async function createUser() {
-  const email = 'noc@microset.com'; 
+  const email = 'toninho@microset.com'; 
   const password = 'M1cr0S3t'; 
+  const name = 'Toninho';
 
   try {
     const salt = await bcrypt.genSalt(10);
     const pass_hash = await bcrypt.hash(password, salt);
 
-    const user = await prisma.users.upsert({
+    const user = await prisma.n2.upsert({
       where: { email: email },
-      update: { pass_hash: pass_hash },
+      update: { pass_hash: pass_hash, name: name },
       create: {
         email: email,
         pass_hash: pass_hash,
+        name: name,
       },
     });
     console.log('User created/updated successfully:', user);

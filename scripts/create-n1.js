@@ -4,15 +4,16 @@ import 'dotenv/config';
 
 const prisma = new PrismaClient();
 
-async function createAdmin() {
-  const email = 'aloysio@microset.com.br'; 
-  const password = '12123636';
-  const name = 'Zibrinix';
+async function createUser() {
+  const email = 'diogo@microset.com'; 
+  const password = 'NocUsersN1@'; 
+  const name = 'Diogo';
+
   try {
     const salt = await bcrypt.genSalt(10);
     const pass_hash = await bcrypt.hash(password, salt);
 
-    const admin = await prisma.admins.upsert({
+    const user = await prisma.n1.upsert({
       where: { email: email },
       update: { pass_hash: pass_hash, name: name },
       create: {
@@ -21,13 +22,13 @@ async function createAdmin() {
         name: name,
       },
     });
-    console.log('Admin created/updated successfully:', admin);
+    console.log('User created/updated successfully:', user);
     console.log('Use this password for login:', password);
   } catch (e) {
-    console.error('Error creating/updating admin:', e);
+    console.error('Error creating/updating user:', e);
   } finally {
     await prisma.$disconnect();
   }
 }
 
-createAdmin();
+createUser();

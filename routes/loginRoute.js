@@ -14,34 +14,47 @@ router.post("/", async (req, res) => {
 
   try {
     // Tenta primeiro admin, depois user
-    const admin = await prisma.admins.findUnique({ where: { email } });
-    const user = admin
-      ? null
-      : await prisma.users.findUnique({ where: { email } });
-    const monitoringUser = admin || user
-      ? null
-      : await prisma.monitoramento.findUnique({ where: { email } });
-    
-   const account = admin || user || monitoringUser;
-   const role = admin ? "admin" : user ? "user" : monitoringUser ? "monitoring" : null;
+    const providers = [
+      { role: "admin", model: prisma.admins },
+      { role: "n2", model: prisma.n2 },
+      { role: "monitoring", model: prisma.monitoramento },
+      { role: "n1", model: prisma.n1 },
+    ];
 
-    if (!account || !role) {
+    let account = null;
+    let role = null;
+
+    for (const p of providers) {
+      const found = await p.model.findUnique({ where: { email } });
+      if (found) {
+        account = found;
+        role = p.role;
+        break;
+      }
+    }
+
+   if (!account || !role) {
       return res.status(401).json({ error: "Credenciais inválidas." });
     }
 
     const isMatch = await bcrypt.compare(password, account.pass_hash);
-
     if (!isMatch) {
       return res.status(401).json({ error: "Credenciais inválidas." });
     }
 
-    // Coloca o usuário logado na sessão com a role correspondente
-    req.session.user = { id: account.id, email: account.email, role };
-    return res.json({ message: "Login bem-sucedido!", role });
+    req.session.user = {
+      id: account.id,
+      email: account.email,
+      role,
+    };
+
+    return res.json({
+      message: "Login bem-sucedido!",
+      role,
+    });
   } catch (error) {
     console.error("Login error:", error);
     return res.status(500).json({ error: "Erro interno do servidor." });
   }
 });
-
 export default router;
