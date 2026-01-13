@@ -59,7 +59,7 @@ morgan.token("date_flask", () => {
 });
 
 morgan.token("user-and-headers", (req, res) => {
-  const user = req.session?.user?.role || "guest";
+  const user = req.session?.user?.name || "guest";
   const userAgent = req.headers['user-agent'];
   return `user=${user} user-agent=${userAgent}`;
 });
@@ -98,6 +98,7 @@ app.get("/host-ccs", ensureMonitoramento, (req, res) => {
 });
 
 // Backend Routes
+ 
 app.use("/api/login", loginRouter);
 app.use("/api/about", ensureAdmin, aboutRouter);
 app.use("/api/unimed", ensureN2, unimedRouter);

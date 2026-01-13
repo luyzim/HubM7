@@ -63,13 +63,27 @@ model interfaces_mkt {
   interfaceName String
   ip            String
   comentario    String?
+  macAddress    String?
   created_at    DateTime  @default(now()) @db.Timestamptz(6)
   updatedAt     DateTime  @updatedAt
   scanId        Int?
   scan          mkt_scan? @relation(fields: [scanId], references: [id])
 
+  ipAddresses   interfaces_ip_address[]
+
   @@unique([ip, interfaceName], name: "ip_interfaceName")
-  @@index([scanId])
+}
+
+model interfaces_ip_address {
+  id           Int      @id @default(autoincrement())
+  interfaceId  Int
+  address      String
+  comment      String?
+
+  interface    interfaces_mkt @relation(fields: [interfaceId], references: [id])
+
+  @@unique([interfaceId, address])
+  @@index([address])
 }
 
 model vcn_mkt {

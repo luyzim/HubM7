@@ -8,6 +8,7 @@ import {
   splitSuperOutput,
   parseInterfaceOutputTerse,
   parseRouteOutputTerse,
+  parseIpAddressOutputTerse,
 } from "../scripts/trataSaidaInterfaces.js";
 
 const prisma = new PrismaClient();
@@ -27,7 +28,7 @@ const SPAWN_OPTS = {
 // Constantes de validação do endpoint scan-super
 // ======================================================
 const SUPER_SCAN_CMD =
-  "/interface print detail terse without-paging; /ip route print detail terse without-paging where dst-address=191.5.128.105/32; /ip route print detail terse without-paging where dst-address=191.5.128.106/32; /ip route print detail terse without-paging where dst-address=191.5.128.107/32; /ip route print detail terse without-paging where dst-address =45.160.230.105/32 ; /ip route print detail terse without-paging where dst-address =45.160.230.106/32; /ip route print detail terse without-paging where dst-address =45.160.228.0/22; /ip route print detail terse without-paging where dst-address =189.51.32.250/32";
+  "/interface print detail terse without-paging; /ip route print detail terse without-paging where dst-address=191.5.128.105/32; /ip route print detail terse without-paging where dst-address=191.5.128.106/32; /ip route print detail terse without-paging where dst-address=191.5.128.107/32; /ip route print detail terse without-paging where dst-address =45.160.230.105/32 ; /ip route print detail terse without-paging where dst-address =45.160.230.106/32; /ip route print detail terse without-paging where dst-address =45.160.228.0/22; /ip route print detail terse without-paging where dst-address =189.51.32.250/32; /ip address print terse without-paging";
 
 // ======================================================
 // Endpoint: scan-super (captura stdout completo, parseia, salva e retorna JSON)
@@ -58,32 +59,20 @@ router.post("/scan-super", async (req, res) => {
     }
 
     try {
-      const { interfacesText, routesText } = splitSuperOutput(fullStdout);
+      const { interfacesText, routesText, ipAddressText } = splitSuperOutput(fullStdout);
 
+      const parsedIpAddresses = parseIpAddressOutputTerse(ipAddressText, ip);
       const parsedIfaces = parseInterfaceOutputTerse(interfacesText, ip);
       const ifaceByName = new Map(
         parsedIfaces.map((i) => [String(i.interfaceName || "").toLowerCase(), i])
       );
-      const parsedRoutes = parseRouteOutputTerse(routesText, ip, ifaceByName);
-
-      // Enrich routes with interface comments based on gatewayStatus (robust version)
-      for (const r of parsedRoutes) {
-        if (typeof r.gatewayStatus === "string" && r.gatewayStatus) {
-          const parts = r.gatewayStatus.split(" ");
-          const potentialIfaceName = parts[parts.length - 1];
-          const iface = ifaceByName.get(potentialIfaceName.toLowerCase());
-          
-          if (iface && iface.comentario) {
-            r.comentario = iface.comentario;
-          }
-        }
-      }
+      const parsedRoutes = parseRouteOutputTerse(routesText, ip, parsedIpAddresses, parsedIfaces);
 
       if (!parsedIfaces.length && !parsedRoutes.length) {
         return res.status(404).json({ ok: false, error: "Nada parseável no stdout (interfaces/rotas vazias)" });
       }
 
-      const { garyPartner, planktonPartner } = findPartners(parsedIfaces, parsedRoutes);
+      const { garyPartner, planktonPartner } = findPartners(parsedIfaces, parsedRoutes, parsedIpAddresses);
 
       const result = await prisma.$transaction(async (tx) => {
         const scan = await tx.mkt_scan.create({
@@ -102,14 +91,36 @@ router.post("/scan-super", async (req, res) => {
 
           const row = await tx.interfaces_mkt.upsert({
             where: { ip_interfaceName: { ip: iface.ip, interfaceName: iface.interfaceName } },
-            update: { comentario: iface.comentario ?? null, scanId },
-            create: { ip: iface.ip, interfaceName: iface.interfaceName, comentario: iface.comentario ?? null, scanId },
+            update: { comentario: iface.comentario ?? null, macAddress: iface.macAddress ?? null, scanId },
+            create: { ip: iface.ip, interfaceName: iface.interfaceName, comentario: iface.comentario ?? null, macAddress: iface.macAddress ?? null, scanId },
           });
 
           savedIfaces.push(row);
         }
 
-        // 2) salva rotas em vcn_mkt (schema exige tudo obrigatório)
+        // 2) Com base nas interfaces salvas, popula a tabela filha de endereços IP
+        const interfaceNameToIdMap = new Map(savedIfaces.map(i => [i.interfaceName.toLowerCase(), i.id]));
+        const savedIpAddresses = [];
+
+        for (const addr of parsedIpAddresses) {
+          if (!addr.address || !addr.interfaceName) continue;
+
+          const parentInterfaceId = interfaceNameToIdMap.get(addr.interfaceName.toLowerCase());
+          if (!parentInterfaceId) continue; // Não salva IP se a interface pai não foi salva
+
+          const ipRow = await tx.interfaces_ip_address.upsert({
+            where: { interfaceId_address: { interfaceId: parentInterfaceId, address: addr.address } },
+            update: { comment: addr.comentario ?? null },
+            create: {
+              interfaceId: parentInterfaceId,
+              address: addr.address,
+              comment: addr.comentario ?? null,
+            },
+          });
+          savedIpAddresses.push(ipRow);
+        }
+
+        // 3) salva rotas em vcn_mkt (schema exige tudo obrigatório)
         const savedRoutes = [];
         for (const r of parsedRoutes) {
           // sem campos obrigatórios, não persiste (mas segue o baile)
@@ -152,6 +163,7 @@ router.post("/scan-super", async (req, res) => {
           interfacesParsed: parsedIfaces.length,
           routesParsed: parsedRoutes.length,
           interfacesSaved: savedIfaces.length,
+          ipAddressesSaved: savedIpAddresses.length,
           routesSaved: savedRoutes.length,
         };
       });
@@ -161,6 +173,7 @@ router.post("/scan-super", async (req, res) => {
         ...result,
         garyPartner,
         planktonPartner,
+        routes: parsedRoutes, // Adiciona as rotas parseadas à resposta
       };
 
       console.log("Scan successful:", JSON.stringify(finalResult, null, 2));
