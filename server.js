@@ -11,7 +11,13 @@ import ensureAdmin from "./middleware/ensureAdmin.js";
 import ensureMonitoramento from "./middleware/ensureMonitoramento.js";
 import ensureN2 from "./middleware/ensureN2.js";
 import ensureN1 from "./middleware/ensureN1.js";
+
+
+
 // Imports de rotas
+
+
+
 import loginRouter from "./routes/loginRoute.js";
 import aboutRouter from "./routes/aboutRoute.js";
 import unimedRouter from "./routes/unimedRoute.js";
@@ -27,6 +33,7 @@ import oxidizedRouter from "./routes/oxidizedRoute.js";
 import comandosOxidizedRouter from "./routes/comandosOxidizedRoute.js";
 import hostZemaRouter from "./routes/hostZemaRoute.js";
 import commandMktRouter from "./routes/commandMktRoute.js";
+import changePasswordRouter from "./routes/changePasswordRoute.js";
 
 
 const __filename = fileURLToPath(import.meta.url);
@@ -35,7 +42,7 @@ const __dirname = path.dirname(__filename);
 const app = express();
 
 app.use(express.json());
-app.use(express.static(path.join(__dirname, "public")));
+
 app.set("trust proxy", true);
 
 app.use(session({
@@ -59,7 +66,7 @@ morgan.token("date_flask", () => {
 });
 
 morgan.token("user-and-headers", (req, res) => {
-  const user = req.session?.user?.name || "guest";
+  const user = req.session?.user?.email || "guest";
   const userAgent = req.headers['user-agent'];
   return `user=${user} user-agent=${userAgent}`;
 });
@@ -79,6 +86,10 @@ app.get("/login", (req, res) => {
 });
 app.get("/home", ensureAuth, (req, res) => {
   res.sendFile(path.join(__dirname, "public", "home.html"));
+});
+
+app.get("/changepassword", ensureN1, (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "changePassword.html"));
 });
 
 app.get("/oxidized", ensureN2, (req, res) => {
@@ -114,6 +125,7 @@ app.use("/api/oxidized", ensureN2, oxidizedRouter);
 app.use("/api/comandos-oxidized", ensureN2, comandosOxidizedRouter);
 app.use("/api/host-zema", ensureMonitoramento, hostZemaRouter);
 app.use("/api/comandos-mkt", ensureN1, commandMktRouter);
+app.use("/api/change-password", ensureN1, changePasswordRouter);
 
 const PORT = process.env.PORT;
 const HOST = "0.0.0.0";

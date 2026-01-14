@@ -38,7 +38,7 @@ export function splitSuperOutput(text) {
   const ipAddress = [];
 
   for (const rec of records) {
-    const isRoute = /\bdst-address=/.test(rec) && /\bgateway=/.test(rec);
+    const isRoute = /\bdst-address=/.test(rec) && (/\bgateway=/.test(rec) || /\bimmediate-gw=/.test(rec));
     const isIface = /\bname=/.test(rec) && /\btype=/.test(rec);
     const isIpAddress = /\baddress=/.test(rec) && /\bnetwork=/.test(rec);
 
@@ -121,7 +121,12 @@ function inferActive(flags, gatewayStatus) {
 // Saída: [{ ip, interfaceName, comentario }]
 // ======================================================
 export function parseInterfaceOutputTerse(text, ip) {
+  if (DEBUG) console.log("--- Starting parseInterfaceOutputTerse ---");
+  if (DEBUG) console.log("Raw text received:\n", text);
+
   const records = toRecords(text);
+  if (DEBUG) console.log("Generated records:\n", records);
+
   const out = [];
 
   const IFACE_PREFIX_RE = /^(ether|vlan|l2tp|pppoe|lte|bridge|loopback|wlan|sfp|eoip|gre|vxlan)/i;
@@ -145,6 +150,8 @@ export function parseInterfaceOutputTerse(text, ip) {
     out.push({ ip, interfaceName, comentario, parentInterfaceName, macAddress });
   }
 
+  if (DEBUG) console.log("--- Finished parseInterfaceOutputTerse ---");
+  if (DEBUG) console.log("Final parsed interfaces:\n", out);
   return out;
 }
 
@@ -153,7 +160,12 @@ export function parseInterfaceOutputTerse(text, ip) {
 // Saída: [{ ip, address, interfaceName, comentario }]
 // ======================================================
 export function parseIpAddressOutputTerse(text, ip) {
+  if (DEBUG) console.log("--- Starting parseIpAddressOutputTerse ---");
+  if (DEBUG) console.log("Raw text received:\n", text);
+
   const records = toRecords(text);
+  if (DEBUG) console.log("Generated records:\n", records);
+
   const out = [];
 
   for (const rec of records) {
@@ -166,16 +178,25 @@ export function parseIpAddressOutputTerse(text, ip) {
     out.push({ ip, address, interfaceName, comentario });
   }
 
+  if (DEBUG) console.log("--- Finished parseIpAddressOutputTerse ---");
+  if (DEBUG) console.log("Final parsed IP addresses:\n", out);
   return out;
 }
 
+
+const DEBUG = true;
 
 // ======================================================
 // Parse Routes (terse detail)
 // Saída: [{ vcn, ip, dstAddress, gateway, gatewayStatus, distance, comentario, active }]
 // ======================================================
 export function parseRouteOutputTerse(text, ip, ipAddresses = [], interfaces = []) {
+  if (DEBUG) console.log("--- Starting parseRouteOutputTerse ---");
+  if (DEBUG) console.log("Raw text received:\n", text);
+
   const records = toRecords(text);
+  if (DEBUG) console.log("Generated records:\n", records);
+
   const out = [];
 
   // --- Lógica de Mapeamento Aprimorada ---
@@ -222,15 +243,28 @@ export function parseRouteOutputTerse(text, ip, ipAddresses = [], interfaces = [
   // --- Fim da Lógica de Mapeamento ---
 
   for (const rec of records) {
-    if (!/\bdst-address=/.test(rec) || !/\bgateway=/.test(rec)) continue;
+    if (DEBUG) console.log(`\nProcessing record: ${rec}`);
+
+    if (!/\bdst-address=/.test(rec) || !(/\bgateway=/.test(rec) || /\bimmediate-gw=/.test(rec))) {
+      if (DEBUG) console.log(" -> Skipping record (doesn't look like a route).");
+      continue;
+    }
 
     let routeOriginalComment = pickKV(rec, "comment");
     let interfaceComment = null;
 
     const dstAddress = pickKV(rec, "dst-address");
-    const gateway = pickKV(rec, "gateway");
+    const gateway = pickKV(rec, "immediate-gw") || pickKV(rec, "gateway");
     const gatewayStatus = pickKV(rec, "gateway-status");
     const distance = pickKV(rec, "distance");
+
+    if (DEBUG) {
+        console.log(` -> dstAddress: ${dstAddress}`);
+        console.log(` -> gateway: ${gateway}`);
+        console.log(` -> gatewayStatus: ${gatewayStatus}`);
+        console.log(` -> distance: ${distance}`);
+    }
+
 
     if (!dstAddress || !gateway || distance == null) {
       console.log("ROUTE DROPPED (missing fields):", { rec, dstAddress, gateway, distance });
@@ -302,7 +336,9 @@ export function parseRouteOutputTerse(text, ip, ipAddresses = [], interfaces = [
       active: Boolean(active),
     });
   }
-
+  
+  if (DEBUG) console.log("--- Finished parseRouteOutputTerse ---");
+  if (DEBUG) console.log("Final parsed routes:\n", out);
   return out;
 }
 
@@ -310,6 +346,7 @@ export function parseRouteOutputTerse(text, ip, ipAddresses = [], interfaces = [
 // Helpers: Provider hints (usa interfaces parseadas)
 // ======================================================
 export function findPartners(interfaces, routes, ipAddresses) {
+  if (DEBUG) console.log("--- Starting findPartners ---");
   const routesByVcn = {
     gary: [],
     plankton: [],
@@ -319,48 +356,84 @@ export function findPartners(interfaces, routes, ipAddresses) {
     if (route.vcn === "gary") routesByVcn.gary.push(route);
     else if (route.vcn === "plankton") routesByVcn.plankton.push(route);
   }
+  if (DEBUG) console.log("Routes grouped by VCN:\n", routesByVcn);
+
 
   const findPartnerForVcn = (vcnRoutes) => {
+    if (DEBUG) console.log(`\nFinding partner for VCN routes:\n`, vcnRoutes);
     if (vcnRoutes.length === 0) return "";
 
     const bestRoute = vcnRoutes.reduce((min, r) =>
       parseInt(r.distance) < parseInt(min.distance) ? r : min
     );
+    if (DEBUG) console.log(` -> Best route found:`, bestRoute);
 
     let partner = "";
 
-    // 1ª Tentativa: Para rotas 'reachable', o status do gateway é a fonte mais confiável.
+    // Early exit: se o gateway for uma interface PPPoE, já encontramos!
+    if (bestRoute.gateway && bestRoute.gateway.toLowerCase().startsWith('pppoe-')) {
+        if (DEBUG) console.log(` -> Direct partner found from gateway (PPPoE): ${bestRoute.gateway}`);
+        partner = bestRoute.gateway;
+        return partner;
+    }
+    
+    // 1ª Tentativa: Se o gateway for uma interface PPPoE, já encontramos!
+    if (bestRoute.gateway && bestRoute.gateway.toLowerCase().startsWith('pppoe-')) {
+        if (DEBUG) console.log(` -> Direct partner found from gateway (PPPoE): ${bestRoute.gateway}`);
+        partner = bestRoute.gateway;
+        return partner;
+    }
+
+    // 2ª Tentativa: Para rotas 'reachable' (v6), o status do gateway é a fonte mais confiável.
     if (bestRoute.gatewayStatus && /reachable/i.test(bestRoute.gatewayStatus)) {
+      if (DEBUG) console.log(` -> Attempting partner find via 'gatewayStatus': ${bestRoute.gatewayStatus}`);
       const gs = bestRoute.gatewayStatus;
 
       // Caso 1: O parceiro é um túnel PPPoE nomeado.
       const pppoeMatch = gs.match(/pppoe-([^\s]+)/);
       if (pppoeMatch && pppoeMatch[1]) {
+        if (DEBUG) console.log(` -> Partner found from gatewayStatus (PPPoE match): ${pppoeMatch[1]}`);
         partner = pppoeMatch[1];
       } else {
         // Caso 2: A rota sai por uma interface explícita (ex: "via ether2").
         const parts = gs.split(" ");
         const potentialIfaceName = parts[parts.length - 1];
+        if (DEBUG) console.log(` -> Potential interface from gatewayStatus: ${potentialIfaceName}`);
         const iface = interfaces.find(
           (i) => i.interfaceName.toLowerCase() === potentialIfaceName.toLowerCase()
         );
         if (iface) {
+          if (DEBUG) console.log(` -> Found matching interface:`, iface);
           partner = iface.comentario || "";
         }
       }
     }
 
-    // 2ª Tentativa: Se a 1ª tentativa falhou (inclui rotas 'unreachable'),
-    // usamos o 'comentario' que já foi pré-calculado pela `parseRouteOutputTerse`.
+    // 3ª Tentativa: Se as tentativas anteriores falharem (v7 ou rotas 'unreachable' em v6),
+    // usamos o 'comentario' que já foi pré-calculado ou buscamos o comentário da interface do gateway.
     if (!partner) {
-      partner = bestRoute.comentario || "";
+      if (bestRoute.comentario) {
+        if (DEBUG) console.log(` -> No partner yet, using pre-calculated comment: ${bestRoute.comentario}`);
+        partner = bestRoute.comentario;
+      } else if (bestRoute.gateway) {
+        if (DEBUG) console.log(` -> No pre-calculated comment, trying to find gateway interface: ${bestRoute.gateway}`);
+        const gatewayIface = interfaces.find(
+          (i) => i.interfaceName.toLowerCase() === bestRoute.gateway.toLowerCase()
+        );
+        if (gatewayIface && gatewayIface.comentario) {
+          if (DEBUG) console.log(` -> Found comment on gateway interface: ${gatewayIface.comentario}`);
+          partner = gatewayIface.comentario;
+        }
+      }
     }
 
+    if (DEBUG) console.log(` -> Final partner for VCN: ${partner}`);
     return partner;
   };
 
   const garyPartner = findPartnerForVcn(routesByVcn.gary);
   const planktonPartner = findPartnerForVcn(routesByVcn.plankton);
 
+  if (DEBUG) console.log("--- Finished findPartners ---");
   return { garyPartner, planktonPartner };
 }

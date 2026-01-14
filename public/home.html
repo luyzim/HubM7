@@ -35,6 +35,19 @@
         gap: 1.5rem; /* gap-6 */
         grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); 
     }
+    .btn-voltar {
+        background-color: #4B5563; /* bg-gray-600 */
+        color: white;
+        text-decoration: none;
+        padding: 0.5rem 1rem;
+        border-radius: 0.375rem; /* rounded-md */
+        display: inline-block;
+        transition: background-color 0.2s ease-in-out;
+        font-weight: 500;
+        font-size: 0.875rem; /* text-sm */
+        line-height: 1.25rem; /* leading-5 */
+    }
+    .btn-voltar:hover { background-color: #6B7280; /* hover:bg-gray-500 */ }
     .card {
         background-color: #1F2937; /* bg-gray-800 */
         border: 1px solid #4B5563; /* border-gray-600 */
@@ -62,10 +75,15 @@
         padding: 0.5rem 1.5rem; /* py-2 px-6 */
         border-radius: 0.375rem; /* rounded-md */
         display: inline-block;
-        transition: background-color 0.2s ease-in-out;
+        transition: background-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
     .btn:hover {
         background-color: #2563EB; /* hover:bg-blue-700 */
+        box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+    }
+    .settings-link:hover, .settings-icon:hover {
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     }
   </style>
 </head>
@@ -104,20 +122,28 @@
         <div class="card">
           <div class="title">Hosts CCS</div>
           <a href="/host-ccs" class="btn">Acessar</a>
-      </div>
-      <div class="card">
-          <div class="title">Hosts ZEMA</div>
-          <a href="/host-zema" class="btn">Acessar</a>
-      </div>
-      <div class="card">
-          <div class="title">BKP - oxidized</div>
-          <a href="/api/oxidized" class="btn">Acessar</a>
-      </div>
-      <div class="card">
-          <div class="title">Triagem - N1</div>
-          <a href="/api/comandos-mkt" class="btn">Acessar</a>
-      </div>
+        </div>
+        <div class="card">
+            <div class="title">Hosts ZEMA</div>
+            <a href="/host-zema" class="btn">Acessar</a>
+        </div>
+        <div class="card">
+            <div class="title">BKP - oxidized</div>
+            <a href="/api/oxidized" class="btn">Acessar</a>
+        </div>
+        <div class="card">
+            <div class="title">Triagem - N1</div>
+            <a href="/api/comandos-mkt" class="btn">Acessar</a>
+        </div>
+    </div>
     </main>
+    
   </div>
+  <a href="/changepassword" class="fixed top-4 right-4 text-white hover:text-gray-300 transition settings-icon">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.096 2.572-1.065z" />
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+    </svg>
+  </a>
 </body>
 </html>

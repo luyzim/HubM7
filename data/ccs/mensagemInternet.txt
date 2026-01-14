@@ -11,12 +11,12 @@ pppoe-{PARCEIRO}
 Favor adicionar no monitoramento 
 
 Internet
-*Gary - IP   {IP_GARY}
-*Plankton - IP {IP_PLANKTON}
-*IP Ether5 Mikrotik - IP   {IP_UNIDADE_P1}
+*Gary - IP:   {IP_GARY}  ->#####ALTERAR ULTIMO OCTETO PARA IP DO GARY####<-
+*Plankton - IP: {IP_PLANKTON}  ->####ALTERAR ULTIMO OCTETO PARA IP DO PLANKTON####<-
+*IP Ether5 Mikrotik - IP:   {IP_UNIDADE}
 
-*IP Gi0/0/0 - Cisco WAN - IP {IP_UNIDADE_P2}
-*IP Gi0/0/1 - Cisco LAN - IP  {IP_VALIDO_P1}
+*IP Gi0/0/0 - Cisco WAN - IP: {IP_UNIDADE_P1}
+*IP Gi0/0/1 - Cisco LAN - IP: {IP_VALIDO_P1}
 
 @adriel.giovanni
 Favor adicionar informações de escalonamento na Intranet
@@ -35,7 +35,7 @@ Fim IP Lan Valido:  {IP_VALIDO_P1}
 Máscara: {MASCARA_EXTENSO}
 DNS Primário: 191.5.128.146 DNS Secundário: 191.5.128.147 
 
-Dados de Endereçamento IP Wan IP CPE Wan: {IP_UNIDADE_P2} Máscara: 255.255.255.252
+Dados de Endereçamento IP Wan IP CPE Wan: {IP_UNIDADE_P1} Máscara: 255.255.255.252
 
 
 
