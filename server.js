@@ -34,7 +34,7 @@ import comandosOxidizedRouter from "./routes/comandosOxidizedRoute.js";
 import hostZemaRouter from "./routes/hostZemaRoute.js";
 import commandMktRouter from "./routes/commandMktRoute.js";
 import changePasswordRouter from "./routes/changePasswordRoute.js";
-
+import ccsFortgateRouter from "./routes/ccsFortgateRoute.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -73,6 +73,9 @@ morgan.token("user-and-headers", (req, res) => {
 
 const flaskFormat = ':remote-addr - - [:date_flask] ":method :url HTTP/:http-version" :status :res[content-length] - :user-and-headers';
 app.use(morgan(flaskFormat));
+
+// Servir arquivos estáticos da pasta 'public'
+app.use(express.static(path.join(__dirname, "public")));
 
 // Frontend Routes
 app.get("/", (req, res) => res.redirect("/guest"));
@@ -126,6 +129,7 @@ app.use("/api/comandos-oxidized", ensureN2, comandosOxidizedRouter);
 app.use("/api/host-zema", ensureMonitoramento, hostZemaRouter);
 app.use("/api/comandos-mkt", ensureN1, commandMktRouter);
 app.use("/api/change-password", ensureN1, changePasswordRouter);
+app.use("/api/ccsFortgate", ensureN1, ccsFortgateRouter);
 
 const PORT = process.env.PORT;
 const HOST = "0.0.0.0";

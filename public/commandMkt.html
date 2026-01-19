@@ -85,6 +85,38 @@
       min-height: 100px;
       white-space: pre-wrap;
     }
+
+    .help-fab {
+    position: fixed; right: 24px; bottom: 24px;
+    width: 44px; height: 44px; border-radius: 999px;
+    border: 1px solid #3a3a3a; background:#1a1a1d; color:#eee;
+    font-weight: 700; cursor: pointer;
+    display:flex; align-items:center; justify-content:center;
+    box-shadow: 0 6px 20px rgba(0,0,0,.35); z-index: 1000;
+  }
+  .help-fab:focus { outline: 2px solid #3a3a3a; outline-offset: 2px; }
+
+  .help-bubble {
+    position: fixed; right: 24px; bottom: 84px;
+    max-width: 420px; padding: 14px 16px;
+    border-radius: 14px; background:#101014; color:#eee;
+    border:1px solid #2a2a2a; box-shadow: 0 14px 40px rgba(0,0,0,.5);
+    z-index: 1000; display:none;
+  }
+  .help-bubble::after {
+    content: ""; position:absolute; right: 18px; bottom:-10px;
+    border-width:10px; border-style:solid;
+    border-color:#101014 transparent transparent transparent;
+    filter: drop-shadow(0 -2px 0 #2a2a2a);
+  }
+  .help-bubble h4 { margin: 0 0 8px 0; font-size: 16px; }
+  .help-bubble p  { margin: 6px 0; color:#ccc; line-height:1.35; }
+  .help-bubble code { background:#0b0b0c; border:1px solid #222; padding:2px 6px; border-radius:6px; }
+  .help-bubble .close {
+    position:absolute; top:8px; right:10px; border:0; background:transparent; color:#aaa; cursor:pointer;
+    font-size:18px; line-height:1;
+  }
+  .help-bubble .close:hover { color:#fff; }
   </style>
 </head>
 <body class="p-4 sm:p-6 lg:p-8">
@@ -138,6 +170,19 @@
     <pre id="out">—</pre>
   </div>
 
+  
+<button class="help-fab" id="helpFab" aria-controls="helpBubble" aria-expanded="false" title="Instrucoes">?</button>
+
+  <div class="help-bubble" id="helpBubble" role="dialog" aria-labelledby="helpTitle" aria-modal="false">
+    <button class="close" id="helpClose" aria-label="Fechar">×</button>
+    <h4 id="helpTitle">Instrucoes rapidas</h4>
+    <p>- Essa interface permite a execução de <strong>comandos</strong> de visualiação no mikrotik</p>
+    <p>- Sendo possivel visialiar interfaces <strong>desconectadas</strong></p>
+    <p>- Utilize <code>IP</code> o qual esteja operante.</p>
+    <p>- O comando<code>DESCOBRE GRAY/PLANKTON</code> faz o acesso no equipamento e salva as configurações(parceiros) no banco.</p>
+    <p>- Escolha o <code>Comando</code> para ser executado no Mikrotik.</p>
+  </div>
+
   <script type="module">
   // ===== DOM refs (TEM que vir primeiro) =====
   const commandSelect = document.getElementById("commandSelect");
@@ -152,12 +197,10 @@
   const toggleKnob = document.getElementById("toggleKnob");
 
   // ===== State =====
-  let showRouteDetails = false; // default OFF
+  let showRouteDetails = true; // Default ON
 
   // ===== Toggle ON/OFF =====
-  toggleRoutesBtn.addEventListener("click", () => {
-    showRouteDetails = !showRouteDetails;
-
+  function updateToggleVisuals() {
     toggleRoutesBtn.setAttribute("aria-pressed", String(showRouteDetails));
 
     if (showRouteDetails) {
@@ -171,6 +214,11 @@
       toggleKnob.classList.remove("translate-x-6");
       toggleKnob.classList.add("translate-x-1");
     }
+  }
+
+  toggleRoutesBtn.addEventListener("click", () => {
+    showRouteDetails = !showRouteDetails;
+    updateToggleVisuals();
   });
 
   // ===== Load commands =====
@@ -219,6 +267,7 @@
   document.addEventListener("DOMContentLoaded", async () => {
     await loadCommands();
     handleCommandChange();
+    updateToggleVisuals(); // Sincroniza o visual do botão no carregamento
   });
 
   commandSelect.addEventListener("change", handleCommandChange);
@@ -298,6 +347,27 @@
   saveBtn.addEventListener("click", () => runCommand("/api/comandos-mkt/scan-super"));
 
   form.addEventListener("submit", (e) => e.preventDefault());
+
+  const helpFab    = document.getElementById("helpFab");
+  const helpBubble = document.getElementById("helpBubble");
+  const helpClose  = document.getElementById("helpClose");
+
+  if (helpFab && helpBubble && helpClose) {
+    const setBubble = (show) => {
+      helpBubble.style.display = show ? "block" : "none";
+      helpFab.setAttribute("aria-expanded", String(show));
+    };
+
+    helpFab.addEventListener("click", () => {
+      const open = helpBubble.style.display !== "block";
+      setBubble(open);
+    });
+
+    helpClose.addEventListener("click", () => setBubble(false));
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") setBubble(false);
+    });
+  }
 </script>
 
 </body>

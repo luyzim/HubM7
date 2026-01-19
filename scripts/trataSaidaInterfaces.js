@@ -184,7 +184,7 @@ export function parseIpAddressOutputTerse(text, ip) {
 }
 
 
-const DEBUG = true;
+const DEBUG = false;
 
 // ======================================================
 // Parse Routes (terse detail)
@@ -219,7 +219,7 @@ export function parseRouteOutputTerse(text, ip, ipAddresses = [], interfaces = [
       macToEthernetName.set(iface.macAddress, name);
     }
 
-    if (iface.interfaceName.startsWith('VLAN')) {
+    if (iface.interfaceName.startsWith('vlan')) {
       vlansToProcess.push(iface);
     }
 
@@ -267,7 +267,6 @@ export function parseRouteOutputTerse(text, ip, ipAddresses = [], interfaces = [
 
 
     if (!dstAddress || !gateway || distance == null) {
-      console.log("ROUTE DROPPED (missing fields):", { rec, dstAddress, gateway, distance });
       continue;
     }
     
@@ -359,81 +358,55 @@ export function findPartners(interfaces, routes, ipAddresses) {
   if (DEBUG) console.log("Routes grouped by VCN:\n", routesByVcn);
 
 
+  const NOT_FOUND = "PARTNER_NOT_FOUND";
+
   const findPartnerForVcn = (vcnRoutes) => {
-    if (DEBUG) console.log(`\nFinding partner for VCN routes:\n`, vcnRoutes);
-    if (vcnRoutes.length === 0) return "";
+    if (!vcnRoutes || vcnRoutes.length === 0) return NOT_FOUND;
 
     const bestRoute = vcnRoutes.reduce((min, r) =>
       parseInt(r.distance) < parseInt(min.distance) ? r : min
     );
-    if (DEBUG) console.log(` -> Best route found:`, bestRoute);
 
     let partner = "";
 
-    // Early exit: se o gateway for uma interface PPPoE, já encontramos!
-    if (bestRoute.gateway && bestRoute.gateway.toLowerCase().startsWith('pppoe-')) {
-        if (DEBUG) console.log(` -> Direct partner found from gateway (PPPoE): ${bestRoute.gateway}`);
-        partner = bestRoute.gateway;
-        return partner;
-    }
-    
-    // 1ª Tentativa: Se o gateway for uma interface PPPoE, já encontramos!
-    if (bestRoute.gateway && bestRoute.gateway.toLowerCase().startsWith('pppoe-')) {
-        if (DEBUG) console.log(` -> Direct partner found from gateway (PPPoE): ${bestRoute.gateway}`);
-        partner = bestRoute.gateway;
-        return partner;
+    // 1. PPPoE direto (v6 e v7)
+    if (bestRoute.gateway?.toLowerCase().startsWith("pppoe-")) {
+      return bestRoute.gateway;
     }
 
-    // 2ª Tentativa: Para rotas 'reachable' (v6), o status do gateway é a fonte mais confiável.
+    // 2. gateway-status (RouterOS v6)
     if (bestRoute.gatewayStatus && /reachable/i.test(bestRoute.gatewayStatus)) {
-      if (DEBUG) console.log(` -> Attempting partner find via 'gatewayStatus': ${bestRoute.gatewayStatus}`);
       const gs = bestRoute.gatewayStatus;
 
-      // Caso 1: O parceiro é um túnel PPPoE nomeado.
-      const pppoeMatch = gs.match(/pppoe-([^\s]+)/);
-      if (pppoeMatch && pppoeMatch[1]) {
-        if (DEBUG) console.log(` -> Partner found from gatewayStatus (PPPoE match): ${pppoeMatch[1]}`);
-        partner = pppoeMatch[1];
-      } else {
-        // Caso 2: A rota sai por uma interface explícita (ex: "via ether2").
-        const parts = gs.split(" ");
-        const potentialIfaceName = parts[parts.length - 1];
-        if (DEBUG) console.log(` -> Potential interface from gatewayStatus: ${potentialIfaceName}`);
-        const iface = interfaces.find(
-          (i) => i.interfaceName.toLowerCase() === potentialIfaceName.toLowerCase()
-        );
-        if (iface) {
-          if (DEBUG) console.log(` -> Found matching interface:`, iface);
-          partner = iface.comentario || "";
-        }
-      }
+      const pppoeMatch = gs.match(/pppoe-([^\s]+)/i);
+      if (pppoeMatch) return pppoeMatch[0];
+
+      const ifaceName = gs.split(" ").pop();
+      const iface = interfaces.find(
+        (i) => i.interfaceName.toLowerCase() === ifaceName.toLowerCase()
+      );
+      if (iface?.comentario) return iface.comentario;
     }
 
-    // 3ª Tentativa: Se as tentativas anteriores falharem (v7 ou rotas 'unreachable' em v6),
-    // usamos o 'comentario' que já foi pré-calculado ou buscamos o comentário da interface do gateway.
-    if (!partner) {
-      if (bestRoute.comentario) {
-        if (DEBUG) console.log(` -> No partner yet, using pre-calculated comment: ${bestRoute.comentario}`);
-        partner = bestRoute.comentario;
-      } else if (bestRoute.gateway) {
-        if (DEBUG) console.log(` -> No pre-calculated comment, trying to find gateway interface: ${bestRoute.gateway}`);
-        const gatewayIface = interfaces.find(
-          (i) => i.interfaceName.toLowerCase() === bestRoute.gateway.toLowerCase()
-        );
-        if (gatewayIface && gatewayIface.comentario) {
-          if (DEBUG) console.log(` -> Found comment on gateway interface: ${gatewayIface.comentario}`);
-          partner = gatewayIface.comentario;
-        }
-      }
+    // 3. Comentário pré-calculado (v7 enrichment)
+    if (bestRoute.comentario) return bestRoute.comentario;
+
+    // 4. Fallback por interface de gateway
+    if (bestRoute.gateway) {
+      const gwIface = interfaces.find(
+        (i) => i.interfaceName.toLowerCase() === bestRoute.gateway.toLowerCase()
+      );
+      if (gwIface?.comentario) return gwIface.comentario;
     }
 
-    if (DEBUG) console.log(` -> Final partner for VCN: ${partner}`);
-    return partner;
+    // 5. Fallback corporativo (NUNCA quebrar)
+    return NOT_FOUND;
   };
 
   const garyPartner = findPartnerForVcn(routesByVcn.gary);
   const planktonPartner = findPartnerForVcn(routesByVcn.plankton);
 
-  if (DEBUG) console.log("--- Finished findPartners ---");
   return { garyPartner, planktonPartner };
+
+  
 }

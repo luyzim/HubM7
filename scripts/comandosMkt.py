@@ -39,7 +39,7 @@ def run_ssh_command(host, command, username, password, port=22, timeout=15):
         # Aumentar a largura do terminal ajuda a evitar quebras de linha inesperadas na saída.
         full_command = f"/terminal length 0\n/terminal width 511\n{command}"
         
-        stdin, stdout, stderr = client.exec_command(full_command)
+        stdin, stdout, stderr = client.exec_command(full_command, timeout=30)
         
         # Lê a saída completa
         out = stdout.read().decode("utf-8", "ignore")
