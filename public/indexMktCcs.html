@@ -140,7 +140,7 @@
         <h2 class="text-xl text-gray-300 mb-2">Versao: 7.20</h2>
       </div>
       <div class="flex gap-2">
-        <a href="/api/tabela" class="btn-voltar">Tabela</a>
+        <a href="/tabelaIps.html?returnUrl=/indexMktCcs.html" class="bg-gray-600 px-4 py-2 rounded hover:bg-gray-500">Tabela</a>
         <a href="/home" class="btn-voltar">Voltar</a>
       </div>
     </div>
@@ -150,9 +150,9 @@
 
 
     <form id="form" class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
-      <label>PA-: <input name="NUM_PA" required placeholder="07" /></label>
+      <label>PAC: <input name="NUM_PA" required placeholder="07" /></label>
       <label>Cidade: <input name="NOME_PA" required placeholder="ex: Jardinopolis" /></label>
-      <label>Identificacao <input name="IDENTIFICACAO" placeholder="ex: CREDIVALE" /></label>
+      <label>Singular: <input name="IDENTIFICACAO" placeholder="ex: CREDIVALE" /></label>
       <label>Parceiro: <input name="PARCEIRO" /></label>
       <label>Ip da Unidade: <input name="IP_UNIDADE" placeholder="ex: 192.168.10.1" /></label>
       <label>Ip Valido:  <input name="IP_VALIDO"  placeholder="ex: 191.5.132.18/31" /></label>
@@ -169,8 +169,8 @@
         </select>
       </label>  
       
-      <label>AS LOCAL: <input name="AS_LOCAL" placeholder="AS Local" /></label>
-      <label>AS REMOTO: <input name="AS_REMOTO" placeholder="AS Remoto"/></label>
+      <label>ASN LOCAL: <input name="AS_LOCAL" placeholder="AS Local" /></label>
+
 
       <div class="md:col-span-2 flex flex-wrap gap-3 mt-2">
         <button id="btn-config" type="submit" class="py-3 px-4">Gerar Configuracao</button>

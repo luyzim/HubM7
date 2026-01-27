@@ -22,6 +22,7 @@ const SPAWN_OPTS = {
 const templatePaths = {
   internet: path.join(__dirname, "..", "data", "ccs", "ccsFotgateModelo.conf"),
   mpls: path.join(__dirname, "..", "data", "ccs", "ccsFotgateModeloMpls.conf"),
+  "mpls/24": path.join(__dirname, "..", "data", "ccs", "ccsFotgateModeloMpls-24.conf"),
 };
 
 // --- Rota para servir a página HTML ---
@@ -41,12 +42,19 @@ router.post("/", (req, res) => {
     });
   }
 
-  // Agora o tipo de template é determinado pelo valor selecionado no VRF
+  // Converte o tipo de template para minúsculas para encontrar o caminho do template
   const templateType = (data.VRF || "internet").toLowerCase();
   const templatePath = templatePaths[templateType];
 
   if (!templatePath) {
     return res.status(400).json({ ok: false, error: `Tipo de template inválido ou não suportado: ${templateType}` });
+  }
+
+  // Garante que o valor da VRF esteja em maiúsculas antes de passar para o script
+  if (data.VRF) {
+    data.VRF = data.VRF.toUpperCase();
+  } else {
+    data.VRF = "INTERNET";
   }
 
   const child = spawn(PY_CMD, ["-u", SCRIPT_PATH, "--template", templatePath], SPAWN_OPTS);
@@ -73,7 +81,8 @@ router.post("/", (req, res) => {
 
     // O script foi executado com sucesso
     const unidadeNome = data.SINGULAR || 'fortigate_conf';
-    const filename = `${unidadeNome}-${templateType}.conf`; // Nome do arquivo inclui o tipo de template
+    const numPa = data.NUM_PA || '1';
+    const filename = `${unidadeNome}-${templateType}-${numPa}.conf`; // Nome do arquivo inclui o tipo de template
     
     res.json({
       ok: true,

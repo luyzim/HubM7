@@ -115,6 +115,7 @@
       <h1 class="text-3xl font-bold">CCS - FortiGate – (Internet)</h1>
       <p class="text-gray-400">Geração de configuração baseada no modelo Internet.</p>
     </div>
+    <a href="/tabelaIps.html?returnUrl=/ccsFortgate.html" class="bg-gray-600 px-4 py-2 rounded hover:bg-gray-500">Tabela</a>
     <a href="/home" class="bg-gray-600 px-4 py-2 rounded hover:bg-gray-500">Voltar</a>
   </div>
 
@@ -131,11 +132,12 @@
         <select name="VRF" id="vrf_select" required>
           <option value="internet">INTERNET</option>
           <option value="mpls">MPLS</option>
+          <option value="mpls/24">MPLS/24</option>
         </select>
       </label>
  
       <label>
-        Número do PA
+        PAC
         <input name="NUM_PA" required placeholder="09">
       </label>
       
@@ -145,7 +147,7 @@
       </label>
 
       <label id="ip_publico_label">
-        IP Público
+        IP de LAN
         <input name="IP_PUBLICO" id="ip_field" required placeholder="201.33.116.19/30">
       </label>
     </div>
@@ -195,12 +197,17 @@
     pageSubtitle.textContent = `Configurações de ativação padrão CCS ${selectedVrf.toUpperCase()}.`;
 
     // Atualiza o label, placeholder e o NOME do campo de IP
-    if (selectedVrf === "mpls") {
-      ipLabel.childNodes[0].nodeValue = "IP Privado ";
+    if (selectedVrf === "mpls/24") {
+      ipLabel.childNodes[0].nodeValue = "IP de LAN ";
+      ipInput.placeholder = "10.0.0.1/24";
+      ipInput.name = "IP_PRIVADO"; // Atualiza o nome do input
+    }
+    else if (selectedVrf === "mpls") {
+      ipLabel.childNodes[0].nodeValue = "IP de LAN ";
       ipInput.placeholder = "10.0.0.1/29";
       ipInput.name = "IP_PRIVADO"; // Atualiza o nome do input
     } else {
-      ipLabel.childNodes[0].nodeValue = "IP Público ";
+      ipLabel.childNodes[0].nodeValue = "IP de LAN ";
       ipInput.placeholder = "10.0.0.1/30";
       ipInput.name = "IP_PUBLICO"; // Retorna ao nome original
     }

@@ -6,7 +6,7 @@ import { fileURLToPath } from "url";
 const router = express.Router();
 
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+export const __dirname = path.dirname(__filename);
 
 const PY_CMD = process.platform === "win32" ? "python" : "python3";
 const SPAWN_OPTS = {

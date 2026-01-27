@@ -50,7 +50,7 @@
         <h1 class="text-3xl font-bold mb-1">Tabela de IPs e ASN</h1>
         <h2 class="text-xl text-gray-300 mb-2">Referência CCS</h2>
       </div>
-      <a href="/api/mkt" class="btn-voltar">Voltar</a>
+      <a href="/api/mkt" id="backButton" class="btn-voltar">Voltar</a>
     </div>
 
     <p class="text-gray-300 mb-4">Tabela generica de ips.</p>
@@ -73,6 +73,18 @@
 <script type="module">
   const tbody = document.getElementById("ips-body");
   const feedback = document.getElementById("feedback");
+  const backButton = document.getElementById("backButton");
+
+  // Get returnUrl from query parameters
+  const urlParams = new URLSearchParams(window.location.search);
+  const returnUrl = urlParams.get('returnUrl');
+
+  if (backButton && returnUrl) {
+    backButton.href = returnUrl;
+  } else if (backButton) {
+    // Default fallback if no returnUrl is provided
+    backButton.href = "/home.html";
+  }
 
   function render(list) {
     tbody.innerHTML = "";

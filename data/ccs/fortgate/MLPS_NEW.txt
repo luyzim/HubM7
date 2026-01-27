@@ -8,7 +8,7 @@ config system global
     set alias "FortiGate-40F"
     set gui-auto-upgrade-setup-warning disable
     set gui-theme security-fabric
-    set hostname "CCS-{{SINGULAR}}-{{VRF}}-PA{{NUM_PA}}"
+    set hostname "CCS-SAROM-MPLS-PA21"
     set switch-controller enable
     set timezone "America/Sao_Paulo"
 end
@@ -37,7 +37,7 @@ end
 config system interface
     edit "wan"
         set vdom "root"
-        set ip {{WAN_IP}} 255.255.255.252
+        set ip 172.27.218.98 255.255.255.252
         set allowaccess ping https ssh snmp
         set type physical
         set alias "MICROSET"
@@ -47,7 +47,7 @@ config system interface
     next
     edit "lan1"
         set vdom "root"
-        set ip {{IP_PRIVADO}} 255.255.255.248
+        set ip 10.43.108.254 255.255.255.0
         set allowaccess ping https ssh snmp
         set type physical
         set alias "CCS"
@@ -11303,7 +11303,7 @@ config router ripng
 end
 config router static
     edit 1
-        set gateway {{WAN_IP_M1}}
+        set gateway 172.27.218.97
         set device "wan"
     next
 end

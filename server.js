@@ -12,11 +12,7 @@ import ensureMonitoramento from "./middleware/ensureMonitoramento.js";
 import ensureN2 from "./middleware/ensureN2.js";
 import ensureN1 from "./middleware/ensureN1.js";
 
-
-
 // Imports de rotas
-
-
 
 import loginRouter from "./routes/loginRoute.js";
 import aboutRouter from "./routes/aboutRoute.js";
@@ -35,6 +31,7 @@ import hostZemaRouter from "./routes/hostZemaRoute.js";
 import commandMktRouter from "./routes/commandMktRoute.js";
 import changePasswordRouter from "./routes/changePasswordRoute.js";
 import ccsFortgateRouter from "./routes/ccsFortgateRoute.js";
+import loginOtrsRouter from "./routes/loginOtrsRoute.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -111,6 +108,12 @@ app.get("/host-ccs", ensureMonitoramento, (req, res) => {
   res.sendFile(path.join(__dirname, "public", "hostCcs.html"));
 });
 
+app.get("/login-otrs", ensureN2, (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "loginOtrs.html"));
+});
+
+
+
 // Backend Routes
  
 app.use("/api/login", loginRouter);
@@ -130,6 +133,7 @@ app.use("/api/host-zema", ensureMonitoramento, hostZemaRouter);
 app.use("/api/comandos-mkt", ensureN1, commandMktRouter);
 app.use("/api/change-password", ensureN1, changePasswordRouter);
 app.use("/api/ccsFortgate", ensureN1, ccsFortgateRouter);
+app.use("/api/loginOtrs", ensureN2, loginOtrsRouter);
 
 const PORT = process.env.PORT;
 const HOST = "0.0.0.0";

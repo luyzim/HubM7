@@ -10,15 +10,50 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     body {
-        font-family: 'Inter', sans-serif;
-        background-image: url('https://images.unsplash.com/photo-1749150270018-1dee5a5e4b88?q=80&w=1170&auto=format&fit=crop&ixlibrb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');
-        background-size: cover;
-        background-repeat: no-repeat;
-        background-position: center;
-        background-attachment: fixed;
-        min-height: 100vh; 
-        margin: 0;
+      font-family: 'Inter', sans-serif;
+      background-image: url('https://images.unsplash.com/photo-1749150270018-1dee5a5e4b88?q=80&w=1170&auto=format&fit=crop&ixlibrb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-position: center;
+      background-attachment: fixed;
+      margin: 0;
+      min-height: 100vh;
     }
+    .sidebar {
+      background-color: rgba(30, 41, 59, 0.90);
+      backdrop-filter: blur(6px);
+      width: 210px;
+      min-height: 100vh;
+      padding: 1.5rem;
+      box-shadow: 3px 0 10px rgba(0,0,0,0.3);
+    }
+          .sidebar a {
+            color: #E5E7EB;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            transition: background-color 0.2s;
+          }
+          .sidebar a:hover {
+            background-color: #374151;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+          }
+          .sidebar-icon {
+            height: 1.5rem; width: 1.5rem;
+            flex-shrink: 0; /* Prevents icon from shrinking */
+          }
+          .sidebar #desktop-sidebar-toggle svg {
+              transition: transform 0.3s ease-in-out;
+          }    .content {
+      margin-left: 100px;
+      padding: 2rem;
+      color: white;
+      max-width: 100px;
+    }
+
     .content-box {
         background-color: rgba(30, 41, 59, 0.75); /* bg-slate-800 bg-opacity-75 */
         backdrop-filter: blur(4px); /* backdrop-blur-sm */
@@ -75,67 +110,263 @@
     }
   </style>
 </head>
+
+
 <body class="p-4 sm:p-6 lg:p-8">
-  <!-- Container principal com o novo estilo -->
-  <div class="content-box max-w-4xl">
-    <h1 class="text-3xl font-bold text-center mb-2 text-white">Hub de automações</h1>
-    <h2 class="text-center text-lg text-gray-300 mb-8">Zibrinix</h2>
-    <main>
-      <p class="text-center text-2xl mb-6 text-gray-100">Automações:</p>
-      <div class="row">
-        <div class="card">
-          <div class="title">Add Ip UNIMED</div>
-          <a href="/api/unimed" class="btn">Acessar</a>
-        </div>
-        <div class="card">
-          <div class="title">About</div>
-          <a href="/api/about" class="btn">Acessar</a>
-        </div>
-        <div class="card">
-          <div class="title">Boas Práticas - Mikrotik</div>
-          <a href="/api/bkpMkt" class="btn">Acessar</a>
-        </div>
-        <div class="card">
-          <div class="title">Reboot 4g RoyalFic</div>
-          <a href="/api/4g" class="btn">Acessar</a>
-        </div>
-        <div class="card">
-          <div class="title">CCS - Mkt</div>
-          <a href="/api/mkt" class="btn">Acessar</a>
-        </div>
-        <div class="card">
-          <div class="title">CCS - Cisco</div>
-          <a href="/api/cisco" class="btn">Acessar</a>
-        </div>
-        <div class="card">
-          <div class="title">Hosts CCS</div>
-          <a href="/host-ccs" class="btn">Acessar</a>
-        </div>
-        <div class="card">
-            <div class="title">Hosts ZEMA</div>
-            <a href="/host-zema" class="btn">Acessar</a>
-        </div>
-        <div class="card">
-            <div class="title">BKP - oxidized</div>
-            <a href="/api/oxidized" class="btn">Acessar</a>
-        </div>
-        <div class="card">
-            <div class="title">Triagem - N1</div>
-            <a href="/api/comandos-mkt" class="btn">Acessar</a>
-        </div>
-        <div class="card">
-            <div class="title">CCS - Fortgate</div>
-            <a href="/api/ccsFortgate" class="btn">Acessar</a>
-        </div>
+
+  <div class="sidebar fixed top-0 left-0">
+    <div class="flex items-center justify-between mb-6">
+        <h2 class="text-2xl font-bold text-white sidebar-title">Configurações</h2>
+        <button id="desktop-sidebar-toggle" class="p-1 rounded-full text-white hover:bg-gray-700 hidden lg:block" title="Recolher menu">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+        </button>
     </div>
-    </main>
-    
+
+    <a href="/settings/profile">
+      <svg xmlns="http://www.w3.org/2000/svg" class="sidebar-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 15c2.27 0 4.418.57 6.334 1.574M12 12a5 5 0 100-10 5 5 0 000 10z"/></svg>
+      <span class="link-text">Perfil</span>
+    </a>
+
+    <a href="/changepassword">
+      <svg xmlns="http://www.w3.org/2000/svg" class="sidebar-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11V7a5 5 0 0110 0v4"/>
+      <circle cx="12" cy="17" r="1"></circle></svg>
+      <span class="link-text">Alterar Senha</span>
+    </a>
+
+    <a href="/login-otrs">
+      <svg xmlns="http://www.w3.org/2000/svg" class="sidebar-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3-3m0 0l3 3m-3-3v12"/></svg>
+      <span class="link-text">OTRS Login</span>
+    </a>
+
+    <a href="/settings/notifications">
+      <svg xmlns="http://www.w3.org/2000/svg" class="sidebar-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+      <span class="link-text">Notificações</span>
+    </a>
+
+    <a href="/settings/integration">
+      <svg xmlns="http://www.w3.org/2000/svg" class="sidebar-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+      <span class="link-text">Integrações</span>
+    </a>
+
+    <a href="/logout" class="mt-auto text-red-400 font-semibold">
+      <svg xmlns="http://www.w3.org/2000/svg" class="sidebar-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7"/></svg>
+      <span class="link-text">Sair</span>
+    </a>
   </div>
+
+  <div id="mainContent" class="transition-all duration-300 ease-in-out">
+      <div class="content-box max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold text-center mb-2 text-white">Hub de automações</h1>
+        <h2 class="text-center text-lg text-gray-300 mb-8">Zibrinix</h2>
+        <main>
+          <p class="text-center text-2xl mb-6 text-gray-100">Automações:</p>
+          <div class="row">
+            <div class="card">
+              <div class="title">Add Ip UNIMED</div>
+              <a href="/api/unimed" class="btn">Acessar</a>
+            </div>
+            <div class="card">
+              <div class="title">About</div>
+              <a href="/api/about" class="btn">Acessar</a>
+            </div>
+            <div class="card">
+              <div class="title">Boas Práticas - Mikrotik</div>
+              <a href="/api/bkpMkt" class="btn">Acessar</a>
+            </div>
+            <div class="card">
+              <div class="title">Reboot 4g RoyalFic</div>
+              <a href="/api/4g" class="btn">Acessar</a>
+            </div>
+            <div class="card">
+              <div class="title">CCS - Mkt</div>
+              <a href="/api/mkt" class="btn">Acessar</a>
+            </div>
+            <div class="card">
+              <div class="title">CCS - Cisco</div>
+              <a href="/api/cisco" class="btn">Acessar</a>
+            </div>
+            <div class="card">
+              <div class="title">Hosts CCS</div>
+              <a href="/host-ccs" class="btn">Acessar</a>
+            </div>
+            <div class="card">
+                <div class="title">Hosts ZEMA</div>
+                <a href="/host-zema" class="btn">Acessar</a>
+            </div>
+            <div class="card">
+                <div class="title">BKP - oxidized</div>
+                <a href="/api/oxidized" class="btn">Acessar</a>
+            </div>
+            <div class="card">
+                <div class="title">Triagem - N1</div>
+                <a href="/api/comandos-mkt" class="btn">Acessar</a>
+            </div>
+            <div class="card">
+                <div class="title">CCS - Fortigate</div>
+                <a href="/api/ccsFortgate" class="btn">Acessar</a>
+            </div>
+        </div>
+        </main>
+      </div>
+  </div>
+    
   <a href="/changepassword" class="fixed top-4 right-4 text-white hover:text-gray-300 transition settings-icon">
     <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.096 2.572-1.065z" />
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+      <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11V7a5 5 0 0110 0v4"/>
+      <circle cx="12" cy="17" r="1"></circle>
     </svg>
   </a>
 </body>
+
+
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const sidebar = document.querySelector(".sidebar");
+    const mainContent = document.getElementById("mainContent");
+    const sidebarLinks = sidebar ? sidebar.querySelectorAll("a") : [];
+    
+    // --- Injeção de Estilos ---
+    const style = document.createElement("style");
+    style.textContent = `
+      .sidebar-active {
+        background-color: rgba(59,130,246,0.6) !important;
+        border-left: 4px solid #3B82F6 !important;
+        font-weight: 600 !important; color: #fff !important;
+      }
+      .sidebar-active svg { stroke: #fff !important; }
+
+      /* --- Estilos base do sidebar (aplicados a todas as telas) --- */
+      .sidebar {
+        background-color: rgba(30, 41, 59, 0.90);
+        backdrop-filter: blur(6px);
+        box-shadow: 3px 0 10px rgba(0,0,0,0.3);
+        min-height: 100vh;
+        padding: 1.5rem;
+        display: flex; /* Make sidebar a flex container */
+        flex-direction: column; /* Arrange items vertically */
+        transition: width 0.3s ease-in-out; /* Add transition for smooth width changes */
+      }
+      .sidebar a {
+        color: #E5E7EB;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem 1rem;
+        border-radius: 0.5rem;
+        transition: background-color 0.2s;
+      }
+      .sidebar a:hover {
+        background-color: #374151;
+        text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+      }
+      .sidebar-icon {
+        height: 1.5rem; width: 1.5rem;
+        flex-shrink: 0; /* Prevents icon from shrinking */
+      }
+      .sidebar #desktop-sidebar-toggle svg {
+          transition: transform 0.3s ease-in-out;
+      }
+
+      /* --- Estilos para Desktop (min-width: 1024px) --- */
+      @media (min-width: 1024px) {
+        .sidebar { width: 230px; } /* Default width for expanded state */
+        .sidebar.collapsed { width: 72px; padding-left: 0.5rem; padding-right: 0.5rem; } /* Collapsed width with adjusted padding */
+        .sidebar.collapsed .link-text, .sidebar.collapsed .sidebar-title { display: none; }
+        .sidebar.collapsed #desktop-sidebar-toggle svg { transform: rotate(180deg); }
+        
+        /* Adjust padding and centering for links in collapsed state */
+        .sidebar.collapsed a {
+          justify-content: center; /* Center icon */
+          padding: 0.75rem 0; /* Remove horizontal padding, rely on internal spacing */
+          gap: 0; /* Remove gap when text is hidden */
+        }
+
+        /* Adjust padding for the toggle button within sidebar */
+        #desktop-sidebar-toggle {
+            padding: 0.5rem; /* Give toggle button more space */
+        }
+        
+        #mainContent { margin-left: 230px; transition: margin-left 0.3s ease-in-out; }
+        #mainContent.collapsed { margin-left: 72px; }
+      }
+
+      /* --- Estilos para Mobile (max-width: 1023px) --- */
+      .sidebar-toggle-btn { display: none; cursor: pointer; }
+      @media (max-width: 1023px) {
+        .sidebar {
+          position: fixed; top: 0; left: 0;
+          transform: translateX(-100%);
+          transition: transform 0.3s ease-in-out;
+          z-index: 1000;
+        }
+        .sidebar.open { transform: translateX(0); }
+        .sidebar-toggle-btn { display: block; }
+        body.sidebar-open { overflow: hidden; }
+      }
+    `;
+    document.head.appendChild(style);
+
+    // --- Lógica para marcar link ativo ---
+    const currentPath = window.location.pathname.toLowerCase().replace(/\/$/, "");
+    sidebarLinks.forEach(link => {
+      const hrefPath = link.getAttribute("href").toLowerCase().replace(/\/$/, "");
+      if (hrefPath && currentPath.startsWith(hrefPath) && hrefPath !== "") {
+        link.classList.add("sidebar-active");
+      }
+    });
+
+    // --- Lógica do Menu para DESKTOP ---
+    const desktopToggleBtn = document.getElementById("desktop-sidebar-toggle");
+    if (desktopToggleBtn && window.innerWidth >= 1024) {
+      const applyDesktopState = (isCollapsed) => {
+        sidebar.classList.toggle('collapsed', isCollapsed);
+        mainContent.classList.toggle('collapsed', isCollapsed);
+        localStorage.setItem('sidebarState', isCollapsed ? 'collapsed' : 'expanded');
+      };
+
+      desktopToggleBtn.addEventListener("click", () => {
+        const isCollapsed = !sidebar.classList.contains('collapsed');
+        applyDesktopState(isCollapsed);
+      });
+
+      // Aplicar estado inicial do localStorage
+      const initialState = localStorage.getItem('sidebarState') === 'collapsed';
+      applyDesktopState(initialState);
+    }
+    
+    // --- Lógica do Menu para MOBILE ---
+    const mobileToggleBtn = document.createElement("div");
+    mobileToggleBtn.className = "sidebar-toggle-btn fixed top-4 left-4 z-50 p-2 bg-blue-600 rounded-md text-white lg:hidden";
+    mobileToggleBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>`;
+    document.body.appendChild(mobileToggleBtn);
+
+    const overlay = document.createElement('div');
+    overlay.className = 'fixed inset-0 bg-black bg-opacity-50 z-40 hidden lg:hidden';
+    document.body.appendChild(overlay);
+
+    const toggleMobileMenu = (show) => {
+      sidebar.classList.toggle("open", show);
+      overlay.classList.toggle("hidden", !show);
+      document.body.classList.toggle("sidebar-open", show);
+    };
+
+    mobileToggleBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      toggleMobileMenu(true);
+    });
+
+    overlay.addEventListener("click", () => toggleMobileMenu(false));
+    document.addEventListener("click", (e) => {
+        if (sidebar.classList.contains('open') && !sidebar.contains(e.target) && !mobileToggleBtn.contains(e.target)) {
+            toggleMobileMenu(false);
+        }
+    });
+  });
+</script>
+
+
 </html>
