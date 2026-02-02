@@ -71,8 +71,6 @@ morgan.token("user-and-headers", (req, res) => {
 const flaskFormat = ':remote-addr - - [:date_flask] ":method :url HTTP/:http-version" :status :res[content-length] - :user-and-headers';
 app.use(morgan(flaskFormat));
 
-// Servir arquivos estáticos da pasta 'public'
-app.use(express.static(path.join(__dirname, "public")));
 
 // Frontend Routes
 app.get("/", (req, res) => res.redirect("/guest"));
@@ -92,11 +90,11 @@ app.get("/changepassword", ensureN1, (req, res) => {
   res.sendFile(path.join(__dirname, "public", "changePassword.html"));
 });
 
-app.get("/oxidized", ensureN2, (req, res) => {
+app.get("/api/oxidized", ensureN2, (req, res) => {
   res.sendFile(path.join(__dirname, "public", "oxidized.html"));
 });
 
-app.get("/about", (req, res) => {
+app.get("/api/about", ensureAdmin, (req, res) => {
   res.sendFile(path.join(__dirname, "public", "about.html"));
 });
 
@@ -112,7 +110,41 @@ app.get("/login-otrs", ensureN2, (req, res) => {
   res.sendFile(path.join(__dirname, "public", "loginOtrs.html"));
 });
 
+app.get("/tabela/ips", ensureN2, (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "tabelaIps.html"));
+});
 
+app.get("/api/unimed", ensureN2, (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "indexUnimed.html"));
+});
+
+
+
+app.get("/api/mkt", ensureN2, (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "indexMktCcs.html"));
+});
+
+app.get("/api/4g", ensureN1, (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "indexFic.html"));
+});
+
+app.get("/api/comandos-mkt", ensureN1, (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "commandMkt.html"));
+});
+
+app.get("/api/cisco", ensureN2, (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "indexCiscoCcs.html"));
+});
+
+app.get("/api/ccsFortgate", ensureN1, (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "ccsFortgate.html"));
+});
+
+app.get("/api/bkpMkt", ensureN2, (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "bkpMkt.html"));
+});
+
+// Servir arquivos estáticos da pasta 'public'
 
 // Backend Routes
  

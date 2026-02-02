@@ -50,8 +50,8 @@
         <h1 class="text-3xl font-bold mb-1">Tabela de IPs e ASN</h1>
         <h2 class="text-xl text-gray-300 mb-2">Referência CCS</h2>
       </div>
-      <a href="/api/mkt" id="backButton" class="btn-voltar">Voltar</a>
-    </div>
+        <a href="javascript:history.back()" class="btn-voltar">Voltar</a>
+      </div>
 
     <p class="text-gray-300 mb-4">Tabela generica de ips.</p>
     <span id="feedback" class="text-sm text-gray-300 block mb-3"></span>
@@ -61,7 +61,9 @@
         <thead class="bg-slate-800/70 text-gray-200 uppercase tracking-wide">
           <tr>
             <th class="px-4 py-3 text-left">P /32</th>
-            <th class="px-4 py-3 text-left">Bloco /30</th>
+            <th class="px-4 py-3 text-left">IP MKT</th>
+            <th class="px-4 py-3 text-left">IP Firewall/Cisco</th>
+            <th class="px-4 py-3 text-left">REDE</th>
             <th class="px-4 py-3 text-left">ASN</th>
           </tr>
         </thead>
@@ -93,9 +95,9 @@
       return;
     }
     feedback.textContent = ` ${list.length} registros`;
-    list.forEach(({ p32, bloco30, asn }) => {
+    list.forEach(({ p32, mkt, bloco30, cisco, asn }) => {
       const tr = document.createElement("tr");
-      [p32, bloco30, asn].forEach((value) => {
+      [p32, mkt, bloco30, cisco, asn].forEach((value) => {
         const td = document.createElement("td");
         td.className = "px-4 py-2";
         td.textContent = value;

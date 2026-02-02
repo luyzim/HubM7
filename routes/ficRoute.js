@@ -15,9 +15,7 @@ if (typeof getUnidades !== "function" || typeof postRun !== "function") {
 const router = express.Router();
 
 // Front
-router.get("/", (_req, res) => {
-  res.sendFile(path.join(__dirname, "..", "public", "indexFic.html"));
-});
+
 
 // Lista de unidades (precisa ser uma função!)
 router.get("/unidades", getUnidades);

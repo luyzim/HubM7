@@ -1,7 +1,7 @@
 import express from "express";
 import path from "path";
 import fs from "fs";
-import { spawn } from "child_process";
+
 import { fileURLToPath } from "url";
 
 const router = express.Router();
@@ -13,9 +13,7 @@ const TPL_DIR = path.join(__dirname, "..", "data");
 const TABELA_IPS_PATH = path.join(__dirname, "..", "data", "ccs", "tabelaIps.txt");
 
 
-router.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "..", "public", "tabelaIps.html"));
-});
+
 
 router.get("/ips", (_req, res) => {
   try {
@@ -26,10 +24,10 @@ router.get("/ips", (_req, res) => {
       .filter(Boolean)
       .map((line) => {
         if (line.toLowerCase().startsWith("p /32")) return null; // ignora cabeçalho
-        const match = line.match(/^(\S+)\s+(\S+)\s+(\S+)$/);
+        const match = line.match(/^(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)$/);
         if (!match) return null;
-        const [, p32, bloco30, asn] = match;
-        return { p32, bloco30, asn };
+        const [, p32, mkt, cisco, bloco30, asn] = match;
+        return { p32, mkt, cisco, bloco30, asn };
       })
       .filter((row) => row && row.p32 && row.bloco30 && row.asn);
     res.json({ rows });

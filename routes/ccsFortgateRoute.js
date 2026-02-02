@@ -26,9 +26,7 @@ const templatePaths = {
 };
 
 // --- Rota para servir a página HTML ---
-router.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "..", "public", "ccsFortgate.html"));
-});
+
 
 // --- Rota para gerar a configuração ---
 router.post("/", (req, res) => {
@@ -90,6 +88,7 @@ router.post("/", (req, res) => {
       filename: filename,
       message: "Configuração gerada com sucesso!"
     });
+    console.log('Gerada config FORTIGATE para', unidadeNome, 'Tipo:', templateType);
   });
 
   child.on("error", (spawnError) => {

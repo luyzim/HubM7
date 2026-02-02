@@ -94,9 +94,50 @@
       font-weight: 600;
       font-size: 0.85rem;
     }
+    .empty-row {
+      background-color: #1f2937;
+      text-align: center;
+      color: #9ca3af;
+    }
+    #toast-container {
+      position: fixed;
+      top: 1.5rem;
+      right: 1.5rem;
+      z-index: 50;
+      display: flex;
+      flex-direction: column-reverse; /* Stack from bottom to top */
+      align-items: flex-end; /* Align to the right */
+      gap: 0.5rem; /* Space between toasts */
+    }
+    .toast {
+      padding: 1rem 1.5rem;
+      border-radius: 0.5rem;
+      font-weight: 600;
+      color: white;
+      opacity: 0;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      transform: translateY(0); /* Remove initial transform */
+    }
+    .toast.show {
+      opacity: 1;
+    }
+    .toast.success { background-color: #16a34a; }
+    .toast.error { background-color: #dc2626; }
+    pre.full-width {
+        background-color: #1F2937;
+        border: 1px solid #4B5563;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        overflow-x: auto;
+        color: #E5E7EB;
+        min-height: 100px;
+        width: 100%;
+        margin-top: 1rem;
+    }
   </style>
 </head>
 <body class="p-4 sm:p-6 lg:p-8">
+  <div id="toast-container"></div>
   <div class="content-box">
     <div class="flex items-start justify-between gap-4 mb-6 flex-wrap">
       <div class="flex items-center gap-3">
@@ -174,6 +215,20 @@
           </div>
         </div>
       </div>
+      
+      
+    </div>
+
+    <div class="mt-8">
+      <h3 class="text-2xl font-semibold mb-3">BKP Automatico</h3>
+      <div class="overflow-x-auto border border-slate-700 rounded-xl">
+
+      </div>
+      <pre id="bkp-out" class="full-width" style="display: none;">-</pre>
+      <div id="bkp-result-buttons" class="mt-2 flex justify-end"></div>
+          <div class="mt-6 flex justify-end">
+      <button id="bkp-btn" class="btn">Gerar BKP</button>
+    </div>
     </div>
 
     <div class="mt-6 flex justify-end">
@@ -194,8 +249,8 @@
             </tr>
           </thead>
           <tbody id="result-body">
-            <tr>
-              <td colspan="3" class="text-gray-400 py-4">Nenhum host gerado ainda.</td>
+            <tr class="empty-row">
+              <td colspan="3" class="py-4">Nenhum host gerado ainda.</td>
             </tr>
           </tbody>
         </table>
@@ -204,21 +259,43 @@
   </div>
 
   <script>
+    const bkpBtn = document.getElementById('bkp-btn');
     const submitBtn = document.getElementById('submit-btn');
     const alertBox = document.getElementById('alert');
     const resultBody = document.getElementById('result-body');
+    const toastContainer = document.getElementById('toast-container');
+    const bkpOut = document.getElementById('bkp-out');
+    const bkpResultButtons = document.getElementById('bkp-result-buttons');
 
     const getValue = (id) => document.getElementById(id).value.trim();
 
-    const setLoading = (loading) => {
-      submitBtn.disabled = loading;
-      submitBtn.textContent = loading ? 'Gerando...' : 'Gerar hosts';
-      submitBtn.style.opacity = loading ? '0.7' : '1';
+    const showToast = (message, type = 'success') => {
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.textContent = message;
+      toastContainer.appendChild(toast);
+
+      setTimeout(() => {
+        toast.classList.add('show');
+      }, 100);
+
+      setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => {
+          toast.remove();
+        }, 300);
+      }, 3000);
+    };
+
+    const setLoading = (btn, loading, text = 'Gerando...') => {
+      btn.disabled = loading;
+      btn.textContent = loading ? text : (btn.id === 'bkp-btn' ? 'Gerar BKP' : 'Gerar hosts');
+      btn.style.opacity = loading ? '0.7' : '1';
     };
 
     const renderRows = (rows) => {
       if (!rows || !rows.length) {
-        resultBody.innerHTML = '<tr><td colspan="3" class="text-gray-400 py-4">Nenhum resultado retornado.</td></tr>';
+        resultBody.innerHTML = '<tr class="empty-row"><td colspan="3" class="py-4">Nenhum resultado retornado.</td></tr>';
         return;
       }
 
@@ -273,7 +350,7 @@
         return;
       }
 
-      setLoading(true);
+      setLoading(submitBtn, true);
       try {
         const res = await fetch('/api/host-ccs', {
           method: 'POST',
@@ -293,7 +370,109 @@
         alertBox.textContent = 'Falha na requisicao. Tente novamente.';
         renderRows([]);
       } finally {
-        setLoading(false);
+        setLoading(submitBtn, false);
+      }
+    });
+
+
+    bkpBtn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      alertBox.textContent = '';
+      bkpOut.style.display = 'none';
+      bkpResultButtons.innerHTML = '';
+      
+      const group = getValue('group');
+      const identifier = getValue('identifier');
+      const ipCisco = getValue('ip_wan_internet');
+      const ipMkt = getValue('ip_mkt_internet');
+
+      if (!group || !identifier) {
+        alertBox.textContent = 'Informe grupo e identificador.';
+        return;
+      }
+
+      const templatesToProcess = [
+        {
+          name: "CCS-MKT.txt",
+          payload: {
+            template_principal: "CCS-MKT.txt",
+            dados: {
+              UNIDADE: group,
+              NUM_PA: identifier,
+              IP_CISCO: ipCisco,
+              IP_MKT: ipMkt,
+            },
+          },
+        },
+        {
+          name: "CCS-CISCO.txt",
+          payload: {
+            template_principal: "CCS-CISCO.txt",
+            dados: {
+              UNIDADE: group,
+              NUM_PA: identifier,
+              IP_CISCO: ipCisco,
+              IP_MKT: ipMkt, // This might not be used by CCS-CISCO.txt, but it's sent anyway
+            },
+          },
+        },
+      ];
+
+      setLoading(bkpBtn, true, 'Gerando BKPs...');
+
+      try {
+        const generatedConfigs = await Promise.all(
+          templatesToProcess.map(async (template) => {
+            const res = await fetch('/api/oxidized/generate', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(template.payload),
+            });
+            const data = await res.json();
+            if (!res.ok) {
+              throw new Error(data.error || `Erro ao gerar BKP para ${template.name}.`);
+            }
+            return { template_name: template.name, generated_config: data.generated_config };
+          })
+        );
+
+        showToast('Configurações BKP geradas com sucesso! Clique em "Subir para Oxidized" para enviar.', 'success');
+        
+        const uploadButton = document.createElement('button');
+        uploadButton.textContent = 'Subir para Oxidized';
+        uploadButton.className = 'btn';
+        uploadButton.onclick = async () => {
+            uploadButton.textContent = 'Subindo...';
+            uploadButton.disabled = true;
+
+            try {
+                await Promise.all(
+                  generatedConfigs.map(async (config) => {
+                    const res = await fetch('/api/comandos-oxidized/run', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ template_name: config.template_name, texto_para_inserir: config.generated_config })
+                    });
+                    const result = await res.json();
+                    if (result.ok) {
+                        showToast(`BKP ${config.template_name} subiu com sucesso!`, 'success');
+                    } else {
+                        showToast(`Erro ao subir ${config.template_name}: ${result.error}`, 'error');
+                    }
+                  })
+                );
+                uploadButton.textContent = 'Subiu com Sucesso!';
+            } catch (error) {
+                showToast('Erro na Requisição ao subir BKPs.', 'error');
+                uploadButton.textContent = 'Erro na Requisição';
+            }
+        };
+        bkpResultButtons.appendChild(uploadButton);
+
+      } catch (err) {
+        showToast(err.message || 'Falha na requisicao. Tente novamente.', 'error');
+      } finally {
+        setLoading(bkpBtn, false);
       }
     });
   </script>

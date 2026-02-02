@@ -74,7 +74,7 @@ def main():
 
         # --- Etapa de Processamento de Dados Dinâmico ---
         # Determina o nome do campo de IP (público ou privado) com base na VRF
-        is_mpls = payload.get("VRF") == "mpls"
+        is_mpls = payload.get("VRF", "").lower().startswith("mpls")
         ip_field_name = "IP_PRIVADO" if is_mpls else "IP_PUBLICO"
 
         # 1. Valida os IPs de entrada

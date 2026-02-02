@@ -26,9 +26,7 @@ function sendSseEvent(event, data) {
 
 // ================= /get =================
 
-router.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "..", "public", "indexUnimed.html"));
-});
+
 
 
 

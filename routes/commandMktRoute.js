@@ -189,9 +189,7 @@ router.post("/scan-super", async (req, res) => {
 // ======================================================
 // Página principal (front)
 // ======================================================
-router.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "..", "public", "commandMkt.html"));
-});
+
 
 // ======================================================
 // Lista de comandos (DB)

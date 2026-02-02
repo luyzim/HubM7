@@ -13,9 +13,7 @@ const __dirname = path.dirname(__filename);
 
 router.use(express.json());
 
-router.get("/", (_req, res) => {
-  res.sendFile(path.join(__dirname, "..", "public", "hostCcs.html"));
-});
+
 
 router.post('/', (req, res) => {
     const { group, identifier, ips } = req.body;

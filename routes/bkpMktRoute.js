@@ -29,9 +29,7 @@ function sendSseEvent(event, data) {
 
 const TPL_DIR = path.join(__dirname, "..", "data");
 
-router.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "..", "public", "bkpMkt.html"));
-});
+
 
 
 router.post("/", (req, res) => {
