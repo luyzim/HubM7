@@ -140,7 +140,7 @@
         <h2 class="text-xl text-gray-300 mb-2">Versao: 7.20</h2>
       </div>
       <div class="flex gap-2">
-        <a href="/tabelaIps.html?returnUrl=/indexMktCcs.html" class="bg-gray-600 px-4 py-2 rounded hover:bg-gray-500">Tabela</a>
+        <a href="/tabela/ips" class="bg-gray-600 px-4 py-2 rounded hover:bg-gray-500">Tabela</a>
         <a href="/home" class="btn-voltar">Voltar</a>
       </div>
     </div>
@@ -151,18 +151,23 @@
 
     <form id="form" class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
       <label>PAC: <input name="NUM_PA" required placeholder="07" /></label>
-      <label>Cidade: <input name="NOME_PA" required placeholder="ex: Jardinopolis" /></label>
-      <label>Singular: <input name="IDENTIFICACAO" placeholder="ex: CREDIVALE" /></label>
+      <label>Cidade: <input name="NOME_PA" required placeholder="Jardinopolis" /></label>
+      <label>Singular: <input name="IDENTIFICACAO" placeholder="CREDIVALE" /></label>
       <label>Parceiro: <input name="PARCEIRO" /></label>
-      <label>Ip da Unidade: <input name="IP_UNIDADE" placeholder="ex: 192.168.10.1" /></label>
-      <label>Ip Valido:  <input name="IP_VALIDO"  placeholder="ex: 191.5.132.18/31" /></label>
+      <label>
+        <span id="ipLabelText">Ip MKT Ether5:</span>
+        <input  name="IP_UNIDADE" placeholder="192.168.10.1" />
+      </label>      
+      <label id="ipLabel">
+        <span id="ipLabelText">Ip Fortigate Lan1:</span> 
+        <input id="ipInput" name="IP_VALIDO"  placeholder="191.5.128.123/30" /></label>
       <label>Login PPPoE: <input name="PPPOE_USER" /></label>
       <label>Senha PPPoE: <input name="PPPOE_PASS" /></label>
       <label>Gary User: <input name="GARY_USER" placeholder="User do l2tp do Gary" /></label>
       <label>Plankton User: <input name="PLANKTON_USER" placeholder="User do l2tp do Plankton"/></label>
       <label>VELOCIDADE: <input name="VELOCIDADE" placeholder="ex: 10M" /></label>
       <label>VRF:
-        <select name="VRF" required style="color: black;">
+        <select id="vrf_select" name="VRF" required style="color: black;">
           <option value="" style="color: black;">Exemplo: INTERNET</option>
           <option value="MPLS" style="color: black;">MPLS</option>
           <option value="INTERNET" style="color: black;">INTERNET</option>
@@ -219,6 +224,30 @@
   const helpFab    = document.getElementById("helpFab");
   const helpBubble = document.getElementById("helpBubble");
   const helpClose  = document.getElementById("helpClose");
+  const vrfSelect = document.getElementById("vrf_select");
+  const ipLabelText = document.getElementById("ipLabelText");
+  const ipInput = document.getElementById("ipInput");
+
+  vrfSelect.addEventListener("change", (e) => {
+    const selectedVrf = e.target.value;
+
+    if (selectedVrf === "mpls/24") {
+
+      ipInput.placeholder = "10.0.0.1/24";
+      ipInput.name = "IP_VALIDO";
+    }
+    else if (selectedVrf === "MPLS") {
+
+      ipInput.placeholder = "172.23.0.1/29";
+      ipInput.name = "IP_VALIDO";
+    } 
+    else {
+
+      ipInput.placeholder = "191.5.128.123/30";
+      ipInput.name = "IP_VALIDO";
+    }
+  });
+
 
   if (helpFab && helpBubble && helpClose) {
     const setBubble = (show) => {
@@ -256,5 +285,3 @@
 
 </body>
 </html>
-
-

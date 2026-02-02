@@ -47,9 +47,7 @@ router.get("/placeholders/:templateName", async (req, res) => {
 });
 
 
-router.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "..", "public", "oxidized.html"));
-});
+
 
 router.post("/generate", (req, res) => {
   // O corpo da requisição deve conter:

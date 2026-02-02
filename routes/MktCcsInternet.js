@@ -15,9 +15,7 @@ const SPAWN_OPTS = {
   env: { ...process.env, PYTHONIOENCODING: "utf-8" },
 };
 
-router.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "..", "public", "indexMktCcs.html"));
-});
+
 
 function runTemplate(res, data, templateName, cmd) {
   if (!data || typeof data !== "object") {
@@ -34,15 +32,30 @@ function runTemplate(res, data, templateName, cmd) {
   child.stderr.on("data", (c) => err += c.toString());
 
   child.on("close", (code) => {
-    if (code !== 0) return res.status(500).json({ ok: false, code, error: err });
-    try { res.json(JSON.parse(out)); }
-    catch { res.json({ ok: true, raw: out.trim() }); }
+    if (code !== 0) {
+      return res.status(500).json({ ok: false, code, error: err || "Falha ao executar o script Python." });
+    }
+
+    try {
+      const result = JSON.parse(out);
+      //console.log('Resposta do script automacaoCcs.py:', result); // Log da resposta completa
+      if (result.status === "error") {
+        // Erro de validação retornado pelo script, ex: IP inválido.
+        return res.status(400).json({ ok: false, error: result.error || "Erro nos dados fornecidos." });
+      }
+      // Sucesso
+      res.json(result);
+    } catch (e) {
+      // Erro ao analisar o JSON de resposta do script.
+      res.status(500).json({ ok: false, error: "Falha ao processar a resposta do script.", raw: out });
+    }
   });
 }
 
 router.post("/", (req, res) => {
   const data = req.body?.data || req.body;
   runTemplate(res, data, "mktModelo.txt", "mkt");
+  console.log('Gerado Script MKT:', data.NOME_PA, data.NUM_PA, data.VRF, data.IP_VALIDO);
 });
 
 router.post("/mensagem", (req, res) => {
