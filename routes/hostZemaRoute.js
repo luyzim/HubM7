@@ -48,7 +48,7 @@ function handlePythonSpawn(scriptName, req, res) {
 router.post('/', (req, res) => {
     const scriptPath = path.join(__dirname, '..', 'scripts', 'createHostZema.py');
     handlePythonSpawn(scriptPath, req, res);
-    console.log("Feito spawn do python para criação dos hosts Zema", req.body);
+    console.log("Feito spawn do python para hosts Zema", req.body);
 });
 
 export default router;

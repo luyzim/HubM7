@@ -2,6 +2,7 @@ import express from "express";
 import path from "path";
 import { spawn } from "child_process";
 import { fileURLToPath } from "url";
+import { group } from "console";
 
 const router = express.Router();
 
@@ -19,9 +20,9 @@ router.post("/run", (req, res) => {
   }
 
   // Log de governança p/ saber o que está chegando
-  console.log("[ComandosOxidized] template_name:", template_name);
-  console.log("[ComandosOxidized] texto_para_inserir typeof:", typeof texto_para_inserir);
-  console.log("[ComandosOxidized] texto_para_inserir raw:", texto_para_inserir);
+  //console.log("[ComandosOxidized] template_name:", template_name);
+  //console.log("[ComandosOxidized] texto_para_inserir typeof:", typeof texto_para_inserir);
+  //console.log("[ComandosOxidized] texto_para_inserir raw:", texto_para_inserir);
 
   const pythonCmd = process.platform === "win32" ? "python" : "python3";
   const scriptPath = path.join(__dirname, "..", "scripts", "comandosOxidized.py");
@@ -46,7 +47,6 @@ router.post("/run", (req, res) => {
     if (code !== 0) {
       console.error(`[ComandosOxidized] Script failed with exit code: ${code}`);
       console.error(`[ComandosOxidized] Stderr: ${stderr}`);
-      console.error(`[ComandosOxidized] Stdout: ${stdout}`);
 
       const errorDetails = stderr || stdout;
 
@@ -62,6 +62,7 @@ router.post("/run", (req, res) => {
       ok: true,
       message: "Comando executado com sucesso.",
       output: stdout.trim(),
+      consoleLog: `Bkp inserido no Oxidized: ${template_name} - ${texto_para_inserir}`,
     });
   });
 
