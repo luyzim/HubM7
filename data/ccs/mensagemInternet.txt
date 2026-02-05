@@ -11,8 +11,8 @@ pppoe-{PARCEIRO}
 Favor adicionar no monitoramento 
 
 Internet
-*Gary - IP:   {IP_GARY}  ->#####ALTERAR ULTIMO OCTETO PARA IP DO GARY####<-
-*Plankton - IP: {IP_PLANKTON}  ->####ALTERAR ULTIMO OCTETO PARA IP DO PLANKTON####<-
+*Gary - IP:   {IP_GARY} 
+*Plankton - IP: {IP_PLANKTON}  
 *IP Ether5 Mikrotik - IP:   {IP_UNIDADE}
 
 *IP Gi0/0/0 - Cisco WAN - IP: {IP_UNIDADE_P1}

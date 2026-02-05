@@ -160,9 +160,9 @@ def main_api(api_data: dict):
     output_dir.mkdir(exist_ok=True)
     output_file = output_dir / "output.txt"
     
-    conteudo_final = "".join(resultados)
+    conteudo_final = "\n---END_OF_CONFIG---\n".join(resultados)
     with open(output_file, "a", encoding="utf-8") as f:
-        f.write(conteudo_final + "")
+        f.write(conteudo_final + "\n")
 
     # Retorna o conteúdo gerado para o stdout, para a API capturar
     print(conteudo_final)

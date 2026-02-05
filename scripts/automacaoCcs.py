@@ -127,21 +127,55 @@ def derivar_ipBarrado_p1_m1(campo_ip: str, prefixo_saida: str, dados: dict):
         print(f"[WARN] IP invalido para derivacao em {campo_ip}: {e}", file=sys.stderr)
 
 
-def derivar_ip_gary_plankton(campo_ip: str, prefixo_saida: str, dados: dict):
+def inferir_n_por_ip_mkt(ip_mkt: str) -> int:
+    raw = (ip_mkt or "").split("/")[0].strip()
+    if not raw:
+        raise ValueError("IP MKT vazio")
+
+    ip = ipaddress.IPv4Address(raw)
+    m = int(str(ip).split(".")[-1])  # último octeto do IP MKT
+
+    # validações conforme sua tabela
+    if m < 97 or m > 253:
+        raise ValueError(f"IP MKT último octeto não coresponde a tabela: {m}")
+
+    delta = m - 97
+    if delta % 4 != 0:
+        raise ValueError(f"IP MKT último octeto < 97: {m}")
+
+    n = (delta // 4) + 2  # inversa exata do seu padrão
+    if n < 2 or n > 41:
+        raise ValueError(f"N inferido fora do range (2..41): {n}")
+
+    return n
+
+
+def derivar_ip_gary_plankton_por_mkt(campo_ip: str, prefixo_saida: str, dados: dict):
     raw = (dados.get(campo_ip) or "").split("/")[0].strip()
     if not raw:
         return
+
     try:
-        ip = ipaddress.IPv4Address(raw)
-        ip_int = int(ip)
-        gary_int = (ip_int & 0xFFFFFF00) | 0x01
-        plankton_step = ip_int + (1 << 8)
-        plankton_int = (plankton_step & 0xFFFFFF00) | 0x01
+        ip_mkt = ipaddress.IPv4Address(raw)
+        ip_int = int(ip_mkt)
+
+        # 1) Inferir N (último octeto do P/32) via IP MKT
+        n = inferir_n_por_ip_mkt(dados.get(campo_ip))
+
+        # 2) GARY: mesmo /24 do MKT, host = N
+        gary_int = (ip_int & 0xFFFFFF00) | n
+
+        # 3) PLANKTON: próximo /24 ( +256 ), host = N
+        plankton_step = ip_int + (1 << 8)  # +256
+        plankton_int = (plankton_step & 0xFFFFFF00) | n
 
         dados[f"{prefixo_saida}_GARY"] = str(ipaddress.IPv4Address(gary_int))
         dados[f"{prefixo_saida}_PLANKTON"] = str(ipaddress.IPv4Address(plankton_int))
+        dados[f"{prefixo_saida}_N"] = n  # opcional: útil pra auditoria/log
+
     except Exception as e:
-        print(f"[WARN] IP invalido para derivacao em {campo_ip}: {e}", file=sys.stderr)
+        print(f"[WARN] Falha derivando GARY/PLANKTON por IP MKT: {e}", file=sys.stderr)
+        raise ValueError(f"Falha ao derivar GARY/PLANKTON por IP MKT: {e}")
 
 
 def validar_ip_sem_barra(dados: dict, campo: str):
@@ -168,7 +202,7 @@ def run_command(dados: dict, cmd: str) -> dict:
         derivar_ipBarrado_p1_m1("IP_VALIDO_BARRADO", "IP_VALIDO_BARRADO", dados)
         derivar_ip_p1_m1("IP_UNIDADE", "IP_UNIDADE", dados)
         derivar_ip_p1_m1("IP_VALIDO", "IP_VALIDO", dados)
-        derivar_ip_gary_plankton("IP_UNIDADE", "IP", dados)
+        derivar_ip_gary_plankton_por_mkt("IP_UNIDADE", "IP", dados)
 
         tpl_path = escolher_template(dados)
         preview = render_template(tpl_path, dados)

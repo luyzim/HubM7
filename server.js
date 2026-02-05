@@ -71,6 +71,9 @@ morgan.token("user-and-headers", (req, res) => {
 const flaskFormat = ':remote-addr - - [:date_flask] ":method :url HTTP/:http-version" :status :res[content-length] - :user-and-headers';
 app.use(morgan(flaskFormat));
 
+// Servir arquivos estáticos da pasta 'public'
+app.use(express.static(path.join(__dirname, 'public')));
+
 
 // Frontend Routes
 app.get("/", (req, res) => res.redirect("/guest"));
@@ -169,6 +172,8 @@ app.use("/api/loginOtrs", ensureN2, loginOtrsRouter);
 
 const PORT = process.env.PORT;
 const HOST = "0.0.0.0";
+
+app.use(express.static(path.join(__dirname, "public")));
 
 app.listen(PORT, HOST, () => {
   console.log(`API Express ouvindo em http://${HOST}:${PORT}`);

@@ -59,10 +59,11 @@ router.post('/', (req, res) => {
         try {
             const results = JSON.parse(stdout);
             res.json(results);
+            console.log('Host CCS criado:', results);
         } catch (e) {
             res.status(500).json({ error: 'Erro ao processar a resposta do script.', details: stdout });
         }
-    });
+     });
 });
 
 export default router;

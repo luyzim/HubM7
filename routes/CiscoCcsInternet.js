@@ -38,7 +38,7 @@ function runTemplate(res, data, templateName, cmd) {
 
     try {
       const result = JSON.parse(out);
-      console.log('Resposta do script automacaoCcs.py:', result); // Log da resposta completa
+      // console.log('Resposta do script automacaoCcs.py:', result); // Log da resposta completa
       if (result.status === "error") {
         // Erro de validação retornado pelo script, ex: IP inválido.
         return res.status(400).json({ ok: false, error: result.error || "Erro nos dados fornecidos." });
