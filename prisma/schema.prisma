@@ -114,3 +114,13 @@ model mkt_scan {
   interfaces interfaces_mkt[]
   routes     vcn_mkt[]
 }
+
+model WikiTemplate {
+  id         Int      @id @default(autoincrement())
+  name       String   @unique
+  content    String
+  editor     String   @default("markdown")
+  locale     String   @default("pt-br")
+  createdAt  DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt  DateTime @updatedAt
+}

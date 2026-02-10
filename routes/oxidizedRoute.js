@@ -15,7 +15,6 @@ const TEMPLATES_DIR = path.join(__dirname, "..", "data", "oxidized");
 // GET /api/oxidized/templates - Listar todos os templates .txt
 router.get("/templates", async (req, res) => {
     try {
-        console.log("Tentando ler o diretório de templates em:", TEMPLATES_DIR);
         const files = await fs.readdir(TEMPLATES_DIR);
         const txtTemplates = files.filter(file => file.endsWith('.txt'));
         res.json(txtTemplates);
@@ -98,6 +97,7 @@ router.post("/generate", (req, res) => {
       message: "Configuração gerada e salva com sucesso.",
       generated_config: stdout.trim()
     });
+    //console.log("Configuração gerada com sucesso para template:", apiData.template_principal, apiData.dados);
   });
 
   child.on("error", (err) => {

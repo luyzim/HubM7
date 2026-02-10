@@ -1,0 +1,1 @@
+{STA/AP}-RPT-{RPT}_{CIDADE}:{IP_RADIO}:airos:SANTANDER:22:ubnt:M1cr0S3t

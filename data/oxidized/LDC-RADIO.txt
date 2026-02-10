@@ -1,0 +1,1 @@
+{STA/AP}-LDC-{FILIAL}-{CIDADE}:IP:airos:LDC:22:ubnt:M1cr0S3t

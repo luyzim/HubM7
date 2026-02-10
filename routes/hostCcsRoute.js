@@ -42,7 +42,7 @@ router.post('/', (req, res) => {
 
     const scriptPath = path.join(__dirname, "..", "scripts", "createHostCcs.py");
     const command = `python "${scriptPath}" ${sanitizedGroup} ${sanitizedIdentifier} ${sanitizedIps}`;
-    console.log("Feito spwan do python para criação dos hots CCS", req.body);
+    console.log("Criado Hosts para", req.group, identifier);
 
     exec(command, (error, stdout, stderr) => {
         if (error) {

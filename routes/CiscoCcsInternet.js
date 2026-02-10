@@ -55,7 +55,7 @@ function runTemplate(res, data, templateName, cmd) {
 router.post("/", (req, res) => {
   const data = req.body?.data || req.body;
   runTemplate(res, data, "ciscoModelo.txt", "cisco");
-    console.log('Gerado Script Cisco:', data.NOME_PA, data.NUM_PA, data.VRF, data.IP_VALIDO);
+    console.log('Gerado Script Cisco:', data.IDENTIFICACAO, data.NUM_PA, data.VRF, data.IP_VALIDO);
 
 });
 

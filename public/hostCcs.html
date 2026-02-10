@@ -228,6 +228,8 @@
       <div id="bkp-result-buttons" class="mt-2 flex justify-end"></div>
           <div class="mt-6 flex justify-end">
       <button id="bkp-btn" class="btn">Gerar BKP</button>
+          
+      <button id="bkp-btn-mpls" class="btn">Gerar BKP - Mpls</button>
     </div>
     </div>
 
@@ -259,7 +261,9 @@
   </div>
 
   <script>
+    //lert("Script de hostCcs.html carregado!"); // Script loading check
     const bkpBtn = document.getElementById('bkp-btn');
+    const bkpBtnMpls = document.getElementById('bkp-btn-mpls');
     const submitBtn = document.getElementById('submit-btn');
     const alertBox = document.getElementById('alert');
     const resultBody = document.getElementById('result-body');
@@ -289,7 +293,10 @@
 
     const setLoading = (btn, loading, text = 'Gerando...') => {
       btn.disabled = loading;
-      btn.textContent = loading ? text : (btn.id === 'bkp-btn' ? 'Gerar BKP' : 'Gerar hosts');
+      btn.textContent = loading 
+        ? text 
+        : (btn.id === 'bkp-btn' ? 'Gerar BKP' : 
+           btn.id === 'bkp-btn-mpls' ? 'Gerar BKP - Mpls' : 'Gerar hosts');
       btn.style.opacity = loading ? '0.7' : '1';
     };
 
@@ -375,7 +382,123 @@
     });
 
 
+    bkpBtnMpls.addEventListener('click', async (e) => {
+      alert("Botão MPLS clicado!"); // Event Listener Entry
+      e.preventDefault();
+      alertBox.textContent = '';
+      bkpOut.style.display = 'none';
+      bkpResultButtons.innerHTML = '';
+      
+      const group = getValue('group');
+      const identifier = getValue('identifier');
+      const ipCisco = getValue('ip_wan_mpls');
+      const ipMkt = getValue('ip_mkt_mpls');
+
+      if (!group || !identifier) {
+        alertBox.textContent = 'MPLS: Informe grupo e identificador.';
+        alert('MPLS: Informe grupo e identificador.'); // Added alert()
+        return;
+      }
+
+      const templatesToProcess = [];
+
+      if (ipMkt) {
+        templatesToProcess.push({
+          name: "CCS-MKT.txt",
+          payload: {
+            template_principal: "CCS-MKT.txt",
+            dados: {
+              UNIDADE: group,
+              NUM_PA: identifier,
+              IP_MKT: ipMkt,
+            },
+          },
+        });
+      }
+
+      if (ipCisco) {
+        templatesToProcess.push({
+          name: "CCS-CISCO.txt",
+          payload: {
+            template_principal: "CCS-CISCO.txt",
+            dados: {
+              UNIDADE: group,
+              NUM_PA: identifier,
+              IP_CISCO: ipCisco,
+            },
+          },
+        });
+      }
+      
+      if (templatesToProcess.length === 0) {
+        alertBox.textContent = 'MPLS: Nenhum IP fornecido para gerar o BKP MPLS.';
+        alert('MPLS: Nenhum IP fornecido para gerar o BKP MPLS.'); // Added alert()
+        return;
+      }
+      alert("MPLS: Enviando requisição para /api/oxidized/generate"); // Before Fetch
+
+      setLoading(bkpBtnMpls, true, 'Gerando BKPs...');
+
+      try {
+        const generatedConfigs = await Promise.all(
+          templatesToProcess.map(async (template) => {
+            const res = await fetch('/api/oxidized/generate', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(template.payload),
+            });
+            const data = await res.json();
+            if (!res.ok) {
+              throw new Error(data.error || `Erro ao gerar BKP para ${template.name}.`);
+            }
+            return { template_name: template.name, generated_config: data.generated_config };
+          })
+        );
+
+        showToast('Configurações BKP geradas com sucesso! Clique em "Subir para Oxidized" para enviar.', 'success');
+        
+        const uploadButton = document.createElement('button');
+        uploadButton.textContent = 'Subir para Oxidized';
+        uploadButton.className = 'btn';
+        uploadButton.onclick = async () => {
+            uploadButton.textContent = 'Subindo...';
+            uploadButton.disabled = true;
+
+            try {
+                await Promise.all(
+                  generatedConfigs.map(async (config) => {
+                    const res = await fetch('/api/comandos-oxidized/run', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ template_name: config.template_name, texto_para_inserir: config.generated_config })
+                    });
+                    const result = await res.json();
+                    if (result.ok) {
+                        showToast(`BKP ${config.template_name} subiu com sucesso!`, 'success');
+                    } else {
+                        showToast(`Erro ao subir ${config.template_name}: ${result.error}`, 'error');
+                    }
+                  })
+                );
+                uploadButton.textContent = 'Subiu com Sucesso!';
+            } catch (error) {
+                showToast('Erro na Requisição ao subir BKPs.', 'error');
+                uploadButton.textContent = 'Erro na Requisição';
+            }
+        };
+        bkpResultButtons.appendChild(uploadButton);
+
+      } catch (err) {
+        showToast(err.message || 'Falha na requisicao. Tente novamente.', 'error');
+      } finally {
+        setLoading(bkpBtnMpls, false);
+      }
+   });
+
+
+
     bkpBtn.addEventListener('click', async (e) => {
+      //alert("Botão INTERNET clicado!"); // Event Listener Entry
       e.preventDefault();
       alertBox.textContent = '';
       bkpOut.style.display = 'none';
@@ -387,12 +510,15 @@
       const ipMkt = getValue('ip_mkt_internet');
 
       if (!group || !identifier) {
-        alertBox.textContent = 'Informe grupo e identificador.';
+        alertBox.textContent = 'INTERNET: Informe grupo e identificador.';
+        //alert('INTERNET: Informe grupo e identificador.'); // Added alert()
         return;
       }
 
-      const templatesToProcess = [
-        {
+      const templatesToProcess = [];
+
+      if (ipMkt) {
+        templatesToProcess.push({
           name: "CCS-MKT.txt",
           payload: {
             template_principal: "CCS-MKT.txt",
@@ -402,8 +528,11 @@
               IP_MKT: ipMkt,
             },
           },
-        },
-        {
+        });
+      }
+
+      if (ipCisco) {
+        templatesToProcess.push({
           name: "CCS-CISCO.txt",
           payload: {
             template_principal: "CCS-CISCO.txt",
@@ -413,8 +542,15 @@
               IP_CISCO: ipCisco,
             },
           },
-        },
-      ];
+        });
+      }
+      
+      if (templatesToProcess.length === 0) {
+        alertBox.textContent = 'INTERNET: Nenhum IP fornecido para gerar o BKP INTERNET.';
+        //alert('INTERNET: Nenhum IP fornecido para gerar o BKP INTERNET.'); // Added alert()
+        return;
+      }
+      //alert("INTERNET: Enviando requisição para /api/oxidized/generate"); // Before Fetch
 
       setLoading(bkpBtn, true, 'Gerando BKPs...');
 

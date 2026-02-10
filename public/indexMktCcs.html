@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8" />
@@ -129,9 +129,37 @@
       font-size:18px; line-height:1;
     }
     .help-bubble .close:hover { color:#fff; }
+
+    /* Toast container from hostCcs.html */
+    #toast-container {
+      position: fixed;
+      top: 1.5rem;
+      right: 1.5rem;
+      z-index: 50;
+      display: flex;
+      flex-direction: column-reverse; /* Stack from bottom to top */
+      align-items: flex-end; /* Align to the right */
+      gap: 0.5rem; /* Space between toasts */
+    }
+    .toast {
+      padding: 1rem 1.5rem;
+      border-radius: 0.5rem;
+      font-weight: 600;
+      color: white;
+      opacity: 0;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      transform: translateY(0); /* Remove initial transform */
+    }
+    .toast.show {
+      opacity: 1;
+    }
+    .toast.success { background-color: #16a34a; }
+    .toast.error { background-color: #dc2626; }
+
 </style>
 </head>
 <body class="p-4 sm:p-6 lg:p-8">
+  <div id="toast-container"></div> <!-- Toast container added -->
 
   <div class="content-box">
     <div class="flex justify-between items-start mb-4">
@@ -150,17 +178,17 @@
 
 
     <form id="form" class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
-      <label>PAC: <input name="NUM_PA" required placeholder="07" /></label>
+      <label>PAC: <input name="NUM_PA" id="num_pa" required placeholder="07" /></label>
       <label>Cidade: <input name="NOME_PA" required placeholder="Jardinopolis" /></label>
-      <label>Singular: <input name="IDENTIFICACAO" placeholder="CREDIVALE" /></label>
+      <label>Singular: <input name="IDENTIFICACAO" id="identificacao" placeholder="CREDIVALE" /></label>
       <label>Parceiro: <input name="PARCEIRO" /></label>
       <label>
         <span id="ipLabelText">Ip MKT Ether5:</span>
-        <input  name="IP_UNIDADE" placeholder="192.168.10.1" />
+        <input  name="IP_UNIDADE" placeholder="192.168.10.1" required />
       </label>      
       <label id="ipLabel">
         <span id="ipLabelText">Ip Fortigate Lan1:</span> 
-        <input id="ipInput" name="IP_VALIDO"  placeholder="191.5.128.123/30" /></label>
+        <input id="ipInput" name="IP_VALIDO"  placeholder="191.5.128.123/30" required /></label>
       <label>Login PPPoE: <input name="PPPOE_USER" /></label>
       <label>Senha PPPoE: <input name="PPPOE_PASS" /></label>
       <label>Gary User: <input name="GARY_USER" placeholder="User do l2tp do Gary" /></label>
@@ -179,47 +207,96 @@
 
       <div class="md:col-span-2 flex flex-wrap gap-3 mt-2">
         <button id="btn-config" type="submit" class="py-3 px-4">Gerar Configuracao</button>
-        <button id="btn-mensagem" type="button" class="py-3 px-4">Gerar Mensagem (Internet)</button>
+        <button id="btn-wiki" type="button" class="py-3 px-4">Gerar Documentação (Wiki)</button>
+        <button id="btn-mensagem" type="button" class="py-3 px-4">Gerar Mensagem (OTRS)</button>
       </div>
     </form>
 
     <h3 class="text-2xl font-semibold mt-8 mb-3">Preview Configuracao</h3>
     <pre id="out" class="full">Nenhum arquivo gerado.</pre>
 
-    <h3 class="text-2xl font-semibold mt-6 mb-3">Mensagem Internet</h3>
-    <pre id="msg-out" class="full">Nenhuma mensagem gerada.</pre>
+    <h3 class="text-2xl font-semibold mt-6 mb-3">Documentação Wiki</h3>
+    <pre id="msg-out" class="full">Nenhuma Documentação gerada.</pre>
+
+    
+
   </div>
 
 <script type="module">
-  import { renderResult } from "/result.js";
+  import { renderResult, showToast } from "/result.js"; // Import showToast
   const form = document.getElementById("form");
+  const btnWiki = document.getElementById("btn-wiki");
   const btnMensagem = document.getElementById("btn-mensagem");
+
+  const btnConfig = document.getElementById("btn-config"); // Adicionar esta linha para obter o botão de configuração
+
+  // Removed local showToast definition as it's now imported
 
   const collectData = () => Object.fromEntries(new FormData(form).entries());
 
   const callApi = async (url, outId, labels = {}) => {
     const data = collectData();
+    // Adicionado log para depuração
+    console.log(`Chamando API: ${url} com dados:`, data);
     const response = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ data })
     });
     const payload = await response.json();
-    renderResult(payload, { outId, containerId: `${outId}-buttons`, ...labels });
+    // Adicionado log para depuração
+    console.log(`Resposta da API ${url}:`, payload);
+    
+    // Get IDENTIFICACAO and NUM_PA for wiki path
+    const identificacao = document.getElementById('identificacao').value;
+    const numPa = document.getElementById('num_pa').value;
+
+    renderResult(payload, { 
+      outId, 
+      containerId: `${outId}-buttons`, 
+      ...labels,
+      wikiAction: labels.downloadLabel === "Subir para Wiki", // Pass wikiAction flag
+      identifier: identificacao, // Pass identifier
+      numPa: numPa // Pass numPa
+    });
   };
 
-  form.addEventListener("submit", async (e) => {
+    // Event listener para o formulário (para o botão "Gerar Configuracao" que é tipo submit)
+    form.addEventListener("submit", async (e) => {
+        e.preventDefault(); // Previne o envio padrão do formulário
+        await callApi("/api/mkt", "out", {
+            previewLabel: "Pre-visualizar configuracao",
+            downloadLabel: "Baixar Configuracao",
+        });
+    });
+
+  btnWiki.addEventListener("click", async (e) => {
     e.preventDefault();
-    await callApi("/api/mkt", "out", { downloadLabel: "Baixar configuracao" });
+
+    btnWiki.disabled = true;
+    const originalText = btnWiki.textContent;
+    btnWiki.textContent = 'Gerando...';
+
+    try {
+      await callApi("/api/mkt/gerawiki", "msg-out", {
+        previewLabel: "Pre-visualizar Documentação",
+        downloadLabel: "Subir para Wiki",
+      });
+    } finally {
+      btnWiki.disabled = false;
+      btnWiki.textContent = originalText;
+    }
   });
 
-  btnMensagem.addEventListener("click", async (e) => {
+    btnMensagem.addEventListener("click", async (e) => {
     e.preventDefault();
     await callApi("/api/mkt/mensagem", "msg-out", {
-      previewLabel: "Pre-visualizar mensagem",
-      downloadLabel: "Baixar mensagem",
+      previewLabel: "Pre-visualizar Documentação",
+      downloadLabel: "Baixar Documentação",
     });
   });
+
+
 
   const helpFab    = document.getElementById("helpFab");
   const helpBubble = document.getElementById("helpBubble");

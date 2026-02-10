@@ -1,28 +1,22 @@
 import express from "express";
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
-
+import * as templateController from "../controllers/templateController.js";
+import ensureN2 from "../middleware/ensureN2.js";
+import ensureAdmin from "../middleware/ensureAdmin.js";
 const router = express.Router();
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// Get all templates
+router.get("/", ensureN2, templateController.getAllTemplates);
 
+// Get a single template by ID
+router.get("/:id", ensureN2, templateController.getTemplateById);
 
-const DATA_DIR = path.join(__dirname, "..", "data");
+// Create a new template (Admin only)
+router.post("/", ensureAdmin, templateController.createTemplate);
 
-function listarTemplates(dir) {
-  if (!fs.existsSync(dir)) return [];
-  return fs.readdirSync(dir).filter(f => f.toLowerCase().endsWith(".txt"));
-}
+// Update a template by ID (Admin only)
+router.put("/:id", ensureAdmin, templateController.updateTemplate);
 
-router.get("/templates", (req, res) => {
-  try {
-    const names = listarTemplates(DATA_DIR);
-    res.json({ templates: names.map((name, i) => ({ idx: i + 1, name })) });
-  } catch (e) {
-    res.status(500).json({ error: e.message });
-  }
-});
+// Delete a template by ID (Admin only)
+router.delete("/:id", ensureAdmin, templateController.deleteTemplate);
 
 export default router;

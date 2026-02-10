@@ -63,4 +63,9 @@ router.post("/mensagem", (req, res) => {
   runTemplate(res, data, "mensagemInternet.txt", "mensagem");
 });
 
+router.post("/gerawiki", (req, res) => {
+  const data = req.body?.data || req.body;
+  runTemplate(res, data, "wiki.txt", "wiki");
+});
+
 export default router;
