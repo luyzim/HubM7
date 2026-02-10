@@ -42,7 +42,7 @@ router.post('/', (req, res) => {
 
     const scriptPath = path.join(__dirname, "..", "scripts", "createHostCcs.py");
     const command = `python "${scriptPath}" ${sanitizedGroup} ${sanitizedIdentifier} ${sanitizedIps}`;
-    console.log("Feito spwan do python para criação dos hots CCS", req.body);
+  
 
     exec(command, (error, stdout, stderr) => {
         if (error) {
@@ -59,7 +59,7 @@ router.post('/', (req, res) => {
         try {
             const results = JSON.parse(stdout);
             res.json(results);
-            console.log('Host CCS criado:', results);
+            console.log("Criado Hosts para", group, identifier);
         } catch (e) {
             res.status(500).json({ error: 'Erro ao processar a resposta do script.', details: stdout });
         }

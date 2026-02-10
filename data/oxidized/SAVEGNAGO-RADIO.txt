@@ -1,0 +1,1 @@
+{AP/STA}-SUP-SAVEGNAGO-LJ{NUM_PA}-TO-{DESTINO}5:{IP_RADIO}:airos:SUP-Savegnago:22:ubnt:M1cr0S3t

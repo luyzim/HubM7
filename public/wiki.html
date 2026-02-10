@@ -1,0 +1,368 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Wiki - HUB</title>
+  <link rel="icon" type="image/png" href="https://i.imgur.com/8qVGalo.png">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-image: url('https://images.unsplash.com/photo-1749150270018-1dee5a5e4b88?q=80&w=1170&auto=format&fit=crop&ixlibrb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-position: center;
+      background-attachment: fixed;
+      min-height: 100vh;
+    }
+    .content-box {
+      background-color: rgba(30, 41, 59, 0.78);
+      backdrop-filter: blur(4px);
+      border-radius: 0.75rem;
+      padding: 2rem;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+      color: white;
+      width: 90%;
+      max-width: 1000px;
+      margin: 2rem auto;
+    }
+    label {
+      display: block;
+      margin-bottom: 0.25rem;
+      font-weight: 500;
+      color: #e5e7eb;
+    }
+    input, select, textarea {
+      background-color: #e5e7eb;
+      color: black;
+      border-radius: 0.375rem;
+      padding: 0.5rem 0.75rem;
+      border: 1px solid #d1d5db;
+      width: 100%;
+    }
+    input::placeholder, textarea::placeholder { color: #374151 !important; }
+    input:focus, select:focus, textarea:focus {
+      outline: 2px solid transparent;
+      outline-offset: 2px;
+      border-color: #4f46e5;
+      box-shadow: 0 0 0 2px #4f46e5;
+      background-color: #f9fafb;
+    }
+    .btn {
+      background-color: #3b82f6;
+      color: white;
+      font-weight: 600;
+      border-radius: 0.375rem;
+      padding: 0.75rem 1rem;
+      transition: background-color 0.2s ease-in-out;
+      cursor: pointer;
+      text-align: center;
+      display: inline-block;
+    }
+    .btn:hover { background-color: #2563eb; }
+    .btn-ghost {
+      background-color: #4b5563;
+      color: white;
+      font-weight: 500;
+      padding: 0.5rem 0.9rem;
+      border-radius: 0.375rem;
+      transition: background-color 0.2s ease-in-out;
+      text-decoration: none;
+      display: inline-block;
+    }
+    .btn-ghost:hover { background-color: #6b7280; }
+    h2 {
+        font-size: 1.75rem; /* text-2xl */
+        font-weight: 700; /* font-bold */
+        margin-top: 1.5rem;
+        margin-bottom: 0.75rem;
+        color: #e5e7eb;
+    }
+    h3 {
+        font-size: 1.25rem; /* text-xl */
+        font-weight: 600; /* font-semibold */
+        margin-top: 1rem;
+        margin-bottom: 0.5rem;
+        color: #e5e7eb;
+    }
+    p {
+        margin-bottom: 1rem;
+        line-height: 1.6;
+        color: #d1d5db;
+    }
+    ul, ol {
+        margin-bottom: 1rem;
+        margin-left: 1.25rem;
+        list-style-type: disc;
+        color: #d1d5db;
+    }
+    ol {
+        list-style-type: decimal;
+    }
+    a {
+        color: #3B82F6; /* blue-600 */
+        text-decoration: underline;
+    }
+    a:hover {
+        color: #2563EB; /* blue-700 */
+    }
+    pre {
+        background-color: #1F2937;
+        border: 1px solid #4B5563;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        overflow-x: auto;
+        color: #E5E7EB;
+        min-height: 50px;
+        width: 100%;
+        margin-top: 1rem;
+        margin-bottom: 1rem;
+    }
+    code {
+        background-color: #374151; /* gray-700 */
+        padding: 0.2em 0.4em;
+        border-radius: 0.25rem;
+        font-family: 'Fira Code', 'Monaco', 'Consolas', monospace;
+    }
+
+    /* Toast styles copied from hostCcs.html for consistency */
+    #toast-container {
+      position: fixed;
+      top: 1.5rem;
+      right: 1.5rem;
+      z-index: 50;
+      display: flex;
+      flex-direction: column-reverse; /* Stack from bottom to top */
+      align-items: flex-end; /* Align to the right */
+      gap: 0.5rem; /* Space between toasts */
+    }
+    .toast {
+      padding: 1rem 1.5rem;
+      border-radius: 0.5rem;
+      font-weight: 600;
+      color: white;
+      opacity: 0;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      transform: translateY(0); /* Remove initial transform */
+    }
+    .toast.show {
+      opacity: 1;
+    }
+    .toast.success { background-color: #16a34a; }
+    .toast.error { background-color: #dc2626; }
+  </style>
+</head>
+<body class="p-4 sm:p-6 lg:p-8">
+  <div id="toast-container"></div>
+  <div class="content-box">
+    <div class="flex items-start justify-between gap-4 mb-6 flex-wrap">
+      <div class="flex items-center gap-3">
+        <img src="https://i.imgur.com/8qVGalo.png" alt="Logo" class="h-12 w-12 rounded-lg shadow" />
+        <div>
+          <h1 class="text-3xl font-bold leading-tight">Wiki - M7</h1>
+          <p class="text-gray-300">Crie/edite páginas da Wiki</p>
+        </div>
+      </div>
+      <div class="flex gap-2">
+        <a href="/home" class="btn-ghost">Voltar</a>
+      </div>
+    </div>
+
+    <main class="wiki-management-form">
+      <form id="wikiForm" class="space-y-4">
+        <div>
+          <label for="action" class="block text-gray-300 mb-2">Ação:</label>
+          <select id="action" name="action" class="form-input" required>
+            <option value="create_page">Criar Página</option>
+            <option value="append_block">Adicionar Bloco de Texto</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="path" class="block text-gray-300 mb-2">Caminho da Página (Path):</label>
+          <input type="text" id="path" name="path" class="form-input" placeholder="Engenharia/Clientes/CCS-Sicoob-Credivale" required>
+        </div>
+
+        <div id="titleField">
+          <label for="title" class="block text-gray-300 mb-2">Título da Página:</label>
+          <input type="text" id="title" name="title" class="form-input" placeholder="CCS-Sicoob-Credivale">
+        </div>
+
+        <div>
+          <label for="templateSelect" class="block text-gray-300 mb-2">Selecionar Template:</label>
+          <select id="templateSelect" name="templateSelect" class="form-input">
+            <option value="">-- Selecione um Template --</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="text" class="block text-gray-300 mb-2">Conteúdo (Text/Markdown):</label>
+          <textarea id="text" name="text" rows="8" class="form-input" placeholder="Insira o conteúdo em Markdown..."></textarea>
+        </div>
+
+        <div class="flex justify-end mt-6">
+          <button type="submit" class="btn" id="submitBtn">Executar Ação</button>
+        </div>
+      </form>
+
+      <div class="mt-8">
+        <h2 class="text-2xl font-bold mb-4">Resultado:</h2>
+        <pre id="resultOutput" class="pre-output">Nenhum resultado ainda.</pre>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const toastContainer = document.getElementById('toast-container');
+    const wikiForm = document.getElementById('wikiForm');
+    const actionSelect = document.getElementById('action');
+    const titleField = document.getElementById('titleField');
+    const submitBtn = document.getElementById('submitBtn');
+    const resultOutput = document.getElementById('resultOutput');
+    const templateSelect = document.getElementById('templateSelect'); // Get reference to the template select
+    const textTextarea = document.getElementById('text'); // Get reference to the text area
+
+    let availableTemplates = []; // To store fetched templates
+
+    // Function to show toast notifications (copied from hostCcs.html pattern)
+    const showToast = (message, type = 'success') => {
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.textContent = message;
+      toastContainer.appendChild(toast);
+
+      setTimeout(() => {
+        toast.classList.add('show');
+      }, 100);
+
+      setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => {
+          toast.remove();
+        }, 300);
+      }, 3000);
+    };
+
+    const fetchTemplates = async () => {
+      try {
+        const response = await fetch('/api/template');
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        availableTemplates = await response.json();
+        populateTemplateDropdown();
+      } catch (error) {
+        console.error("Error fetching templates:", error);
+        showToast('Erro ao carregar templates.', 'error');
+      }
+    };
+
+    const populateTemplateDropdown = () => {
+      templateSelect.innerHTML = '<option value="">-- Selecione um Template --</option>'; // Clear existing options
+      availableTemplates.forEach(template => {
+        const option = document.createElement('option');
+        option.value = template.id;
+        option.textContent = template.name;
+        templateSelect.appendChild(option);
+      });
+    };
+
+    templateSelect.addEventListener('change', () => {
+      const selectedTemplateId = templateSelect.value;
+      if (selectedTemplateId) {
+        const selectedTemplate = availableTemplates.find(t => t.id === parseInt(selectedTemplateId));
+        if (selectedTemplate) {
+          textTextarea.value = selectedTemplate.content;
+        }
+      } else {
+        textTextarea.value = ''; // Clear text area if no template is selected
+      }
+    });
+
+    // Call fetchTemplates on page load
+    fetchTemplates();
+
+
+    // Toggle title field visibility based on action
+    actionSelect.addEventListener('change', () => {
+      if (actionSelect.value === 'create_page') {
+        titleField.style.display = 'block';
+        document.getElementById('title').setAttribute('required', 'required');
+      } else {
+        titleField.style.display = 'none';
+        document.getElementById('title').removeAttribute('required');
+      }
+    });
+
+    // Initial call to set correct state
+    actionSelect.dispatchEvent(new Event('change'));
+
+    // Handle form submission
+    wikiForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Executando...';
+
+      const formData = new FormData(wikiForm);
+      const payload = Object.fromEntries(formData.entries());
+
+      // Remove title if action is append_block
+      if (payload.action === 'append_block') {
+        delete payload.title;
+      }
+
+      resultOutput.textContent = 'Aguardando resposta...';
+
+      try {
+        console.log("Payload enviado para /api/wiki/run:", payload);
+        const response = await fetch('/api/wiki/run', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        console.log("Resposta bruta da API:", response);
+        const data = await response.json();
+        console.log("Dados recebidos da API:", data);
+
+        if (response.ok) {
+          showToast(`Sucesso: ${data.result.message || 'Operação concluída.'}`, 'success');
+          resultOutput.textContent = JSON.stringify(data, null, 2);
+        } else {
+          showToast(`Erro: ${data.error || 'Ocorreu um erro.'}`, 'error');
+          resultOutput.textContent = JSON.stringify(data, null, 2);
+        }
+      } catch (error) {
+        showToast('Erro na requisição: Verifique a conexão ou o servidor.', 'error');
+        resultOutput.textContent = `Erro: ${error.message}`;
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Executar Ação';
+      }
+    });
+
+    // Add a basic style for pre-output, similar to hostCcs.html's pre
+    const style = document.createElement('style');
+    style.textContent = `
+      .pre-output {
+        background-color: #1F2937;
+        border: 1px solid #4B5563;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        overflow-x: auto;
+        color: #E5E7EB;
+        min-height: 100px;
+        width: 100%;
+        margin-top: 1rem;
+        margin-bottom: 1rem;
+        white-space: pre-wrap; /* Ensure text wraps */
+        word-wrap: break-word; /* Break long words */
+      }
+    `;
+    document.head.appendChild(style);
+
+  </script>
+</body>
+</html>

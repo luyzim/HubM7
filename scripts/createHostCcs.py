@@ -204,7 +204,7 @@ def main():
         template_id_mikrotik = get_template_id(zabbix_url, auth_token, 'Template Mikrotik RB750-RB1100-Final')
         template_id_interfaces_snmp = get_template_id(zabbix_url, auth_token, 'Template Module Interfaces SNMPv2')
         template_id_cisco_router = get_template_id(zabbix_url, auth_token, 'Template SNMP Router Cisco')
-
+        
         base_name = f"SICOOB-CCS-{group_name.upper()}-{identifier.upper()}"
         host_definitions = [
             {'prefix': 'MKT',        'suffix': ''},

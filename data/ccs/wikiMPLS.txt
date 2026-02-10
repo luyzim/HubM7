@@ -11,8 +11,8 @@ pppoe-{PARCEIRO}
 Favor adicionar no monitoramento 
 
 Internet
-*Gary - IP:        <<== ALTERAR IP ==>
-*Plankton - IP: {IP_PLANKTON}        <<== ALTERAR IP ==>
+*Gary - IP:        <<== INSERIR IP ==>
+*Plankton - IP:      <<== INSERIR IP ==>
 *IP Ether5 Mikrotik - IP:   {IP_UNIDADE}
 
 *IP Gi0/0/0 - Cisco WAN - IP: {IP_UNIDADE_P1}

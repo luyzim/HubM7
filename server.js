@@ -32,6 +32,7 @@ import commandMktRouter from "./routes/commandMktRoute.js";
 import changePasswordRouter from "./routes/changePasswordRoute.js";
 import ccsFortgateRouter from "./routes/ccsFortgateRoute.js";
 import loginOtrsRouter from "./routes/loginOtrsRoute.js";
+import wikiRouter from "./routes/wikiRoute.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -72,7 +73,6 @@ const flaskFormat = ':remote-addr - - [:date_flask] ":method :url HTTP/:http-ver
 app.use(morgan(flaskFormat));
 
 // Servir arquivos estáticos da pasta 'public'
-app.use(express.static(path.join(__dirname, 'public')));
 
 
 // Frontend Routes
@@ -121,8 +121,6 @@ app.get("/api/unimed", ensureN2, (req, res) => {
   res.sendFile(path.join(__dirname, "public", "indexUnimed.html"));
 });
 
-
-
 app.get("/api/mkt", ensureN2, (req, res) => {
   res.sendFile(path.join(__dirname, "public", "indexMktCcs.html"));
 });
@@ -147,8 +145,13 @@ app.get("/api/bkpMkt", ensureN2, (req, res) => {
   res.sendFile(path.join(__dirname, "public", "bkpMkt.html"));
 });
 
-// Servir arquivos estáticos da pasta 'public'
+app.get("/api/wiki", ensureN2, (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "wiki.html"));
+});
 
+
+// Servir arquivos estáticos da pasta 'public'
+app.use(express.static(path.join(__dirname, "public")));
 // Backend Routes
  
 app.use("/api/login", loginRouter);
@@ -169,11 +172,13 @@ app.use("/api/comandos-mkt", ensureN1, commandMktRouter);
 app.use("/api/change-password", ensureN1, changePasswordRouter);
 app.use("/api/ccsFortgate", ensureN1, ccsFortgateRouter);
 app.use("/api/loginOtrs", ensureN2, loginOtrsRouter);
+app.use("/api/wiki", ensureN2, wikiRouter);
+
 
 const PORT = process.env.PORT;
 const HOST = "0.0.0.0";
 
-app.use(express.static(path.join(__dirname, "public")));
+
 
 app.listen(PORT, HOST, () => {
   console.log(`API Express ouvindo em http://${HOST}:${PORT}`);

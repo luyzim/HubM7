@@ -20,9 +20,7 @@ router.post("/run", (req, res) => {
   }
 
   // Log de governança p/ saber o que está chegando
-  //console.log("[ComandosOxidized] template_name:", template_name);
-  //console.log("[ComandosOxidized] texto_para_inserir typeof:", typeof texto_para_inserir);
-  //console.log("[ComandosOxidized] texto_para_inserir raw:", texto_para_inserir);
+  console.log("Bkp Inserido no Oxidized:", template_name, apiData.dados);
 
   const pythonCmd = process.platform === "win32" ? "python" : "python3";
   const scriptPath = path.join(__dirname, "..", "scripts", "comandosOxidized.py");

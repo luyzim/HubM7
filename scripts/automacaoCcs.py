@@ -192,7 +192,40 @@ def validar_ip_com_barra(dados: dict, campo: str):
         raise ValueError(f'O campo "{campo}" deve conter mascara de rede /.')
 
 
-def run_command(dados: dict, cmd: str) -> dict:
+def _process_ip_data(dados: dict):
+    validar_ip_sem_barra(dados, "IP_UNIDADE")
+    validar_ip_com_barra(dados, "IP_VALIDO")
+    verificar_ip_valido(dados, "IP_VALIDO")
+    verificar_ip_valido(dados, "IP_UNIDADE")
+    normalizar_ip_valido(dados, destino_mask="MASCARA_EXTENSO")
+    derivar_ipBarrado_p1_m1("IP_VALIDO_BARRADO", "IP_VALIDO_BARRADO", dados)
+    derivar_ip_p1_m1("IP_UNIDADE", "IP_UNIDADE", dados)
+    derivar_ip_p1_m1("IP_VALIDO", "IP_VALIDO", dados)
+    derivar_ip_gary_plankton_por_mkt("IP_UNIDADE", "IP", dados)
+
+
+def run_command_mkt(dados: dict, cmd: str) -> dict:
+    try:
+        _process_ip_data(dados)
+        tpl_path = escolher_template(dados)
+        preview = render_template(tpl_path, dados)
+
+        ext = EXT_MAP.get(cmd, "txt")
+        num_pa = dados.get("NUM_PA", "sem_pa")
+        identificacao = dados.get("IDENTIFICACAO", "sem_id")
+        filename = f"{num_pa}-{identificacao}.{ext}"
+
+        return {
+            "status": "ok",
+            "preview": preview,
+            "unidade": dados.get("NOME_PA", ""),
+            "loja": dados.get("NUM_PA", ""),
+            "filename": filename,
+        }
+    except (ValueError, SystemExit) as e:
+        return {"status": "error", "error": str(e)}
+    
+def run_command_cisco(dados: dict, cmd: str) -> dict:
     try:
         validar_ip_sem_barra(dados, "IP_UNIDADE")
         validar_ip_com_barra(dados, "IP_VALIDO")
@@ -202,7 +235,6 @@ def run_command(dados: dict, cmd: str) -> dict:
         derivar_ipBarrado_p1_m1("IP_VALIDO_BARRADO", "IP_VALIDO_BARRADO", dados)
         derivar_ip_p1_m1("IP_UNIDADE", "IP_UNIDADE", dados)
         derivar_ip_p1_m1("IP_VALIDO", "IP_VALIDO", dados)
-        derivar_ip_gary_plankton_por_mkt("IP_UNIDADE", "IP", dados)
 
         tpl_path = escolher_template(dados)
         preview = render_template(tpl_path, dados)
@@ -218,6 +250,25 @@ def run_command(dados: dict, cmd: str) -> dict:
             "unidade": dados.get("NOME_PA", ""),
             "loja": dados.get("NUM_PA", ""),
             "filename": filename,
+        }
+    except (ValueError, SystemExit) as e:
+        return {"status": "error", "error": str(e)}
+
+
+def run_command_wiki(dados: dict, cmd: str) -> dict:
+    try:
+        _process_ip_data(dados) # Call the common IP processing logic
+        tpl_path = escolher_template(dados)
+        preview = render_template(tpl_path, dados)
+
+        # For wiki, we don't need a specific filename or complex validations,
+        # just the rendered content is sufficient.
+        return {
+            "status": "ok",
+            "preview": preview,
+            "unidade": dados.get("NOME_PA", ""), # Still useful for context
+            "loja": dados.get("NUM_PA", ""),     # Still useful for context
+            "filename": "wiki_content.txt", # Generic filename
         }
     except (ValueError, SystemExit) as e:
         return {"status": "error", "error": str(e)}
@@ -264,8 +315,14 @@ if __name__ == "__main__":
     else:
         dados = carregar_dados_interativo()
 
-    if args.cmd in ["mkt", "cisco", "mensagem"]:
-        result = run_command(dados, args.cmd)
+    if args.cmd in ["mkt", "mensagem"]:
+        result = run_command_mkt(dados, args.cmd)
+        print(json.dumps(result, ensure_ascii=False))
+    elif args.cmd == "cisco":
+        result = run_command_cisco(dados, args.cmd)
+        print(json.dumps(result, ensure_ascii=False))
+    elif args.cmd == "wiki":
+        result = run_command_wiki(dados, args.cmd)
         print(json.dumps(result, ensure_ascii=False))
     else:
         print(json.dumps({"status": "error", "error": f"comando desconhecido: {args.cmd}"}))
