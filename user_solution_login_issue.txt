@@ -1,0 +1,22 @@
+Obrigado novamente pelos logs detalhados! Agora temos a causa raiz do problema, e é por isso que *todos* os hosts estavam falhando.
+
+**Erro Principal**:
+```json
+{
+    "status": "Fatal Error",
+    "error": "[ZABBIX] method=user.login code=-32500 message=Invalid user name or password."
+}
+```
+
+**Explicação**:
+O script Python `createHostCcs.py` está falhando logo no início, na tentativa de fazer login na API do Zabbix. A mensagem **"Invalid user name or password"** (nome de usuário ou senha inválidos) é inequívoca.
+
+**Solução**:
+Você precisa garantir que as variáveis de ambiente **`ZBX_USER`** (nome de usuário do Zabbix) e **`ZBX6_PASS`** (senha do Zabbix) estejam configuradas corretamente no ambiente onde o servidor Node.js está rodando.
+
+1.  **Verifique as variáveis de ambiente**: Certifique-se de que os valores para `ZBX_USER` e `ZBX6_PASS` (ou as variáveis correspondentes que você usa para autenticação no Zabbix) estão corretos e correspondem a um usuário válido no Zabbix com permissões para criar hosts e acessar templates.
+2.  **Reinicie o servidor**: Após corrigir as variáveis de ambiente, você precisará reiniciar o servidor Node.js para que ele carregue as novas configurações.
+
+Assim que o login for bem-sucedido, os problemas de criação de hosts (incluindo os do Fortigate, que foram corrigidos anteriormente) deverão ser resolvidos.
+
+Por favor, me avise quando tiver verificado e corrigido as credenciais do Zabbix e testado novamente.

@@ -76,12 +76,19 @@
   </style>
 </head>
 <body class="p-4 sm:p-6 lg:p-8">
-  <!-- Container principal com o novo estilo -->
+  <!-- Container principal com o novo estilo 
+   <div class="flex items-center gap-3">
+    <span id="work-timer" class="font-mono text-lg">00:00:00</span>
+
+    <button id="btn-start" class="bg-green-600 px-3 py-2 rounded">Iniciar</button>
+    <button id="btn-stop" class="bg-red-600 px-3 py-2 rounded">Finalizar</button>
+  </div>-->
   <div class="content-box max-w-4xl">
     <h1 class="text-3xl font-bold text-center mb-2 text-white">Hub de automações</h1>
     <h2 class="text-center text-lg text-gray-300 mb-8">Zibrinix</h2>
     <main>
       <p class="text-center text-2xl mb-6 text-gray-100">Automações:</p>
+      
       <div class="row">
         <div class="card">
           <div class="title">Add Ip UNIMED</div>
@@ -108,12 +115,8 @@
           <a href="/api/cisco" class="btn">Acessar</a>
         </div>
         <div class="card">
-          <div class="title">Hosts CCS</div>
-          <a href="/host-ccs" class="btn">Acessar</a>
-        </div>
-        <div class="card">
           <div class="title">Hosts CCS (Fw)</div>
-          <a href="/host-ccs-fortigate" class="btn">Acessar</a>
+          <a href="/host-ccs" class="btn">Acessar</a>
         </div>
         <div class="card">
             <div class="title">Hosts ZEMA</div>

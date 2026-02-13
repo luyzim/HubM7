@@ -1,0 +1,20 @@
+Essa é uma excelente pergunta e aponta para algo que mudou no ambiente, e não diretamente no código.
+
+Aqui está o porquê isso é possível:
+
+1.  **Variáveis de Ambiente (`ZBX_USER`, `ZBX6_PASS`, `ZBX6_URL`) Alteradas ou Perdidas**:
+    *   O motivo mais comum para esse erro (`Invalid user name or password`) aparecer subitamente, mesmo que estivesse funcionando antes, é que as variáveis de ambiente que o servidor Node.js (que executa o script Python) utiliza não estão mais corretas.
+    *   Isso pode acontecer se:
+        *   O arquivo `.env` (se você o utiliza para armazenar essas variáveis) foi modificado, sobrescrito ou apagado.
+        *   O servidor Node.js foi reiniciado, e as variáveis de ambiente não foram carregadas corretamente (por exemplo, se elas foram definidas temporariamente em uma sessão de terminal que agora está fechada).
+        *   Alguém alterou manualmente as variáveis no sistema.
+
+2.  **Senha ou Permissões do Usuário Zabbix Alteradas**:
+    *   A senha do usuário `ZBX_USER` no próprio Zabbix pode ter sido alterada.
+    *   As permissões desse usuário no Zabbix podem ter sido revogadas ou modificadas, tornando as credenciais existentes inválidas para o acesso à API.
+
+É crucial lembrar que o script `createHostCcs.py` é executado como um processo filho do seu servidor Node.js (`server.js`). As variáveis de ambiente são passadas do ambiente do processo Node.js para o script Python. Se o processo Node.js não tiver as variáveis de ambiente corretas (ou se elas forem passadas incorretamente), o script Python não receberá as credenciais certas, resultando na falha de login.
+
+A solução continua sendo verificar e corrigir as variáveis de ambiente `ZBX_USER` e `ZBX6_PASS` no local onde você as configura para o seu servidor Node.js, e então **reiniciar o servidor Node.js** para que ele carregue as configurações atualizadas.
+
+Por favor, me avise após verificar as variáveis e reiniciar o servidor.

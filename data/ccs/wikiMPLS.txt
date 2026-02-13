@@ -1,46 +1,4 @@
 
-Realizada a ativação de novo ponto cliente, com escopo do CCS, PPPoE de parceiro ativado na RB, configurado Ip de Internet sem MPLS
-Seguem Scripts dos equipamentos em anexo.
-
-
-pppoe-{PARCEIRO}
-{PPPOE_USER}
-{PPPOE_PASS}
-
-
-Favor adicionar no monitoramento 
-
-Internet
-*Gary - IP:        <<== INSERIR IP ==>
-*Plankton - IP:      <<== INSERIR IP ==>
-*IP Ether5 Mikrotik - IP:   {IP_UNIDADE}
-
-*IP Gi0/0/0 - Cisco WAN - IP: {IP_UNIDADE_P1}
-*IP Gi0/0/1 - Cisco LAN - IP: {IP_VALIDO_P1}
-
-@adriel.giovanni
-Favor adicionar informações de escalonamento na Intranet
-
-@aloysio.rosseti @Mateus
-Homologação e rotinas de backup
-
-​DADOS DO LINK:
-
-SICOOB {IDENTIFICACAO} - PA {NUM_PA} - {NOME_PA}
-
-
-Dados de Endereçamento IP Lan Gateway: {IP_VALIDO_P1}
-Inicio IP Lan Válido: {IP_VALIDO}
-Fim IP Lan Valido:  {IP_VALIDO_P1}
-Máscara: {MASCARA_EXTENSO}
-DNS Primário: 191.5.128.146 DNS Secundário: 191.5.128.147 
-
-Dados de Endereçamento IP Wan IP CPE Wan: {IP_UNIDADE_P1} Máscara: 255.255.255.252
-
-
-
-========================INSERIR NO WIKI=========================================================
-
 ==SICOOB-{IDENTIFICACAO}-CCS-MPLS - PA{NUM_PA} - Capitão Leônidas Marques – PR - MPLS ==
   //BKP-MKT-\Noc\Backups\Backup Mikrotik\SICOOB-CREDICAPITAL
   //BKP-CISCO-\Noc\Backups\Backup Cisco\SICOOB-CREDICAPITAL
@@ -73,3 +31,45 @@ Dados de Endereçamento IP Wan IP CPE Wan: {IP_UNIDADE_P1} Máscara: 255.255.25
  ip address 10.42.57.113 255.255.255.248
  negotiation auto
 
+
+========================================================
+
+## Sicoob {SINGULAR} - PA{NUM_PA} - {NOME_PA} - {VRF}
+
+### Serviços
+
+Link Ip Dedicado - {PARCEIRO}  
+VCN Microset - VPN Concentrador Gary e Plankton para comunicação CCS x filial;
+
+Roteador Mikrotik RB750GR3
+
+Ether1 - WAN - Link Parceiro - {PARCEIRO}  
+PPPoE - User={PPPOE_USER} Senha={PPPOE_PASS} - CGNAT  
+Ether2 - Vago
+
+Ether3 - Vago
+
+Ether4 - Vago
+
+Ether5 - {{IP_UNIDADE}}/30
+
+L2TP - Gary  
+IP Servidor.: 191.5.128.105  
+Username.: {GARY_USER} / Senha.: {GARY_USER}  
+IP.: {IP_GARY}  <===ALTERAR===>
+L2TP - Plankton  
+IP Servidor.: 45.160.230.105  
+Username.: {PLANKTON_USER} / Senha.: {PLANKTON_USER}  
+IP.: {IP_PLANKTON} <===ALTERAR===>
+
+Router Cisco C1111
+
+### interface GigabitEthernet0/0/0  
+description WAN  
+ip address {IP_UNIDADE_P1} 255.255.255.252  
+negotiation auto  
+
+### interface GigabitEthernet0/0/1  
+description LAN  
+ip address {IP_VALIDO} 255.255.255.254  
+negotiation auto

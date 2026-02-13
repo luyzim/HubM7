@@ -83,7 +83,7 @@ def login(url, user, password):
 def get_template_id(url, token, template_name):
     params = {
         "output": ["templateid"],
-        "filter": {"host": [template_name]}
+        "filter": {"name": [template_name]}
     }
     templates = zbx_call(url, token, "template.get", params)
     if not templates:
@@ -95,7 +95,7 @@ def get_or_create_group_id(url, token, group_name):
     groups = zbx_call(url, token, "hostgroup.get", params)
     if groups:
         return groups[0]['groupid']
-    result = zbx_call(url, token, "hostgroup.create", {"name": group_name})
+    result = zbx_call(url, token, "hostgroup.create", {"name": f"SICOOB-CCS-{group_name}"})
     return result['groupids'][0]
 
 def get_host_id_by_name(url, token, host_name):
@@ -123,7 +123,7 @@ def build_interfaces(ip, needs_snmp):
         snmp_comm = os.getenv("ZBX_SNMP_COMMUNITY", "public")
         interfaces.append({
             "type": 2,   # SNMP
-            "main": 1,
+            "main": 1,   # Make SNMP interface not main if agent is main
             "useip": 1,
             "ip": ip,
             "dns": "",
@@ -204,19 +204,20 @@ def main():
         template_id_mikrotik = get_template_id(zabbix_url, auth_token, 'Template Mikrotik RB750-RB1100-Final')
         template_id_interfaces_snmp = get_template_id(zabbix_url, auth_token, 'Template Module Interfaces SNMPv2')
         template_id_cisco_router = get_template_id(zabbix_url, auth_token, 'Template SNMP Router Cisco')
+        template_id_fortigate = get_template_id(zabbix_url, auth_token, 'FortiGate by HTTP')
         
         base_name = f"SICOOB-CCS-{group_name.upper()}-{identifier.upper()}"
         host_definitions = [
             {'prefix': 'MKT',        'suffix': ''},
             {'prefix': 'VCN-GARY',   'suffix': ''},
             {'prefix': 'VCN-PLANKTON','suffix': ''},
-            {'prefix': 'WAN-CISCO',  'suffix': ''},
-            {'prefix': 'LAN-CISCO',  'suffix': ''},
+            {'prefix': 'WAN-FORTIGATE',  'suffix': ''},
+            {'prefix': 'LAN-FORTIGATE',  'suffix': ''},
             {'prefix': 'MKT',        'suffix': '-MPLS'},
             {'prefix': 'VCN-GARY',   'suffix': '-MPLS'},
             {'prefix': 'VCN-PLANKTON','suffix': '-MPLS'},
-            {'prefix': 'WAN-CISCO',  'suffix': '-MPLS'},
-            {'prefix': 'LAN-CISCO',  'suffix': '-MPLS'},
+            {'prefix': 'WAN-FORTIGATE',  'suffix': '-MPLS'},
+            {'prefix': 'LAN-FORTIGATE',  'suffix': '-MPLS'},
         ]
 
         results = []
@@ -242,6 +243,12 @@ def main():
             elif definition['prefix'] == 'WAN-CISCO':
                 needs_snmp = True
                 template_ids = [template_id_icmp, template_id_interfaces_snmp, template_id_cisco_router]
+            elif definition['prefix'] == 'WAN-FORTIGATE':
+                needs_snmp = True
+                template_ids = [template_id_icmp, template_id_fortigate]
+            elif definition['prefix'] == 'LAN-FORTIGATE':
+                needs_snmp = True
+                template_ids = [template_id_icmp, template_id_fortigate]
             # LAN/VCN com ICMP apenas (ajuste aqui se quiser SNMP neles)
 
             interfaces = build_interfaces(ip, needs_snmp)

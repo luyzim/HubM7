@@ -1,0 +1,1 @@
+MKT-PM-STZ-LJ-{NUM_PA}:{IP_MKT}:routeros:PM-STZ:22:admin:M1cr0S3t

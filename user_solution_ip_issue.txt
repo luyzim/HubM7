@@ -1,0 +1,17 @@
+Obrigado novamente pelos logs detalhados! A informação que você forneceu é muito clara e nos leva ao problema exato.
+
+**Erro Principal**:
+`message=Invalid parameter for host interface '172.19.1.58' in host 'WAN-FORTIGATE-SICOOB-CCS-TESTE-PA01': IP address is not valid or not unique. Invalid parameter for host interface '172.19.1.58' in host 'WAN-FORTIGATE-SICOOB-CCS-TESTE-PA01': IP address is not valid or not unique.`
+
+**Explicação**:
+O Zabbix está rejeitando a criação do host Fortigate porque o **endereço IP que você está tentando atribuir já está em uso por outro host ou interface no seu ambiente Zabbix, ou ele considera o IP inválido por alguma regra interna.** O IP `172.19.1.58` no erro é o IP da máquina que está fazendo a requisição para o Zabbix, o que é um pouco confuso, mas a mensagem principal é sobre o IP do *host* (no seu caso, `1.1.1.4` no exemplo que vi nos logs).
+
+**Solução**:
+Você precisa garantir que o endereço IP que está inserindo para o host Fortigate (por exemplo, `1.1.1.4`) seja **totalmente único** e não esteja em uso por nenhum outro item no seu servidor Zabbix.
+
+1.  **Verifique a unicidade do IP**: Acesse seu Zabbix e procure por `1.1.1.4` (ou o IP que você está usando para o Fortigate) para garantir que ele não esteja atribuído a nenhum outro host ou interface.
+2.  **Use um IP não utilizado**: Tente usar um endereço IP que você tenha certeza que não está sendo monitorado ou utilizado por nenhum outro dispositivo no Zabbix.
+
+Assim que você garantir que o IP é único e válido, tente gerar os hosts Fortigate novamente.
+
+Por favor, me avise o resultado após verificar a unicidade do IP e tentar novamente.

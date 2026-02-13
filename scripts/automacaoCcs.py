@@ -149,6 +149,24 @@ def inferir_n_por_ip_mkt(ip_mkt: str) -> int:
 
     return n
 
+def derivarIpGaryPlanktonFinal1(campo_ip: str, prefixo_saida: str, dados: dict):
+    raw = (dados.get(campo_ip) or "").split("/")[0].strip()
+    if not raw:
+        return
+
+    try:
+        ip = ipaddress.IPv4Address(raw)
+        ip_int = int(ip)
+        gary_int = (ip_int & 0xFFFFFF00) | 0x01
+        plankton_step = ip_int + (1 << 8)
+        plankton_int = (plankton_step & 0xFFFFFF00) | 0x01
+        dados[f"{prefixo_saida}_GARY_FINAL1"] = str(ipaddress.IPv4Address(gary_int))
+        dados[f"{prefixo_saida}_PLANKTON_FINAL1"] = str(ipaddress.IPv4Address(plankton_int))
+
+    except Exception as e:
+        print(f"[WARN] Falha derivando GARY/PLANKTON por IP MKT: {e}", file=sys.stderr)
+        raise ValueError(f"Falha ao derivar GARY/PLANKTON por IP MKT: {e}")
+
 
 def derivar_ip_gary_plankton_por_mkt(campo_ip: str, prefixo_saida: str, dados: dict):
     raw = (dados.get(campo_ip) or "").split("/")[0].strip()
@@ -202,6 +220,9 @@ def _process_ip_data(dados: dict):
     derivar_ip_p1_m1("IP_UNIDADE", "IP_UNIDADE", dados)
     derivar_ip_p1_m1("IP_VALIDO", "IP_VALIDO", dados)
     derivar_ip_gary_plankton_por_mkt("IP_UNIDADE", "IP", dados)
+    derivarIpGaryPlanktonFinal1("IP_UNIDADE", "IP", dados)
+
+
 
 
 def run_command_mkt(dados: dict, cmd: str) -> dict:

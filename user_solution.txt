@@ -1,0 +1,11 @@
+Obrigado pelos logs! Analisei a saída e a causa do erro para os hosts Fortigate é clara:
+
+**Erro**: `[ZABBIX] method=template.get code=-32500 message=No such template or template does not exist data=null params={"output":["templateid"],"filter":{"host":["FortiGate by SNMP"]}}`
+
+**Explicação**: O script `createHostCcs.py` está tentando encontrar um template no Zabbix com o nome exato **'FortiGate by SNMP'**. No entanto, a API do Zabbix está respondendo que este template **não existe**.
+
+**Solução**: Para corrigir isso, você precisa garantir que o template **'FortiGate by SNMP'** esteja importado e disponível na sua instância do Zabbix. Você pode precisar importá-lo ou verificar se ele foi renomeado.
+
+Assim que o template estiver presente no Zabbix, o script `createHostCcs.py` deverá conseguir criar os hosts Fortigate sem esse erro.
+
+Por favor, me avise quando tiver verificado e corrigido a presença do template no Zabbix.

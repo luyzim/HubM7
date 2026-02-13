@@ -1,0 +1,1 @@
+{STA/AP}-PM-STZ-LJ-{NUM_PA}:{IP_MKT}:airos:PM-STZ:22:ubnt:M1cr0S3t
