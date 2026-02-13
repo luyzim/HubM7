@@ -42,8 +42,8 @@ set contact=microset enabled=yes trap-version=2
 /radius add address=192.168.254.12 service=login timeout=1s
 /radius incoming set accept=yes
 
-/routing bgp connection add as={AS_LOCAL} disabled=no input.filter=bgp-to-gary-in instance=default local.role=ebgp multihop=yes name=peer-to-gary output.filter-chain=bgp-to-gary-out .redistribute=connected,static remote.address={IP_GARY}/32 .as=41392 routing-table=main
-/routing bgp connection add as={AS_LOCAL} disabled=no input.filter=bgp-to-plankton-in instance=default local.role=ebgp multihop=yes name=peer-to-plankton output.filter-chain=bgp-to-plankton-out .redistribute=connected,static remote.address={IP_PLANKTON}/32 .as=41392 routing-table=main
+/routing bgp connection add as={AS_LOCAL} disabled=no input.filter=bgp-to-gary-in instance=default local.role=ebgp multihop=yes name=peer-to-gary output.filter-chain=bgp-to-gary-out .redistribute=connected,static remote.address={IP_GARY_FINAL1}/32 .as=41392 routing-table=main
+/routing bgp connection add as={AS_LOCAL} disabled=no input.filter=bgp-to-plankton-in instance=default local.role=ebgp multihop=yes name=peer-to-plankton output.filter-chain=bgp-to-plankton-out .redistribute=connected,static remote.address={IP_PLANKTON_FINAL1}/32 .as=41392 routing-table=main
 /routing filter rule add chain=bgp-to-gary-in rule="if (dst == 0.0.0.0/0) {accept}"
 /routing filter rule add chain=bgp-to-gary-in disabled=no rule="if (dst in 172.16.0.0/16) {accept}"
 /routing filter rule add chain=bgp-to-gary-in rule="if (dst in 192.168.254.0/24 && dst-len>=24 && dst-len<=32) {accept}"

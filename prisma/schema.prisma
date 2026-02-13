@@ -124,3 +124,21 @@ model WikiTemplate {
   createdAt  DateTime @default(now()) @db.Timestamptz(6)
   updatedAt  DateTime @updatedAt
 }
+
+model WorkSession {
+  id          String   @id @default(cuid())
+  userEmail   String   // ou userId se você já tiver tabela User
+  taskType    String   // ex: "mkt", "cisco", "fortigate", "wiki", etc.
+  context     Json?    // ex: { endpoint: "/api/mkt", cliente: "CCS", ip: "..." }
+  startedAt   DateTime @default(now())
+  stoppedAt   DateTime?
+  durationMs  Int?     // setado no stop
+  status      String   @default("RUNNING") // RUNNING | STOPPED | ABORTED
+  lastPingAt  DateTime @default(now())     // heartbeat opcional
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userEmail, status])
+  @@index([taskType, startedAt])
+}

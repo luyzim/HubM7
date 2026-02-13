@@ -106,7 +106,7 @@ app.get("/host-zema", ensureMonitoramento, (req, res) => {
 });
 
 app.get("/host-ccs", ensureMonitoramento, (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "hostCcs.html"));
+  res.sendFile(path.join(__dirname, "public", "hostCcsFw.html"));
 });
 
 app.get("/login-otrs", ensureN2, (req, res) => {
