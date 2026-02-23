@@ -50,7 +50,7 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: process.env.NODE_ENV === 'production',
+    secure: false,
     httpOnly: true,
     sameSite: 'lax'
   }
@@ -190,7 +190,14 @@ app.use("/api/admin", ensureAdmin, adminDashboardRouter);
 const PORT = process.env.PORT;
 const HOST = "0.0.0.0";
 
+// Captura erros assíncronos não tratados (evita crash silencioso)
+process.on("unhandledRejection", (reason, promise) => {
+  console.error("[CRASH] unhandledRejection:", reason);
+});
 
+process.on("uncaughtException", (err) => {
+  console.error("[CRASH] uncaughtException:", err);
+});
 
 app.listen(PORT, HOST, () => {
   console.log(`API Express ouvindo em http://${HOST}:${PORT}`);
