@@ -1,3 +1,4 @@
+process.env.DEBUG = "";
 import "dotenv/config";
 import session from "express-session";
 import express from "express";
