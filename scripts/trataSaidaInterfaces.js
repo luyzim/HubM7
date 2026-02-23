@@ -84,26 +84,31 @@ function inferVcnFromComment(comentario) {
   return "unknown";
 }
 
-const GARY_PREFIXES = ["191.5.128.105/32", "191.5.128.106/32", "191.5.128.107/32"];
-const PLANKTON_PREFIXES = ["45.160.230.105/32", "45.160.230.106/32", "45.160.230.0/22", "189.51.32.250/32"];
+const GARY_PREFIXES = ["191.5.128.105/32", "191.5.128.106/32", "191.5.128.107/32", "191.5.128.0/20"];
+const PLANKTON_PREFIXES = ["45.160.230.105/32", "45.160.230.106/32", "45.160.228.0/22", "189.51.32.250/32"];
 
 function inferVcnFromDstAddress(dstAddress) {
   if (!dstAddress) return "unknown";
 
+  // 1. Verificação por correspondência exata do prefixo
+  if (GARY_PREFIXES.includes(dstAddress)) return "gary";
+  if (PLANKTON_PREFIXES.includes(dstAddress)) return "plankton";
+
+  // 2. Verificação se o IP está contido em algum dos prefixos
   const ip = dstAddress.split('/')[0];
 
   for (const prefix of GARY_PREFIXES) {
-    const cidr = new CIDR(prefix);
-    if (cidr.contains(ip)) {
-      return "gary";
-    }
+    try {
+      const cidr = new CIDR(prefix);
+      if (cidr.contains(ip)) return "gary";
+    } catch (e) { continue; }
   }
 
   for (const prefix of PLANKTON_PREFIXES) {
-    const cidr = new CIDR(prefix);
-    if (cidr.contains(ip)) {
-      return "plankton";
-    }
+    try {
+      const cidr = new CIDR(prefix);
+      if (cidr.contains(ip)) return "plankton";
+    } catch (e) { continue; }
   }
 
   return "unknown";
@@ -363,9 +368,16 @@ export function findPartners(interfaces, routes, ipAddresses) {
   const findPartnerForVcn = (vcnRoutes) => {
     if (!vcnRoutes || vcnRoutes.length === 0) return NOT_FOUND;
 
-    const bestRoute = vcnRoutes.reduce((min, r) =>
-      parseInt(r.distance) < parseInt(min.distance) ? r : min
-    );
+    const bestRoute = vcnRoutes.reduce((min, r) => {
+      // Prioridade 1: Rota Ativa (A)
+      if (r.active && !min.active) return r;
+      if (!r.active && min.active) return min;
+
+      // Prioridade 2: Menor Distância (se ambos tiverem o mesmo estado 'active')
+      const distR = parseInt(r.distance) || 255;
+      const distMin = parseInt(min.distance) || 255;
+      return distR < distMin ? r : min;
+    });
 
     let partner = "";
 

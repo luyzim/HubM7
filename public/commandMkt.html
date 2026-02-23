@@ -122,14 +122,13 @@
 <body class="p-4 sm:p-6 lg:p-8">
 
   <div class="content-box">
-    <div class="flex justify-between items-start mb-4">
-      <div>
-        <h1 class="text-3xl font-bold mb-1">Triagem N1</h1>
-        <h2 class="text-xl text-gray-300 mb-2">Mikrotik</h2>
-      </div>
-      <a href="/home" class="btn-voltar">Voltar</a>
-    </div>
-
+          <div class="flex justify-between items-start mb-4">
+          <div>
+            <h1 class="text-3xl font-bold mb-1">Triagem N1</h1>
+            <h2 class="text-xl text-gray-300 mb-2">Mikrotik</h2>
+          </div>
+          <a href="javascript:history.back()" class="btn-voltar">Voltar</a>
+        </div>
     <form id="form" class="grid grid-cols-1 gap-4">
       <div>
         <label for="ipInput">Endereço IP:</label>
@@ -250,7 +249,7 @@
 
     if (
       selectedCommand ===
-      "/interface print detail terse without-paging; /ip route print detail terse without-paging where dst-address=191.5.128.105/32; /ip route print detail terse without-paging where dst-address=191.5.128.106/32; /ip route print detail terse without-paging where dst-address=191.5.128.107/32; /ip route print detail terse without-paging where dst-address =45.160.230.105/32 ; /ip route print detail terse without-paging where dst-address =45.160.230.106/32; /ip route print detail terse without-paging where dst-address =45.160.228.0/22; /ip route print detail terse without-paging where dst-address =189.51.32.250/32; /ip address print terse without-paging"
+      "/interface print detail terse without-paging; /ip route print detail terse without-paging where dst-address=191.5.128.105/32; /ip route print detail terse without-paging where dst-address=191.5.128.106/32; /ip route print detail terse without-paging where dst-address=191.5.128.107/32;/ip route print detail terse without-paging where dst-address=191.5.128.0/20; /ip route print detail terse without-paging where dst-address =45.160.230.105/32 ; /ip route print detail terse without-paging where dst-address =45.160.230.106/32; /ip route print detail terse without-paging where dst-address =45.160.228.0/22; /ip route print detail terse without-paging where dst-address =189.51.32.250/32; /ip address print terse without-paging"
     ) {
       saveBtn.style.display = "block";
       executeBtn.style.display = "none";

@@ -61,11 +61,13 @@ router.post("/", (req, res) => {
 router.post("/mensagem", (req, res) => {
   const data = req.body?.data || req.body;
   runTemplate(res, data, "mensagemInternet.txt", "mensagem");
+  console.log('[OK] Gerada Mensagem de Internet para:', data.NOME_PA || 'Unidade');
 });
 
 router.post("/gerawiki", (req, res) => {
   const data = req.body?.data || req.body;
   runTemplate(res, data, "wiki.txt", "wiki");
+  console.log('[OK] Gerada Wiki (MKT):', data.NOME_PA || 'Unidade');
 });
 
 export default router;

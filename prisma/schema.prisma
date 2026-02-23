@@ -133,7 +133,9 @@ model WorkSession {
   startedAt   DateTime @default(now())
   stoppedAt   DateTime?
   durationMs  Int?     // setado no stop
-  status      String   @default("RUNNING") // RUNNING | STOPPED | ABORTED
+  status      String   @default("RUNNING") // RUNNING | PAUSED | STOPPED | ABORTED
+  pausedAt    DateTime?
+  totalPausedMs Int     @default(0)
   lastPingAt  DateTime @default(now())     // heartbeat opcional
 
   createdAt   DateTime @default(now())

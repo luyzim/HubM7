@@ -97,7 +97,7 @@ router.post("/generate", (req, res) => {
       message: "Configuração gerada e salva com sucesso.",
       generated_config: stdout.trim()
     });
-    //console.log("Configuração gerada com sucesso para template:", apiData.template_principal, apiData.dados);
+    console.log("Configuração Oxidized gerada com sucesso para template:", apiData.template_principal, "| Dados:", apiData.dados);
   });
 
   child.on("error", (err) => {

@@ -28,7 +28,8 @@ const SPAWN_OPTS = {
 // Constantes de validação do endpoint scan-super
 // ======================================================
 const SUPER_SCAN_CMD =
-  "/interface print detail terse without-paging; /ip route print detail terse without-paging where dst-address=191.5.128.105/32; /ip route print detail terse without-paging where dst-address=191.5.128.106/32; /ip route print detail terse without-paging where dst-address=191.5.128.107/32; /ip route print detail terse without-paging where dst-address =45.160.230.105/32 ; /ip route print detail terse without-paging where dst-address =45.160.230.106/32; /ip route print detail terse without-paging where dst-address =45.160.228.0/22; /ip route print detail terse without-paging where dst-address =189.51.32.250/32; /ip address print terse without-paging";
+    "/interface print detail terse without-paging; /ip route print detail terse without-paging where dst-address=191.5.128.105/32; /ip route print detail terse without-paging where dst-address=191.5.128.106/32; /ip route print detail terse without-paging where dst-address=191.5.128.107/32;/ip route print detail terse without-paging where dst-address=191.5.128.0/20; /ip route print detail terse without-paging where dst-address =45.160.230.105/32 ; /ip route print detail terse without-paging where dst-address =45.160.230.106/32; /ip route print detail terse without-paging where dst-address =45.160.228.0/22; /ip route print detail terse without-paging where dst-address =189.51.32.250/32; /ip address print terse without-paging"
+;
 
 // ======================================================
 // Endpoint: scan-super (captura stdout completo, parseia, salva e retorna JSON)
@@ -175,9 +176,7 @@ router.post("/scan-super", async (req, res) => {
         planktonPartner,
         routes: parsedRoutes, // Adiciona as rotas parseadas à resposta
       };
-
-      console.log("Scan successful:", JSON.stringify(finalResult, null, 2));
-
+      console.log("Gary/Plakton Partners:", garyPartner, planktonPartner, "\nUnidade:", ip);
       return res.json(finalResult);
     } catch (e) {
       console.error("Scan failed:", e);

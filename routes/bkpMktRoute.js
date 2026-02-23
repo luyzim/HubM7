@@ -1,8 +1,6 @@
 import express from "express";
-import net from "net";
 import path from "path";
 import { spawn } from "child_process";
-import morgan from "morgan";
 import { fileURLToPath } from "url";
 
 const router = express.Router();
@@ -33,6 +31,7 @@ const TPL_DIR = path.join(__dirname, "..", "data");
 
 
 router.post("/", (req, res) => {
+  console.log("[POST] /api/bkpMkt - Gerando backup Mikrotik");
   const data = req.body?.data || req.body;
   if (!data || typeof data !== "object") {
     return res.status(400).json({ error: "Body inválido" });
@@ -56,6 +55,7 @@ router.post("/", (req, res) => {
 
   child.on("close", (code) => {
     if (code !== 0) return res.status(500).json({ ok: false, code, error: err });
+    console.log(`[OK] Backup Mikrotik gerado com sucesso para: ${data.IDENTIFICACAO || 'Sem Nome'}`);
     try { res.json(JSON.parse(out)); }
     catch { res.json({ ok: true, raw: out.trim() }); }
   });

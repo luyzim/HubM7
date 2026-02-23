@@ -3,7 +3,7 @@ export default (req, res, next) => {
   // 1. Verifica se está logado
   if (!req.session?.user) {
     const wantsHtml = req.accepts("html") && !req.xhr;
-    if (wantsHtml) return res.redirect("/login");
+    if (wantsHtml) return res.redirect("/guest");
     return res.status(401).json({ error: "Você precisa estar logado." });
   }
 

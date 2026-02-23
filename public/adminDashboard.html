@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dashboard - Work Sessions</title>
+  <link rel="icon" type="image/png" href="https://i.imgur.com/8qVGalo.png">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+        font-family: 'Inter', sans-serif;
+        background-image: url('https://images.unsplash.com/photo-1749150270018-1dee5a5e4b88?q=80&w=1170&auto=format&fit=crop&ixlibrb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');
+        background-size: cover;
+        background-repeat: no-repeat;
+        background-position: center;
+        background-attachment: fixed;
+        min-height: 100vh;
+        margin: 0;
+    }
+    .content-box {
+        background-color: rgba(30, 41, 59, 0.75);
+        backdrop-filter: blur(4px);
+        border-radius: 0.75rem;
+        padding: 2rem;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        color: white;
+        width: 95%;
+        max-width: 1100px;
+        margin: 2rem auto;
+    }
+    .btn-voltar {
+        background-color: #4B5563;
+        color: white;
+        text-decoration: none;
+        padding: 0.5rem 1rem;
+        border-radius: 0.375rem;
+        display: inline-block;
+        transition: background-color 0.2s ease-in-out;
+        font-weight: 500;
+        font-size: 0.875rem;
+    }
+    .btn-voltar:hover { background-color: #6B7280; }
+    
+    .filter-section {
+        background-color: rgba(15, 23, 42, 0.5);
+        border-radius: 0.5rem;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+        border: 1px solid rgba(75, 85, 99, 0.3);
+    }
+    
+    .hidden { display: none; }
+  </style>
+</head>
+
+<body class="p-4 sm:p-6 lg:p-8">
+  <div class="content-box">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+      <div>
+        <h1 class="text-3xl font-bold mb-1">Work Sessions</h1>
+        <p class="text-gray-300">Monitoramento em tempo real da equipe</p>
+      </div>
+      <div class="flex gap-2">
+        <button id="btn-toggle-filters" class="bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded text-sm font-medium transition">
+          Filtros
+        </button>
+        <a href="javascript:history.back()" class="btn-voltar">Voltar</a>
+      </div>
+    </div>
+
+    <!-- Seção de Filtros (Escondida por padrão) -->
+    <div id="filter-container" class="filter-section hidden">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+        <div>
+          <label class="block text-sm font-medium text-gray-400 mb-1">Pesquisar Usuário</label>
+          <input type="text" id="filter-user" placeholder="E-mail ou nome..." 
+            class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-400 mb-1">Status</label>
+          <select id="filter-status" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-white">
+            <option value="ALL">Todos</option>
+            <option value="RUNNING">Em Atividade</option>
+            <option value="PAUSED">Pausado</option>
+            <option value="OFFLINE">Offline</option>
+          </select>
+        </div>
+        <div class="flex gap-2">
+          <button id="btn-refresh" class="flex-1 bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded text-sm font-medium transition">
+            Atualizar Agora
+          </button>
+          <span id="last-update" class="text-[10px] text-gray-400 self-center">-</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="overflow-x-auto rounded-xl border border-slate-700/70 bg-slate-900/50">
+      <table class="min-w-full text-sm">
+        <thead class="bg-slate-800/70 text-gray-200 uppercase tracking-wide">
+          <tr>
+            <th class="px-4 py-3 text-left">Usuário</th>
+            <th class="px-4 py-3 text-left">Status</th>
+            <th class="px-4 py-3 text-left">Tarefa</th>
+            <th class="px-4 py-3 text-left">Tempo Atual</th>
+            <th class="px-4 py-3 text-left">Total Hoje</th>
+            <th class="px-4 py-3 text-left">Total Ontem</th>
+          </tr>
+        </thead>
+        <tbody id="rows" class="divide-y divide-slate-800 text-gray-100">
+          <tr><td colspan="6" class="px-4 py-8 text-center text-gray-400">Carregando dados...</td></tr>
+        </tbody>
+      </table>
+    </div>
+    
+    <div id="loading" class="mt-4 text-center text-xs text-blue-400 hidden">Sincronizando...</div>
+    
+    <!--<p class="text-[11px] text-gray-500 mt-4 italic text-center">
+      * O tempo exibido é atualizado automaticamente a cada 5 segundos.
+    </p>-->
+  </div>
+
+  <script>
+    const STATS_URL = "/api/admin/stats";
+    const YESTERDAY_URL = "/api/admin/stats/yesterday";
+
+    const elRows = document.getElementById("rows");
+    const elLoading = document.getElementById("loading");
+    const elLastUpdate = document.getElementById("last-update");
+    const btnRefresh = document.getElementById("btn-refresh");
+    const btnToggleFilters = document.getElementById("btn-toggle-filters");
+    const filterContainer = document.getElementById("filter-container");
+    
+    const filterUserInput = document.getElementById("filter-user");
+    const filterStatusSelect = document.getElementById("filter-status");
+
+    let rawData = { stats: [], yesterday: [] };
+
+    // Toggle filtros
+    btnToggleFilters.addEventListener("click", () => {
+      filterContainer.classList.toggle("hidden");
+    });
+
+    const fmtMs = (ms = 0) => {
+      ms = Math.max(0, Number(ms) || 0);
+      const totalSec = Math.floor(ms / 1000);
+      const h = Math.floor(totalSec / 3600);
+      const m = Math.floor((totalSec % 3600) / 60);
+      const s = totalSec % 60;
+      const pad = (n) => String(n).padStart(2, "0");
+      return `${pad(h)}:${pad(m)}:${pad(s)}`;
+    };
+
+    const badge = (status) => {
+      const s = (status || "OFFLINE").toUpperCase();
+      const base = "inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border";
+      if (s === "RUNNING") return `<span class="${base} bg-green-900/40 border-green-700 text-green-300">Em Atividade</span>`;
+      if (s === "PAUSED")  return `<span class="${base} bg-yellow-900/40 border-yellow-700 text-yellow-300">PAUSA</span>`;
+      return `<span class="${base} bg-slate-800 border-slate-700 text-slate-400">${s}</span>`;
+    };
+
+    const escapeHtml = (str = "") =>
+      String(str).replace(/[&<>"']/g, (c) => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#039;" }[c]));
+
+    function render() {
+      const userFilter = filterUserInput.value.toLowerCase();
+      const statusFilter = filterStatusSelect.value;
+      
+      const yMap = new Map(rawData.yesterday.map(x => [x.userEmail, x.totalWorkTimeMs || 0]));
+
+      let filtered = rawData.stats.filter(u => {
+        const matchesUser = (u.userEmail || "").toLowerCase().includes(userFilter);
+        const matchesStatus = statusFilter === "ALL" || (u.currentStatus || "OFFLINE").toUpperCase() === statusFilter;
+        return matchesUser && matchesStatus;
+      });
+
+      // Ordenação: Running primeiro
+      filtered.sort((a, b) => {
+        const as = (a.currentStatus || "").toUpperCase();
+        const bs = (b.currentStatus || "").toUpperCase();
+        if (as === "RUNNING" && bs !== "RUNNING") return -1;
+        if (as !== "RUNNING" && bs === "RUNNING") return 1;
+        return (b.currentElapsedMs || 0) - (a.currentElapsedMs || 0);
+      });
+
+      if (filtered.length === 0) {
+        elRows.innerHTML = `<tr><td colspan="6" class="px-4 py-8 text-center text-gray-500">Nenhum registro encontrado para os filtros atuais.</td></tr>`;
+        return;
+      }
+
+      elRows.innerHTML = filtered.map(u => {
+        const email = u.userEmail || "-";
+        const status = u.currentStatus || "OFFLINE";
+        const task = u.currentTask || "-";
+        const current = fmtMs(u.currentElapsedMs);
+        const total = fmtMs(u.totalWorkTimeMs);
+        const yTotal = fmtMs(yMap.get(email) || 0);
+
+        return `
+          <tr class="hover:bg-slate-800/40 transition-colors">
+            <td class="px-4 py-3 font-medium text-blue-100 text-xs">${escapeHtml(email)}</td>
+            <td class="px-4 py-3">${badge(status)}</td>
+            <td class="px-4 py-3 text-gray-300 max-w-[200px] truncate" title="${escapeHtml(task)}">${escapeHtml(task)}</td>
+            <td class="px-4 py-3 font-mono text-blue-200">${current}</td>
+            <td class="px-4 py-3 font-mono text-gray-400">${total}</td>
+            <td class="px-4 py-3 font-mono text-gray-400">${yTotal}</td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    async function loadStats() {
+      elLoading.classList.remove("hidden");
+      try {
+        const [statsRes, yRes] = await Promise.all([
+          fetch(STATS_URL, { headers: { "Accept": "application/json" } }),
+          fetch(YESTERDAY_URL, { headers: { "Accept": "application/json" } }),
+        ]);
+
+        if (!statsRes.ok || !yRes.ok) throw new Error("Erro na API");
+
+        rawData.stats = await statsRes.json();
+        rawData.yesterday = await yRes.json();
+
+        render();
+        elLastUpdate.textContent = new Date().toLocaleTimeString("pt-BR", { hour: '2-digit', minute: '2-digit' });
+      } catch (e) {
+        console.error(e);
+        elRows.innerHTML = `<tr><td colspan="6" class="px-4 py-8 text-center text-red-400">Falha ao carregar dados do servidor.</td></tr>`;
+      } finally {
+        elLoading.classList.add("hidden");
+      }
+    }
+
+    filterUserInput.addEventListener("input", render);
+    filterStatusSelect.addEventListener("change", render);
+    btnRefresh.addEventListener("click", loadStats);
+
+    // Auto-refresh 5s
+    loadStats();
+    setInterval(loadStats, 7200000);
+  </script>
+</body>
+</html>

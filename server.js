@@ -33,6 +33,8 @@ import changePasswordRouter from "./routes/changePasswordRoute.js";
 import ccsFortgateRouter from "./routes/ccsFortgateRoute.js";
 import loginOtrsRouter from "./routes/loginOtrsRoute.js";
 import wikiRouter from "./routes/wikiRoute.js";
+import workSessionRouter from "./routes/workSessionRoute.js";
+import adminDashboardRouter from "./routes/adminDashboardRoute.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -82,11 +84,19 @@ app.get("/guest", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "guest.html"));
 });
 
-app.get("/login", (req, res) => {
+app.get("/admin", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "login.html"));
 });
 app.get("/home", ensureAuth, (req, res) => {
   res.sendFile(path.join(__dirname, "public", "home.html"));
+});
+
+app.get("/home-sidebar", ensureAdmin, (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "homeSideBar.html"));
+});
+
+app.get("/admin/dashboard", ensureAdmin, (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "adminDashboard.html"));
 });
 
 app.get("/changepassword", ensureN1, (req, res) => {
@@ -173,6 +183,8 @@ app.use("/api/change-password", ensureN1, changePasswordRouter);
 app.use("/api/ccsFortgate", ensureN1, ccsFortgateRouter);
 app.use("/api/loginOtrs", ensureN2, loginOtrsRouter);
 app.use("/api/wiki", ensureN2, wikiRouter);
+app.use("/api/work-session", ensureAuth, workSessionRouter);
+app.use("/api/admin", ensureAdmin, adminDashboardRouter);
 
 
 const PORT = process.env.PORT;
