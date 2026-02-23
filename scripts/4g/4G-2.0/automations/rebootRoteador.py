@@ -9,7 +9,7 @@ async def roteador_reboot(url):
         page = await context.new_page()
 
 
-        await page.goto(url)
+        await page.goto(url, timeout=10011)
         try:
             await page.click('span:has-text("Status do sistema")', timeout=5000)
             await page.click('input.botao_reset[value="Sistema"]')

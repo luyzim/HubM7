@@ -5,7 +5,7 @@ import { createPage, appendBlockToPageByPath } from "../scripts/wikiScript.js";
 const router = express.Router();
 
 router.post("/run", async (req, res) => {
-  //console.log("Recebida requisição POST para /wiki/run. Body:", req.body);
+  console.log("Recebida requisição POST para /wiki/run. Body:", req.body);
   try {
     let { action, path, title, text, locale = "pt-br", marker = "ZIBRA:AUTO" } = req.body || {};
     // Ensure path does not start with a leading slash for consistency with Wiki.js API
@@ -33,6 +33,7 @@ router.post("/run", async (req, res) => {
         isPrivate: false,
       });
 
+      console.log(`[OK] Página Wiki criada: ${path}`);
       return res.json({ ok: true, result: page });
     }
 
@@ -44,6 +45,7 @@ router.post("/run", async (req, res) => {
         text: text || "",
       });
 
+      console.log(`[OK] Bloco adicionado à página Wiki: ${path}`);
       return res.json({ ok: true, result: page });
     }
 
@@ -82,6 +84,7 @@ router.post("/run/append", async (req, res) => {
         text: text || "",
       });
 
+      console.log(`[OK] Bloco adicionado à página Wiki: ${path}`);
       return res.json({ ok: true, result: page });
     }
 

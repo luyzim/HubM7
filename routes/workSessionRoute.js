@@ -1,67 +1,144 @@
 // routes/workSessionRoute.js
 import express from "express";
-import prisma from "../prisma.js"; // ajuste seu caminho
-import { ensureAuth } from "../middlewares/auth.js";
+import { PrismaClient } from '@prisma/client';
 
+const prisma = new PrismaClient();
 const router = express.Router();
 
-router.post("/start", ensureAuth, async (req, res) => {
-  const userEmail = req.session.user.email;
-  const { taskType, context } = req.body || {};
+// 1. Busca sessão ativa
+router.get("/active", async (req, res) => {
+  try {
+    const userEmail = req.session.user.email;
+    const activeSession = await prisma.workSession.findFirst({
+      where: { 
+        userEmail, 
+        status: { in: ["RUNNING", "PAUSED"] } 
+      },
+      orderBy: { startedAt: "desc" }
+    });
+    res.json(activeSession);
+  } catch (error) {
+    res.status(500).json({ error: "Erro ao buscar sessão" });
+  }
+});
 
-  if (!taskType) return res.status(400).json({ error: "taskType obrigatório" });
+// 2. Iniciar (Mantém igual)
+router.post("/start", async (req, res) => {
+  try {
+    const userEmail = req.session.user.email;
+    const { taskType } = req.body || {};
 
-  // Política: só 1 RUNNING por usuário (recomendado)
-  await prisma.workSession.updateMany({
-    where: { userEmail, status: "RUNNING" },
-    data: { status: "ABORTED", stoppedAt: new Date() }
-  });
+    await prisma.workSession.updateMany({
+      where: { userEmail, status: { in: ["RUNNING", "PAUSED"] } },
+      data: { status: "ABORTED", stoppedAt: new Date() }
+    });
 
-  const ws = await prisma.workSession.create({
-    data: {
-      userEmail,
-      taskType,
-      context: context ?? null,
-      status: "RUNNING",
-      lastPingAt: new Date()
+    const ws = await prisma.workSession.create({
+      data: {
+        userEmail,
+        taskType: taskType || "Geral",
+        status: "RUNNING",
+        lastPingAt: new Date()
+      }
+    });
+    console.log(`[SESSION] ${userEmail} Iniciou: ${taskType || 'Geral'}`);
+    res.json(ws);
+  } catch (error) {
+    res.status(500).json({ error: "Erro ao iniciar" });
+  }
+});
+
+// 3. Pausar (Busca automática)
+router.post("/pause", async (req, res) => {
+  try {
+    const userEmail = req.session.user.email;
+    const ws = await prisma.workSession.findFirst({ 
+      where: { userEmail, status: "RUNNING" },
+      orderBy: { startedAt: "desc" }
+    });
+    
+    if (!ws) return res.status(400).json({ error: "Nenhuma sessão em execução para pausar" });
+
+    const updated = await prisma.workSession.update({
+      where: { id: ws.id },
+      data: { status: "PAUSED", pausedAt: new Date() }
+    });
+    console.log(`[SESSION] ${userEmail} Pausou: ${ws.taskType}`);
+    res.json(updated);
+  } catch (error) {
+    res.status(500).json({ error: "Erro ao pausar" });
+  }
+});
+
+// 4. Retomar (Busca automática)
+router.post("/resume", async (req, res) => {
+  try {
+    const userEmail = req.session.user.email;
+    const ws = await prisma.workSession.findFirst({ 
+      where: { userEmail, status: "PAUSED" },
+      orderBy: { startedAt: "desc" }
+    });
+    
+    if (!ws) return res.status(400).json({ error: "Nenhuma sessão pausada para retomar" });
+
+    const now = new Date();
+    const pauseDuration = now.getTime() - new Date(ws.pausedAt).getTime();
+
+    const updated = await prisma.workSession.update({
+      where: { id: ws.id },
+      data: { 
+        status: "RUNNING", 
+        pausedAt: null, 
+        totalPausedMs: (ws.totalPausedMs || 0) + pauseDuration 
+      }
+    });
+    console.log(`[SESSION] ${userEmail} Retomou: ${ws.taskType}`);
+    res.json(updated);
+  } catch (error) {
+    res.status(500).json({ error: "Erro ao retomar" });
+  }
+});
+
+// 5. Parar (Busca automática)
+router.post("/stop", async (req, res) => {
+  try {
+    const userEmail = req.session.user.email;
+    const ws = await prisma.workSession.findFirst({ 
+      where: { userEmail, status: { in: ["RUNNING", "PAUSED"] } },
+      orderBy: { startedAt: "desc" }
+    });
+
+    if (!ws) return res.status(400).json({ error: "Nenhuma sessão ativa encontrada" });
+
+    const stoppedAt = new Date();
+    let totalPaused = ws.totalPausedMs || 0;
+
+    if (ws.status === "PAUSED" && ws.pausedAt) {
+      totalPaused += stoppedAt.getTime() - new Date(ws.pausedAt).getTime();
     }
-  });
 
-  res.json({ id: ws.id, startedAt: ws.startedAt });
+    const durationMs = Math.max(0, (stoppedAt.getTime() - new Date(ws.startedAt).getTime()) - totalPaused);
+
+    await prisma.workSession.update({
+      where: { id: ws.id },
+      data: { stoppedAt, durationMs, status: "STOPPED", lastPingAt: stoppedAt, totalPausedMs: totalPaused }
+    });
+    console.log(`[SESSION] ${userEmail} Finalizou: ${ws.taskType} | Duração: ${Math.floor(durationMs / 60000)} min`);
+    res.json({ ok: true });
+  } catch (error) {
+    res.status(500).json({ error: "Erro ao parar" });
+  }
 });
 
-router.post("/stop", ensureAuth, async (req, res) => {
-  const userEmail = req.session.user.email;
-  const { id } = req.body || {};
-  if (!id) return res.status(400).json({ error: "id obrigatório" });
-
-  const ws = await prisma.workSession.findFirst({ where: { id, userEmail }});
-  if (!ws) return res.status(404).json({ error: "Sessão não encontrada" });
-  if (ws.status !== "RUNNING") return res.json({ ok: true, alreadyStopped: true });
-
-  const stoppedAt = new Date();
-  const durationMs = Math.max(0, stoppedAt - ws.startedAt);
-
-  const updated = await prisma.workSession.update({
-    where: { id },
-    data: { stoppedAt, durationMs, status: "STOPPED", lastPingAt: stoppedAt }
-  });
-
-  res.json({ ok: true, durationMs: updated.durationMs, stoppedAt: updated.stoppedAt });
-});
-
-// Opcional: heartbeat pra reduzir “sessão zumbi”
-router.post("/ping", ensureAuth, async (req, res) => {
-  const userEmail = req.session.user.email;
-  const { id } = req.body || {};
-  if (!id) return res.status(400).json({ error: "id obrigatório" });
-
-  await prisma.workSession.updateMany({
-    where: { id, userEmail, status: "RUNNING" },
-    data: { lastPingAt: new Date() }
-  });
-
-  res.json({ ok: true });
+router.post("/ping", async (req, res) => {
+  try {
+    const userEmail = req.session.user.email;
+    await prisma.workSession.updateMany({
+      where: { userEmail, status: { in: ["RUNNING", "PAUSED"] } },
+      data: { lastPingAt: new Date() }
+    });
+    res.json({ ok: true });
+  } catch (e) { res.status(60000).send(); }
 });
 
 export default router;

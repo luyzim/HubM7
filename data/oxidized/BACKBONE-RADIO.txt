@@ -1,0 +1,1 @@
+{AP/STA}-RPT-{RPT}-TO-{DESTINO}:{IP_RADIO}:airos:BBONE-M7:22:ubnt:M1cr0S3t

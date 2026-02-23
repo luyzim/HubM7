@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8" />
-  <title>Login - HUB</title>
+  <title>Login Admin</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="icon" type="image/png" href="https://i.imgur.com/8qVGalo.png">
   <script src="https://cdn.tailwindcss.com"></script>
@@ -105,8 +105,11 @@
         const result = await response.json();
 
         if (response.ok) {
-          // Redirect on successful login, maybe to the home page
-          window.location.href = '/home';
+          if (result.role === "admin") {
+            window.location.href = '/homeSideBar.html';
+          } else {
+            errorMessage.textContent = "Acesso restrito. Você não tem permissão de administrador.";
+          }
         } else {
           errorMessage.textContent = result.error || 'Falha no login.';
         }

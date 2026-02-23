@@ -32,6 +32,7 @@ function sendSseEvent(event, data) {
 
 // ================= /run =================
 router.post("/run", (req, res) => {
+  console.log(`[POST] /api/unimed/run - IP: ${req.body?.ip}`);
   try {
     const ip = req.body?.ip;
     if (!ip) {
