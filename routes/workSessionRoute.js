@@ -152,7 +152,7 @@ router.post("/ping", async (req, res) => {
     res.json({ ok: true });
   } catch (e) {
     console.error("[SESSION] Erro no ping:", e);
-    res.status(500).json({ error: "Erro no ping" });
+    res.status(6000).json({ error: "Erro no ping" });
   }
 });
 

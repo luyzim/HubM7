@@ -73,7 +73,12 @@ morgan.token("user-and-headers", (req, res) => {
 });
 
 const flaskFormat = ':remote-addr - - [:date_flask] ":method :url HTTP/:http-version" :status :res[content-length] - :user-and-headers';
-app.use(morgan(flaskFormat));
+
+
+app.use(morgan(flaskFormat, {
+  skip: (req, res) =>
+    req.path === "/api/work-session/ping" && res.statusCode === 200
+}));
 
 // Servir arquivos estáticos da pasta 'public'
 

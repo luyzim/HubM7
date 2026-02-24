@@ -143,8 +143,8 @@
       <div class="flex items-center gap-3">
         <img src="https://i.imgur.com/8qVGalo.png" alt="Logo" class="h-12 w-12 rounded-lg shadow" />
         <div>
-          <h1 class="text-3xl font-bold leading-tight">Hosts CCS</h1>
-          <p class="text-gray-300">Criacao de hosts via Zabbix API</p>
+          <h1 class="text-3xl font-bold leading-tight">Hosts CCS Fw</h1>
+          <p class="text-gray-300">Criacao de hosts padrão CCS Fortigate.</p>
         </div>
       </div>
       <div class="flex gap-2">
@@ -180,11 +180,11 @@
             <input id="ip_plankton_internet" type="text" placeholder="Ex: 1.1.1.3" style="color: black;">
           </div>
           <div>
-            <label for="ip_wan_internet">IP WAN-CISCO</label>
+            <label for="ip_wan_internet">IP WAN-FORTIGATE</label>
             <input id="ip_wan_internet" type="text" placeholder="Ex: 1.1.1.4" style="color: black;">
           </div>
           <div>
-            <label for="ip_lan_internet">IP LAN-CISCO</label>
+            <label for="ip_lan_internet">IP LAN-FORTIGATE</label>
             <input id="ip_lan_internet" type="text" placeholder="Ex: 1.1.1.5" style="color: black;">
           </div>
         </div>
@@ -206,11 +206,11 @@
             <input id="ip_plankton_mpls" type="text" placeholder="Ex: 10.0.0.3" style="color: black;">
           </div>
           <div>
-            <label for="ip_wan_mpls">IP WAN-CISCO</label>
+            <label for="ip_wan_mpls">IP WAN-FORTIGATE</label>
             <input id="ip_wan_mpls" type="text" placeholder="Ex: 10.0.0.4" style="color: black;">
           </div>
           <div>
-            <label for="ip_lan_mpls">IP LAN-CISCO</label>
+            <label for="ip_lan_mpls">IP LAN-FORTIGATE</label>
             <input id="ip_lan_mpls" type="text" placeholder="Ex: 10.0.0.5" style="color: black;">
           </div>
         </div>
@@ -279,8 +279,9 @@
            btn.id === 'bkp-btn-mpls' ? 'Gerar BKP - Mpls' : 'Gerar hosts');
       btn.style.opacity = loading ? '0.7' : '1';
     };
+    
+      const getValue = (id) => document.getElementById(id).value;
 
-    const getValue = (id) => document.getElementById(id).value;
 
     const renderRows = (rows) => {
       if (!rows || !rows.length) {
@@ -312,6 +313,7 @@
     submitBtn.addEventListener('click', async (e) => {
       e.preventDefault();
       alertBox.textContent = '';
+      console.log('Submit button clicked on hostCcsFw.html. Payload construction started.');
 
       const payload = {
         group: getValue('group'),
@@ -336,8 +338,10 @@
 
       if (!payload.group || !payload.identifier) {
         alertBox.textContent = 'Informe grupo e identificador.';
+        console.warn('Payload incomplete: group or identifier missing.');
         return;
       }
+      console.log('Payload:', payload);
 
       setLoading(submitBtn, true);
       try {
@@ -350,16 +354,20 @@
         const data = await res.json();
         if (!res.ok) {
           alertBox.textContent = data.error || 'Erro ao gerar hosts.';
+          console.error('API response not OK:', data.error || 'Erro desconhecido', data);
           renderRows([]);
           return;
         }
 
         renderRows(data);
+        console.log('Hosts generated successfully:', data);
       } catch (err) {
         alertBox.textContent = 'Falha na requisicao. Tente novamente.';
+        console.error('Fetch request failed:', err);
         renderRows([]);
       } finally {
         setLoading(submitBtn, false);
+        console.log('Submit button processing finished.');
       }
     });
 
@@ -399,6 +407,31 @@
       }
 
       if (ipCisco) {
+        templatesToProcess.push({
+          name: "CCS-CISCO.txt",
+          payload: {
+            template_principal: "CCS-CISCO.txt",
+            dados: {
+              UNIDADE: group,
+              NUM_PA: identifier,
+              IP_CISCO: ipCisco,
+            },
+          },
+        });
+      }
+
+      if (ipFortigate) {
+         templatesToProcess.push({
+          name: "CCS-FORTIGATE.txt",
+          payload: {
+            template_principal: "CCS-FORTIGATE.txt",
+            dados: {
+              UNIDADE: group,
+              NUM_PA: identifier,
+              IP_FORTIGATE: ipFortigate,
+            },
+          },
+        });
         templatesToProcess.push({
           name: "CCS-CISCO.txt",
           payload: {
@@ -513,19 +546,19 @@
         });
       }
 
-      if (ipCisco) {
-        templatesToProcess.push({
-          name: "CCS-CISCO.txt",
-          payload: {
-            template_principal: "CCS-CISCO.txt",
-            dados: {
-              UNIDADE: group,
-              NUM_PA: identifier,
-              IP_CISCO: ipCisco,
-            },
-          },
-        });
-      }
+      //if (ipCisco) {
+        //templatesToProcess.push({
+          //name: "CCS-CISCO.txt",
+          //payload: {
+            ///template_principal: "CCS-CISCO.txt",
+            //dados: {
+              //UNIDADE: group,
+              //NUM_PA: identifier,
+              //IP_CISCO: ipCisco,
+            //},
+          //},
+        //});
+      //}
       
       if (templatesToProcess.length === 0) {
         alertBox.textContent = 'INTERNET: Nenhum IP fornecido para gerar o BKP INTERNET.';

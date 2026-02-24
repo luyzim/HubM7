@@ -38,6 +38,7 @@
                             <th class="px-6 py-4">Tarefa Atual</th>
                             <th class="px-6 py-4">Tempo da Sessão</th>
                             <th class="px-6 py-4">Histórico Total</th>
+                            <th class="px-6 py-4">Total Ontem</th>
                         </tr>
                     </thead>
                     <tbody id="stats-table" class="divide-y divide-slate-700">
@@ -72,6 +73,37 @@
         async function loadStats() {
             try {
                 const res = await fetch('/api/admin/stats');
+                if (!res.ok) throw new Error();
+                const data = await res.json();
+                
+                const table = document.getElementById('stats-table');
+                table.innerHTML = '';
+
+                data.forEach(user => {
+                    const row = document.createElement('tr');
+                    row.className = 'hover:bg-slate-700/30 transition';
+                    row.innerHTML = `
+                        <td class="px-6 py-4 font-medium">${user.userEmail}</td>
+                        <td class="px-6 py-4">
+                            <span class="${getStatusClass(user.currentStatus)}">${user.currentStatus}</span>
+                        </td>
+                        <td class="px-6 py-4 text-slate-300">${user.currentTask}</td>
+                        <td class="px-6 py-4 font-mono">${formatTime(user.currentElapsedMs)}</td>
+                        <td class="px-6 py-4 text-blue-400 font-semibold">${formatTime(user.totalWorkTimeMs)}</td>
+                    `;
+                    table.appendChild(row);
+                });
+
+                document.getElementById('last-update').textContent = `Última atualização: ${new Date().toLocaleTimeString()}`;
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+
+        async function loadStatsDaily() {
+            try {
+                const res = await fetch('/api/admin/stats/yesterday');
                 if (!res.ok) throw new Error();
                 const data = await res.json();
                 

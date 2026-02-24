@@ -42,27 +42,22 @@ router.post("/run", (req, res) => {
   child.stderr.on("data", (data) => (stderr += data.toString()));
 
   child.on("close", (code) => {
-    if (code !== 0) {
-      console.error(`[ComandosOxidized] Script failed with exit code: ${code}`);
-      console.error(`[ComandosOxidized] Stderr: ${stderr}`);
-
-      const errorDetails = stderr || stdout;
-
-      return res.status(500).json({
-        ok: false,
-        code,
-        error: "Erro no servidor ao executar o script de automação.",
-        details: errorDetails.trim(),
-      });
-    }
+  if (code !== 0) {
+    console.error(`[Script] Falhou (code ${code}): ${err}`); // log rico no servidor
+    return res.status(500).json({ 
+      ok: false, 
+      error: "Ocorreu uma falha ao processar a solicitação." // mensagem genérica pro cliente
+    });
+  }
 
     res.json({
       ok: true,
       message: "Comando executado com sucesso.",
       output: stdout.trim(),
-      consoleLog: `Bkp inserido no Oxidized: ${template_name} - ${texto_para_inserir}`,
+      consoleLog: `[OK]Bkp inserido no Oxidized: ${template_name} - ${texto_para_inserir}`,
     });
   });
+
 
   child.on("error", (err) => {
     console.error(`Falha ao iniciar o processo do script: ${err.message}`);

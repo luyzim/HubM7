@@ -90,4 +90,38 @@ router.get("/stats/yesterday", async (req, res) => {
   }
 });
 
+// Totais por data específica: GET /api/admin/stats/date?date=YYYY-MM-DD
+router.get("/stats/date", async (req, res) => {
+  try {
+    const { date } = req.query;
+    if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+      return res.status(400).json({ error: "Parâmetro 'date' inválido. Use YYYY-MM-DD." });
+    }
+
+    const dt = DateTime.fromISO(date, { zone: TZ });
+    if (!dt.isValid) return res.status(400).json({ error: "Data inválida." });
+
+    const start = dt.startOf("day").toJSDate();
+    const end   = dt.endOf("day").toJSDate();
+
+    const totals = await prisma.workSession.groupBy({
+      by: ["userEmail"],
+      where: {
+        startedAt: { gte: start, lte: end },
+        durationMs: { not: null },
+      },
+      _sum: { durationMs: true },
+    });
+
+    res.json(totals.map(t => ({
+      userEmail: t.userEmail,
+      totalWorkTimeMs: t._sum.durationMs ?? 0,
+      date,
+    })));
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: "Erro ao carregar estatísticas por data" });
+  }
+});
+
 export default router;

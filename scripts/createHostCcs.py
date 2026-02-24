@@ -91,11 +91,17 @@ def get_template_id(url, token, template_name):
     return templates[0]['templateid']
 
 def get_or_create_group_id(url, token, group_name):
-    params = {"output": ["groupid"], "filter": {"name": [group_name]}}
+    normalized_group_name = group_name.strip().upper()
+    if normalized_group_name.startswith("SICOOB-CCS-"):
+        zbx_group_name = normalized_group_name
+    else:
+        zbx_group_name = f"SICOOB-CCS-{normalized_group_name}"
+
+    params = {"output": ["groupid"], "filter": {"name": [zbx_group_name]}}
     groups = zbx_call(url, token, "hostgroup.get", params)
     if groups:
         return groups[0]['groupid']
-    result = zbx_call(url, token, "hostgroup.create", {"name": f"SICOOB-CCS-{group_name}"})
+    result = zbx_call(url, token, "hostgroup.create", {"name": zbx_group_name})
     return result['groupids'][0]
 
 def get_host_id_by_name(url, token, host_name):

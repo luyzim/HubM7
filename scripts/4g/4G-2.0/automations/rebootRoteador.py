@@ -4,7 +4,7 @@ from playwright.async_api import async_playwright
 
 async def roteador_reboot(url):
     async with async_playwright() as p:
-        browser = await p.chromium.launch(headless=False)
+        browser = await p.chromium.launch(headless=True)
         context = await browser.new_context(ignore_https_errors=True)
         page = await context.new_page()
 

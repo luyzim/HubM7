@@ -5,7 +5,6 @@ import { createPage, appendBlockToPageByPath } from "../scripts/wikiScript.js";
 const router = express.Router();
 
 router.post("/run", async (req, res) => {
-  console.log("Recebida requisição POST para /wiki/run. Body:", req.body);
   try {
     let { action, path, title, text, locale = "pt-br", marker = "ZIBRA:AUTO" } = req.body || {};
     // Ensure path does not start with a leading slash for consistency with Wiki.js API
@@ -16,7 +15,6 @@ router.post("/run", async (req, res) => {
     if (!action) return res.status(400).json({ error: "action é obrigatório" });
     if (!path) return res.status(400).json({ error: "path é obrigatório" });
 
-    console.log(`Tentando ${action} para o caminho: ${path}`); // Log do caminho
 
     if (action === "create_page") {
       if (!title) return res.status(400).json({ error: "title é obrigatório para create_page" });
@@ -56,8 +54,8 @@ router.post("/run", async (req, res) => {
       console.warn(`Página Wiki não encontrada para o caminho: ${req.body?.path || 'N/A'}. Erro: ${e.message}`);
       return res.status(404).json({ error: e.message });
     }
-    console.error("Erro interno na rota /wiki/run:", e);
-    return res.status(500).json({ error: e.message, meta: e.meta || null, details: e.details || null });
+    console.error("[Wiki]Erro interno na rota /wiki/run:", e);
+    return res.status(500).json({ error: "Erro interno ao processar a ação na Wiki." });
   }
 });
 

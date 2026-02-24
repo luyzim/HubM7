@@ -71,7 +71,7 @@
 
     <!-- Seção de Filtros (Escondida por padrão) -->
     <div id="filter-container" class="filter-section hidden">
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
         <div>
           <label class="block text-sm font-medium text-gray-400 mb-1">Pesquisar Usuário</label>
           <input type="text" id="filter-user" placeholder="E-mail ou nome..." 
@@ -85,6 +85,11 @@
             <option value="PAUSED">Pausado</option>
             <option value="OFFLINE">Offline</option>
           </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-400 mb-1">Data (coluna extra)</label>
+          <input type="date" id="filter-date"
+            class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-white">
         </div>
         <div class="flex gap-2">
           <button id="btn-refresh" class="flex-1 bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded text-sm font-medium transition">
@@ -104,7 +109,7 @@
             <th class="px-4 py-3 text-left">Tarefa</th>
             <th class="px-4 py-3 text-left">Tempo Atual</th>
             <th class="px-4 py-3 text-left">Total Hoje</th>
-            <th class="px-4 py-3 text-left">Total Ontem</th>
+            <th id="th-date-col" class="px-4 py-3 text-left">Total Ontem</th>
           </tr>
         </thead>
         <tbody id="rows" class="divide-y divide-slate-800 text-gray-100">
@@ -121,34 +126,32 @@
   </div>
 
   <script>
-    const STATS_URL = "/api/admin/stats";
-    const YESTERDAY_URL = "/api/admin/stats/yesterday";
+    const STATS_URL      = "/api/admin/stats";
+    const YESTERDAY_URL  = "/api/admin/stats/yesterday";
+    const DATE_URL       = "/api/admin/stats/date";
 
-    const elRows = document.getElementById("rows");
-    const elLoading = document.getElementById("loading");
-    const elLastUpdate = document.getElementById("last-update");
-    const btnRefresh = document.getElementById("btn-refresh");
-    const btnToggleFilters = document.getElementById("btn-toggle-filters");
-    const filterContainer = document.getElementById("filter-container");
-    
-    const filterUserInput = document.getElementById("filter-user");
-    const filterStatusSelect = document.getElementById("filter-status");
+    const elRows         = document.getElementById("rows");
+    const elLoading      = document.getElementById("loading");
+    const elLastUpdate   = document.getElementById("last-update");
+    const btnRefresh     = document.getElementById("btn-refresh");
+    const btnToggle      = document.getElementById("btn-toggle-filters");
+    const filterContainer= document.getElementById("filter-container");
+    const filterUser     = document.getElementById("filter-user");
+    const filterStatus   = document.getElementById("filter-status");
+    const filterDate     = document.getElementById("filter-date");
+    const thDateCol      = document.getElementById("th-date-col");
 
-    let rawData = { stats: [], yesterday: [] };
+    let rawData = { stats: [], dateData: [] };
+    let currentDateLabel = "Total Ontem";
 
     // Toggle filtros
-    btnToggleFilters.addEventListener("click", () => {
-      filterContainer.classList.toggle("hidden");
-    });
+    btnToggle.addEventListener("click", () => filterContainer.classList.toggle("hidden"));
 
     const fmtMs = (ms = 0) => {
       ms = Math.max(0, Number(ms) || 0);
-      const totalSec = Math.floor(ms / 1000);
-      const h = Math.floor(totalSec / 3600);
-      const m = Math.floor((totalSec % 3600) / 60);
-      const s = totalSec % 60;
+      const s = Math.floor(ms / 1000);
       const pad = (n) => String(n).padStart(2, "0");
-      return `${pad(h)}:${pad(m)}:${pad(s)}`;
+      return `${pad(Math.floor(s / 3600))}:${pad(Math.floor((s % 3600) / 60))}:${pad(s % 60)}`;
     };
 
     const badge = (status) => {
@@ -160,21 +163,19 @@
     };
 
     const escapeHtml = (str = "") =>
-      String(str).replace(/[&<>"']/g, (c) => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#039;" }[c]));
+      String(str).replace(/[&<>"']/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
 
     function render() {
-      const userFilter = filterUserInput.value.toLowerCase();
-      const statusFilter = filterStatusSelect.value;
-      
-      const yMap = new Map(rawData.yesterday.map(x => [x.userEmail, x.totalWorkTimeMs || 0]));
+      const userFilter   = filterUser.value.toLowerCase();
+      const statusFilter = filterStatus.value;
+      const dateMap      = new Map(rawData.dateData.map(x => [x.userEmail, x.totalWorkTimeMs || 0]));
 
       let filtered = rawData.stats.filter(u => {
-        const matchesUser = (u.userEmail || "").toLowerCase().includes(userFilter);
-        const matchesStatus = statusFilter === "ALL" || (u.currentStatus || "OFFLINE").toUpperCase() === statusFilter;
-        return matchesUser && matchesStatus;
+        const matchUser   = (u.userEmail || "").toLowerCase().includes(userFilter);
+        const matchStatus = statusFilter === "ALL" || (u.currentStatus || "OFFLINE").toUpperCase() === statusFilter;
+        return matchUser && matchStatus;
       });
 
-      // Ordenação: Running primeiro
       filtered.sort((a, b) => {
         const as = (a.currentStatus || "").toUpperCase();
         const bs = (b.currentStatus || "").toUpperCase();
@@ -184,46 +185,62 @@
       });
 
       if (filtered.length === 0) {
-        elRows.innerHTML = `<tr><td colspan="6" class="px-4 py-8 text-center text-gray-500">Nenhum registro encontrado para os filtros atuais.</td></tr>`;
+        elRows.innerHTML = `<tr><td colspan="6" class="px-4 py-8 text-center text-gray-500">Nenhum registro encontrado.</td></tr>`;
         return;
       }
 
       elRows.innerHTML = filtered.map(u => {
-        const email = u.userEmail || "-";
-        const status = u.currentStatus || "OFFLINE";
-        const task = u.currentTask || "-";
-        const current = fmtMs(u.currentElapsedMs);
-        const total = fmtMs(u.totalWorkTimeMs);
-        const yTotal = fmtMs(yMap.get(email) || 0);
+        const email   = u.userEmail || "-";
+        const status  = u.currentStatus || "OFFLINE";
+        const task    = u.currentTask || "-";
+        const dTotal  = fmtMs(dateMap.get(email) || 0);
 
         return `
           <tr class="hover:bg-slate-800/40 transition-colors">
             <td class="px-4 py-3 font-medium text-blue-100 text-xs">${escapeHtml(email)}</td>
             <td class="px-4 py-3">${badge(status)}</td>
             <td class="px-4 py-3 text-gray-300 max-w-[200px] truncate" title="${escapeHtml(task)}">${escapeHtml(task)}</td>
-            <td class="px-4 py-3 font-mono text-blue-200">${current}</td>
-            <td class="px-4 py-3 font-mono text-gray-400">${total}</td>
-            <td class="px-4 py-3 font-mono text-gray-400">${yTotal}</td>
-          </tr>
-        `;
+            <td class="px-4 py-3 font-mono text-blue-200">${fmtMs(u.currentElapsedMs)}</td>
+            <td class="px-4 py-3 font-mono text-gray-400">${fmtMs(u.totalWorkTimeMs)}</td>
+            <td class="px-4 py-3 font-mono text-gray-400">${dTotal}</td>
+          </tr>`;
       }).join("");
+    }
+
+    async function loadDateData(date) {
+      // date = "YYYY-MM-DD" ou null (ontem)
+      const url = date ? `${DATE_URL}?date=${date}` : YESTERDAY_URL;
+      const res = await fetch(url, { headers: { "Accept": "application/json" } });
+      if (!res.ok) throw new Error("Erro ao buscar data");
+      return res.json();
     }
 
     async function loadStats() {
       elLoading.classList.remove("hidden");
       try {
-        const [statsRes, yRes] = await Promise.all([
+        const selectedDate = filterDate.value; // "YYYY-MM-DD" ou ""
+
+        const [statsRes, dateRes] = await Promise.all([
           fetch(STATS_URL, { headers: { "Accept": "application/json" } }),
-          fetch(YESTERDAY_URL, { headers: { "Accept": "application/json" } }),
+          loadDateData(selectedDate || null),
         ]);
 
-        if (!statsRes.ok || !yRes.ok) throw new Error("Erro na API");
+        if (!statsRes.ok) throw new Error("Erro na API de stats");
 
-        rawData.stats = await statsRes.json();
-        rawData.yesterday = await yRes.json();
+        rawData.stats    = await statsRes.json();
+        rawData.dateData = dateRes;
+
+        // Atualiza label da coluna
+        if (selectedDate) {
+          const [y, m, d] = selectedDate.split("-");
+          currentDateLabel = `${d}/${m}/${y}`;
+        } else {
+          currentDateLabel = "Total Ontem";
+        }
+        thDateCol.textContent = currentDateLabel;
 
         render();
-        elLastUpdate.textContent = new Date().toLocaleTimeString("pt-BR", { hour: '2-digit', minute: '2-digit' });
+        elLastUpdate.textContent = new Date().toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
       } catch (e) {
         console.error(e);
         elRows.innerHTML = `<tr><td colspan="6" class="px-4 py-8 text-center text-red-400">Falha ao carregar dados do servidor.</td></tr>`;
@@ -232,11 +249,12 @@
       }
     }
 
-    filterUserInput.addEventListener("input", render);
-    filterStatusSelect.addEventListener("change", render);
+    filterUser.addEventListener("input", render);
+    filterStatus.addEventListener("change", render);
+    filterDate.addEventListener("change", loadStats); // busca no banco ao mudar data
+
     btnRefresh.addEventListener("click", loadStats);
 
-    // Auto-refresh 5s
     loadStats();
     setInterval(loadStats, 7200000);
   </script>

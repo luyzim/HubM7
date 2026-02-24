@@ -88,7 +88,7 @@ router.post("/", (req, res) => {
       filename: filename,
       message: "Configuração gerada com sucesso!"
     });
-    console.log('Gerada config FORTIGATE para', unidadeNome, 'Tipo:', templateType);
+    console.log('[OK]Gerada config FORTIGATE para', unidadeNome, 'Tipo:', templateType);
   });
 
   child.on("error", (spawnError) => {

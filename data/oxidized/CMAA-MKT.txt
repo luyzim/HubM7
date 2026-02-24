@@ -1,1 +1,1 @@
-SW-RPT-{REPETIDORA}:{IP_SW}:ios:BBONE-M7:22:ozxidized:Eng@3v0p33vt
+MKT-CMAA-{UNIDADE}:{IP}:routeros:CMAA:22:admin:M1cr0S3t
