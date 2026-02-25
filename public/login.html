@@ -106,7 +106,7 @@
 
         if (response.ok) {
           if (result.role === "admin") {
-            window.location.href = '/homeSideBar.html';
+            window.location.href = '/homeAdmin';
           } else {
             errorMessage.textContent = "Acesso restrito. Você não tem permissão de administrador.";
           }
@@ -118,5 +118,6 @@
       }
     });
   </script>
+  <script src="/js/sessionReminder.js"></script>
 </body>
 </html>

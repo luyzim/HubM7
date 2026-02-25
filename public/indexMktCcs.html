@@ -207,8 +207,8 @@
 
       <div class="md:col-span-2 flex flex-wrap gap-3 mt-2">
         <button id="btn-config" type="submit" class="py-3 px-4">Gerar Configuracao</button>
-        <button id="btn-wiki" type="button" class="py-3 px-4">Gerar Documentação (Wiki)</button>
         <button id="btn-mensagem" type="button" class="py-3 px-4">Gerar Mensagem (OTRS)</button>
+        <button id="btn-wiki" type="button" class="py-3 px-4">Gerar Documentação (Wiki)</button>
       </div>
     </form>
 
@@ -264,10 +264,20 @@
     // Event listener para o formulário (para o botão "Gerar Configuracao" que é tipo submit)
     form.addEventListener("submit", async (e) => {
         e.preventDefault(); // Previne o envio padrão do formulário
-        await callApi("/api/mkt", "out", {
+        
+        btnConfig.disabled = true;
+        const originalText = btnConfig.textContent;
+        btnConfig.textContent = 'Gerando...';
+
+        try {
+          await callApi("/api/mkt", "out", {
             previewLabel: "Pre-visualizar configuracao",
             downloadLabel: "Baixar Configuracao",
-        });
+          });
+        } finally {
+          btnConfig.disabled = false;
+          btnConfig.textContent = originalText;
+        }
     });
 
   btnWiki.addEventListener("click", async (e) => {
@@ -288,14 +298,35 @@
     }
   });
 
-    btnMensagem.addEventListener("click", async (e) => {
+  btnMensagem.addEventListener("click", async (e) => {
     e.preventDefault();
-    await callApi("/api/mkt/mensagem", "msg-out", {
-      previewLabel: "Pre-visualizar Documentação",
-      downloadLabel: "Baixar Documentação",
-    });
+
+    btnMensagem.disabled = true;
+    const originalText = btnMensagem.textContent;
+    btnMensagem.textContent = 'Gerando...';
+
+    try {
+      await callApi("/api/mkt/mensagem", "msg-out", {
+        previewLabel: "Pre-visualizar Documentação",
+        downloadLabel: "Baixar Documentação",
+      });
+    } finally {
+      btnMensagem.disabled = false;
+      btnMensagem.textContent = originalText;
+    }
   });
 
+  //btnConfig.addEventListener("click", async (e) => {
+    //e.preventDefault();
+
+    //btnConfig.disabled = true;
+    //const originalText = btnConfig.textContent;
+    //btnConfig.textContent = 'Gerando...';
+     //await callApi("/api/mkt", "out", {
+            //previewLabel: "Pre-visualizar configuracao",
+            //downloadLabel: "Baixar Configuracao",
+        //});
+  //});
 
 
   const helpFab    = document.getElementById("helpFab");
@@ -360,5 +391,6 @@
     <p>- O IP MKT deve se utilizar apartir da <strong>Tabela de IPs</strong>.</p>
   </div>
 
+  <script src="/js/sessionReminder.js"></script>
 </body>
 </html>

@@ -169,7 +169,7 @@ function appendToManagedBlock(existing, marker, newChunk) {
 
 // --- API do serviço ---
 export async function getPageByPath(path, locale) {
-  const data = await gql(PAGE_BY_PATH, { path, locale });
+  const data = await gql("CCS-Sicoob-" + PAGE_BY_PATH, { path, locale });
   return data?.pages?.singleByPath ?? null;
 }
 

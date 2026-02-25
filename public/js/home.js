@@ -92,7 +92,7 @@ async function checkActiveSession() {
 function startTimerUI() {
     if (timerInterval) clearInterval(timerInterval);
     timerInterval = setInterval(updateTimer, 1000);
-    if (!pingInterval) pingInterval = setInterval(sendPing, 60000);
+    if (!pingInterval) pingInterval = setInterval(sendPing, 5000);
     
     btnStart.disabled = true;
     btnStart.classList.add("opacity-50", "cursor-not-allowed");
@@ -176,5 +176,9 @@ btnStop.addEventListener("click", stopSession);
 
 document.addEventListener("DOMContentLoaded", () => {
     renderAutomations();
+    checkActiveSession();
+});
+
+window.addEventListener("pageshow", () => {
     checkActiveSession();
 });

@@ -373,7 +373,7 @@
 
 
     bkpBtnMpls.addEventListener('click', async (e) => {
-      alert("Botão MPLS clicado!"); // Event Listener Entry
+      //alert("Botão MPLS clicado!"); // Event Listener Entry
       e.preventDefault();
       alertBox.textContent = '';
       bkpOut.style.display = 'none';
@@ -381,12 +381,12 @@
       
       const group = getValue('group');
       const identifier = getValue('identifier');
-      const ipCisco = getValue('ip_wan_mpls');
+      const ipFortigate = getValue('ip_wan_mpls');
       const ipMkt = getValue('ip_mkt_mpls');
 
       if (!group || !identifier) {
         alertBox.textContent = 'MPLS: Informe grupo e identificador.';
-        alert('MPLS: Informe grupo e identificador.'); // Added alert()
+        //alert('MPLS: Informe grupo e identificador.'); // Added alert()
         return;
       }
 
@@ -396,7 +396,7 @@
         templatesToProcess.push({
           name: "CCS-MKT.txt",
           payload: {
-            template_principal: "CCS-MKT.txt",
+            template_principal: "CCS-MKTmpls.txt",
             dados: {
               UNIDADE: group,
               NUM_PA: identifier,
@@ -406,48 +406,23 @@
         });
       }
 
-      if (ipCisco) {
-        templatesToProcess.push({
-          name: "CCS-CISCO.txt",
-          payload: {
-            template_principal: "CCS-CISCO.txt",
-            dados: {
-              UNIDADE: group,
-              NUM_PA: identifier,
-              IP_CISCO: ipCisco,
-            },
-          },
-        });
-      }
-
-      if (ipFortigate) {
-         templatesToProcess.push({
-          name: "CCS-FORTIGATE.txt",
-          payload: {
-            template_principal: "CCS-FORTIGATE.txt",
-            dados: {
-              UNIDADE: group,
-              NUM_PA: identifier,
-              IP_FORTIGATE: ipFortigate,
-            },
-          },
-        });
-        templatesToProcess.push({
-          name: "CCS-CISCO.txt",
-          payload: {
-            template_principal: "CCS-CISCO.txt",
-            dados: {
-              UNIDADE: group,
-              NUM_PA: identifier,
-              IP_CISCO: ipCisco,
-            },
-          },
-        });
-      }
+      //if (ipFortigate) {
+         //templatesToProcess.push({
+          //name: "CCS-FORTIGATE.txt",
+          //payload: {
+           //template_principal: "CCS-FORTIGATE.txt",
+            //dados: {
+              //UNIDADE: group,
+              //NUM_PA: identifier,
+              //IP_FORTIGATE: ipFortigate,
+            //},
+          //},
+        //});
+      //}
       
       if (templatesToProcess.length === 0) {
         alertBox.textContent = 'MPLS: Nenhum IP fornecido para gerar o BKP MPLS.';
-        alert('MPLS: Nenhum IP fornecido para gerar o BKP MPLS.'); // Added alert()
+        //alert('MPLS: Nenhum IP fornecido para gerar o BKP MPLS.'); // Added alert()
         return;
       }
       alert("MPLS: Enviando requisição para /api/oxidized/generate"); // Before Fetch
@@ -625,5 +600,6 @@
       }
     });
   </script>
+  <script src="/js/sessionReminder.js"></script>
 </body>
 </html>

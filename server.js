@@ -12,6 +12,7 @@ import ensureAdmin from "./middleware/ensureAdmin.js";
 import ensureMonitoramento from "./middleware/ensureMonitoramento.js";
 import ensureN2 from "./middleware/ensureN2.js";
 import ensureN1 from "./middleware/ensureN1.js";
+import workSessionReminder from "./middleware/workSessionReminder.js";
 
 // Imports de rotas
 
@@ -57,6 +58,8 @@ app.use(session({
   }
 }));
 
+app.use(workSessionReminder);
+
 // Logger no formato Flask
 morgan.token("date_flask", () => {
   const d = new Date();
@@ -73,11 +76,13 @@ morgan.token("user-and-headers", (req, res) => {
 });
 
 const flaskFormat = ':remote-addr - - [:date_flask] ":method :url HTTP/:http-version" :status :res[content-length] - :user-and-headers';
+app.use(morgan(flaskFormat));
 
 
 app.use(morgan(flaskFormat, {
-  skip: (req, res) =>
-    req.path === "/api/work-session/ping" && res.statusCode === 200
+  skip: (req) =>
+  req.method === "POST" &&
+  req.originalUrl.startsWith("/api/work-session/ping")
 }));
 
 // Servir arquivos estáticos da pasta 'public'
@@ -97,8 +102,8 @@ app.get("/home", ensureAuth, (req, res) => {
   res.sendFile(path.join(__dirname, "public", "home.html"));
 });
 
-app.get("/home-sidebar", ensureAdmin, (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "homeSideBar.html"));
+app.get("/homeAdmin", ensureAdmin, (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "homeAdmin.html"));
 });
 
 app.get("/admin/dashboard", ensureAdmin, (req, res) => {

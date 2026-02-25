@@ -120,7 +120,7 @@ router.post("/", (req, res) => {
       // sucesso: stdout deve ser JSON
       try {
         const results = JSON.parse(stdout);
-        console.log("Criado Hosts para", group, identifier);
+        console.log("[OK]Criado Hosts para", group, identifier);
         return res.json(results);
       } catch (e) {
         return res.status(500).json({
