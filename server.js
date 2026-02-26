@@ -76,7 +76,7 @@ morgan.token("user-and-headers", (req, res) => {
 });
 
 const flaskFormat = ':remote-addr - - [:date_flask] ":method :url HTTP/:http-version" :status :res[content-length] - :user-and-headers';
-app.use(morgan(flaskFormat));
+//app.use(morgan(flaskFormat));
 
 
 app.use(morgan(flaskFormat, {

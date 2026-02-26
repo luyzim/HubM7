@@ -210,20 +210,20 @@ def main():
         template_id_mikrotik = get_template_id(zabbix_url, auth_token, 'Template Mikrotik RB750-RB1100-Final')
         template_id_interfaces_snmp = get_template_id(zabbix_url, auth_token, 'Template Module Interfaces SNMPv2')
         template_id_cisco_router = get_template_id(zabbix_url, auth_token, 'Template SNMP Router Cisco')
-        template_id_fortigate = get_template_id(zabbix_url, auth_token, 'FortiGate by HTTP')
+        template_id_fortigate = get_template_id(zabbix_url, auth_token, 'FortiGate by SNMP')
         
         base_name = f"SICOOB-CCS-{group_name.upper()}-{identifier.upper()}"
         host_definitions = [
             {'prefix': 'MKT',        'suffix': ''},
             {'prefix': 'VCN-GARY',   'suffix': ''},
             {'prefix': 'VCN-PLANKTON','suffix': ''},
-            {'prefix': 'WAN-FORTIGATE',  'suffix': ''},
-            {'prefix': 'LAN-FORTIGATE',  'suffix': ''},
+            {'prefix': 'WAN-FW',  'suffix': ''},
+            {'prefix': 'LAN-FW',  'suffix': ''},
             {'prefix': 'MKT',        'suffix': '-MPLS'},
             {'prefix': 'VCN-GARY',   'suffix': '-MPLS'},
             {'prefix': 'VCN-PLANKTON','suffix': '-MPLS'},
-            {'prefix': 'WAN-FORTIGATE',  'suffix': '-MPLS'},
-            {'prefix': 'LAN-FORTIGATE',  'suffix': '-MPLS'},
+            {'prefix': 'WAN-FW',  'suffix': '-MPLS'},
+            {'prefix': 'LAN-FW',  'suffix': '-MPLS'},
         ]
 
         results = []
@@ -249,12 +249,12 @@ def main():
             elif definition['prefix'] == 'WAN-CISCO':
                 needs_snmp = True
                 template_ids = [template_id_icmp, template_id_interfaces_snmp, template_id_cisco_router]
-            elif definition['prefix'] == 'WAN-FORTIGATE':
+            elif definition['prefix'] == 'WAN-FW':
                 needs_snmp = True
-                template_ids = [template_id_icmp, template_id_fortigate]
-            elif definition['prefix'] == 'LAN-FORTIGATE':
+                template_ids = [ template_id_fortigate]
+            elif definition['prefix'] == 'LAN-FW':
                 needs_snmp = True
-                template_ids = [template_id_icmp, template_id_fortigate]
+                template_ids = [template_id_icmp, ]
             # LAN/VCN com ICMP apenas (ajuste aqui se quiser SNMP neles)
 
             interfaces = build_interfaces(ip, needs_snmp)
