@@ -822,6 +822,8 @@ config system admin
         set trusthost4 192.168.0.0 255.255.0.0
         set accprofile "super_admin"
         set vdom "root"
+        set wildcard enable
+        set remote-group "GRP_TACACS_NETWORK_ENGINEERS"
         config gui-dashboard
             edit 1
                 set name "Status"
@@ -8774,10 +8776,14 @@ config user tacacs+
     edit "TACACS-PRI"
         set server "192.168.254.9"
         set key ENC zd4ZZbosKAP/u6Q8gJrv5bNAMiOd8pe+w+kqTNuJRQqz0HOXmW0Pwpr/LY3TA+GcTM9mIzCWbghggD3EbL+BRHqK8ahb8mqxzdfobZZq2JaHddMoIVK93/PRQARm3geutpwuywnXYBCigAuQh6MjlqafrFJG/2nMsHrkIpvkgbsz7k5bpgBG1ajbk6NVvJn5+555bllmMjY3dkVA
+        set key "M1cr0S3t"
+        set authen-type auto    
     next
     edit "TACACS-SEC"
         set server "192.168.255.9"
         set key ENC SFEzUe2MFDBWYY1VGEdyZ5GkJbzkgSM6zWeLiRgkBpmt0TqeYLHH6LQ4tzBmRIN0K6+CQPg9PJ6LQiZ+O3vquDTBP60S7wzS+/2hFaN2HeeLFe3JAUmh1AZWw+coJao5m/9MibjllbYQCiH+dej2G3QUjkQAFD3iIMMWyywHsPg+GTXyb7hKhznr/lkWRw2+5M2WRVlmMjY3dkVA
+        set key "M1cr0S3t"
+        set authen-type auto
     next
 end
 config user local

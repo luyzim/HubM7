@@ -32,7 +32,8 @@ router.get("/automations", (req, res) => {
     { title: "BKP - oxidized", link: "/api/oxidized", role: "n2", task: "oxidized" },
     { title: "Triagem - n1", link: "/api/comandos-mkt", role: "n1", task: "mkt-n1" },
     { title: "CCS - FORTIGATE", link: "/api/ccsFortgate", role: "n1", task: "Firewall" },
-    { title: "Wiki", link: "/api/wiki", role: "n2", task: "wiki" }
+    { title: "Wiki", link: "/api/wiki", role: "n2", task: "wiki" },
+    { title: "Relatório", link: "/api/relatorio", role: "n1", task: "relatorio" }
   ];
 
   const allowed = allAutomations.filter(auto => {

@@ -176,30 +176,23 @@ router.post("/scan-super", async (req, res) => {
         planktonPartner,
         routes: parsedRoutes, // Adiciona as rotas parseadas à resposta
       };
-      console.log("Gary/Plakton Partners:", garyPartner, planktonPartner, "\nUnidade:", ip);
+      console.log("[OK] Gary/Plakton Partners:", garyPartner, planktonPartner, "\nUnidade:", ip);
       return res.json(finalResult);
     } catch (e) {
-      console.error("Scan failed:", e);
+      console.error("[ERROR]Scan failed:", e);
       return res.status(500).json({ ok: false, error: e.message, details: fullStderr });
     }
   });
 });
 
-// ======================================================
-// Página principal (front)
-// ======================================================
 
-
-// ======================================================
-// Lista de comandos (DB)
-// ======================================================
 router.get("/commands", async (req, res) => {
   try {
     const commands = await prisma.commands_mkt.findMany();
     res.json(commands);
   } catch (error) {
-    console.error("Erro ao buscar comandos:", error);
-    res.status(500).json({ error: "Falha ao buscar comandos do banco de dados." });
+    console.error("[ERROR]Erro ao buscar comandos:", error);
+    res.status(500).json({ error: "[ERROR]Falha ao buscar comandos do banco de dados." });
   }
 });
 

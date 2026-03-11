@@ -170,6 +170,10 @@ app.get("/api/wiki", ensureN2, (req, res) => {
   res.sendFile(path.join(__dirname, "public", "wiki.html"));
 });
 
+app.get("/api/relatorio", ensureN2, (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "relatorio.html"));
+});
+
 
 // Servir arquivos estáticos da pasta 'public'
 app.use(express.static(path.join(__dirname, "public")));

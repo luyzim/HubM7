@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Relatório CCO</title>
+    <link rel="icon" type="image/png" href="https://i.imgur.com/8qVGalo.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #111827;
+            /* Cor de fundo escura (slate-900) */
+            background-image: url('https://images.unsplash.com/photo-1749150270018-1dee5a5e4b88?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center;
+            min-height: 100vh;
+            /* Garante que cubra a tela */
+            background-attachment: scroll;
+            /* Performance muito superior */
+        }
+
+        .container {
+            max-width: 900px;
+        }
+
+        textarea::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        textarea::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        textarea::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+
+        textarea::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        .control-button {
+            transition: all 0.2s ease-in-out;
+        }
+
+        .control-button:hover {
+            transform: translateY(-2px);
+        }
+
+        .ticket-form-container {
+            transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="password"],
+        input[type="date"],
+        input[type="time"],
+        select,
+        textarea {
+            background-color: #E5E7EB;
+            color: #111827;
+        }
+
+        input[type="text"]:focus,
+        input[type="email"]:focus,
+        input[type="password"]:focus,
+        input[type="date"]:focus,
+        input[type="time"]:focus,
+        select:focus,
+        textarea:focus {
+            background-color: #F9FAFB;
+        }
+
+        .ticket-form:hover {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        textarea::placeholder,
+        input::placeholder {
+            color: #9ca3af;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100%);
+            padding: 10px 20px;
+            border-radius: 8px;
+            color: white;
+            font-size: 0.9rem;
+            z-index: 1050;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .toast.success {
+            background-color: #28a745;
+        }
+
+        .toast.error {
+            background-color: #dc3545;
+        }
+
+        .toast.info {
+            background-color: #17a2b8;
+        }
+
+        .update-entry {
+            transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+        }
+
+        #sync-status-container {
+            font-size: 0.8rem;
+            text-align: center;
+            margin-bottom: 15px;
+            min-height: 20px;
+        }
+
+        #sync-status {
+            padding: 3px 8px;
+            border-radius: 4px;
+            opacity: 0.85;
+        }
+
+        #sync-status.connected {
+            background-color: #28a745;
+            color: white;
+        }
+
+        #sync-status.error {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        #sync-status.syncing {
+            background-color: #ffc107;
+            color: black;
+        }
+
+        #sync-status.pending {
+            background-color: #fdba74;
+            color: black;
+        }
+
+        .input-error {
+            border-color: #f87171 !important;
+            box-shadow: 0 0 0 2px #fecaca;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-content {
+            background-color: #1f2937;
+            color: white;
+            padding: 2rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            width: 90%;
+            max-width: 450px;
+            transform: scale(0.95);
+            transition: transform 0.3s ease;
+        }
+
+        .modal-overlay:not(.hidden) .modal-content {
+            transform: scale(1);
+        }
+
+        .ticket-form {
+            border-width: 1px;
+            border-style: solid;
+            border-color: #4b5563;
+            border-left-width: 5px;
+            transition: border-left-color 0.4s ease-in-out, box-shadow 0.3s ease-in-out;
+        }
+
+        .status-border-red {
+            border-left-color: #ef4444;
+        }
+
+        .status-border-yellow {
+            border-left-color: #f59e0b;
+        }
+
+        .status-border-orange {
+            border-left-color: #f97316;
+        }
+
+        .status-border-green {
+            border-left-color: #22c55e;
+        }
+
+        .status-border-blue {
+            border-left-color: #3b82f6;
+        }
+
+        .status-border-default {
+            border-left-color: #6b7280;
+        }
+
+        /* Estilos para o novo Dashboard */
+        #statusDashboard {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+            /* mb-6 */
+        }
+
+        .status-badge {
+            padding: 4px 10px;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        }
+
+        .status-badge .count {
+            background-color: rgba(0, 0, 0, 0.2);
+            border-radius: 9999px;
+            padding: 0 6px;
+            font-size: 0.7rem;
+        }
+
+        /* PERFORMANCE FIX: Fixed height container to avoid expensive blur repaints on scroll */
+        .main-card-scrollable {
+            max-height: 90vh;
+            overflow-y: auto;
+            transform: translateZ(0);
+            /* Promote to own layer */
+            scrollbar-width: thin;
+            scrollbar-color: #888 #1f2937;
+        }
+
+        .main-card-scrollable::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .main-card-scrollable::-webkit-scrollbar-track {
+            background: #1f2937;
+            border-radius: 8px;
+        }
+
+        .main-card-scrollable::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 8px;
+        }
+
+        .main-card-scrollable::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        body {
+            overflow: hidden;
+            /* Prevent body scroll */
+        }
+    </style>
+</head>
+
+
+
+<body class="p-4 sm:p-6 lg:p-8">
+
+    <!-- Conteúdo Principal da Aplicação -->
+    <div id="appContainer" class="hidden">
+        <button id="logoutBtn" title="Sair da sua conta"
+            class="control-button fixed top-4 right-4 bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg shadow-lg z-50 flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd"
+                    d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z"
+                    clip-rule="evenodd" />
+            </svg>
+            Sair
+        </button>
+
+        <div id="toast-notification" class="toast"></div>
+        <div class="bg-slate-800 bg-opacity-60 container mx-auto p-6 rounded-xl shadow-2xl backdrop-blur-sm main-card-scrollable"
+            id="mainCard">
+            <header class="text-center z-10 mb-4">
+                <img src="https://i.imgur.com/EDCURuB.png" alt="Logo M7" class="mx-auto mb-4 h-20">
+                <h1 class="text-3xl font-bold text-white">Gerador de Relatório CCO</h1>
+            </header>
+            <div id="sync-status-container">
+                <span id="sync-status">Verificando conexão...</span>
+            </div>
+
+            <div
+                class="mb-6 p-4 border border-blue-300 rounded-lg bg-slate-700 bg-opacity-40 flex flex-col sm:flex-row justify-between items-center gap-4">
+                <div class="flex items-center">
+                    <label for="reportHour" class="block text-sm font-medium text-white mr-2">Horário CCO:</label>
+                    <select id="reportHour"
+                        class="mt-1 block w-full sm:w-auto px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 sm:text-sm"></select>
+                </div>
+                <div class="flex items-center text-white text-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-gray-300" viewBox="0 0 20 20"
+                        fill="currentColor">
+                        <path d="M2 6a2 2 0 012-2h12a2 2 0 012 2v1H4V6zM2 9h16v7a2 2 0 01-2 2H4a2 2 0 01-2-2V9z" />
+                    </svg>
+                    <span class="font-medium mr-1">Tickets Totais:</span>
+                    <span id="ticketCount" class="font-bold bg-indigo-500 text-white rounded-full px-2 py-0.5">0</span>
+                </div>
+                <!-- NOVO: Filtro Avançado por Status -->
+                <div class="flex items-center">
+                    <label for="statusFilter" class="block text-sm font-medium text-white mr-2">Filtrar Status:</label>
+                    <select id="statusFilter"
+                        class="mt-1 block w-full sm:w-auto px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 sm:text-sm"></select>
+                </div>
+                <div class="relative flex-grow max-w-xs w-full sm:w-auto">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
+                            fill="currentColor">
+                            <path fill-rule="evenodd"
+                                d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
+                                clip-rule="evenodd" />
+                        </svg>
+                    </div>
+                    <input type="text" id="searchInput"
+                        class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 sm:text-sm"
+                        placeholder="Filtrar por Ticket, Cliente...">
+                </div>
+            </div>
+
+            <!-- NOVO: Painel Rápido de Status (Dashboard) -->
+            <div id="statusDashboard"></div>
+
+            <div id="ticketsContainer" class="space-y-8 mb-8"></div>
+
+            <div class="flex flex-wrap gap-3 mb-8 justify-center">
+                <button id="addTicketBtn" type="button"
+                    class="control-button bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20"
+                        fill="currentColor">
+                        <path fill-rule="evenodd"
+                            d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+                            clip-rule="evenodd" />
+                    </svg>
+                    Adicionar Ticket
+                </button>
+            </div>
+
+            <div class="mb-6 space-y-3">
+                <button id="generateReportBtn" type="button"
+                    class="control-button w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg shadow-lg text-lg flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" viewBox="0 0 20 20"
+                        fill="currentColor">
+                        <path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" />
+                        <path fill-rule="evenodd"
+                            d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"
+                            clip-rule="evenodd" />
+                    </svg>
+                    Gerar Relatório
+                </button>
+            </div>
+            <div id="reportPreviewContainer" class="mb-4">
+                <label for="reportOutput" class="block text-lg font-semibold text-white mb-2">Relatório Gerado:</label>
+                <textarea id="reportOutput" rows="15"
+                    class="w-full p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm"
+                    readonly placeholder="Seu relatório formatado aparecerá aqui..."></textarea>
+                <div class="flex flex-col sm:flex-row gap-3 mt-3">
+                    <button id="copyReportBtn" type="button"
+                        class="control-button flex-1 bg-teal-500 hover:bg-teal-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20"
+                            fill="currentColor">
+                            <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
+                            <path
+                                d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
+                        </svg>
+                        Copiar Relatório
+                    </button>
+                    <button id="sendWhatsappBtn" type="button"
+                        class="control-button flex-1 bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20"
+                            fill="currentColor">
+                            <path
+                                d="M10.25 1.25a.75.75 0 00-1.5 0v1.655a.25.25 0 01-.397.202l-1.32-.88a.75.75 0 00-.914 1.255l1.32.88a.25.25 0 010 .403l-1.32.88a.75.75 0 00.914 1.255l1.32-.88a.25.25 0 01.397.202V8.5a.75.75 0 001.5 0v-1.655a.25.25 0 01.397-.202l1.32.88a.75.75 0 10.914-1.255l-1.32-.88a.25.25 0 010-.403l1.32-.88a.75.75 0 10-.914-1.255l-1.32.88a.25.25 0 01-.397-.202V1.25zM3.75 8a.75.75 0 000 1.5h12.5a.75.75 0 000-1.5H3.75z" />
+                        </svg>
+                        Enviar por WhatsApp
+                    </button>
+                    <button id="sendEmailBtn" type="button"
+                        class="control-button flex-1 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20"
+                            fill="currentColor">
+                            <path
+                                d="M2.003 5.884L10 2.25l7.997 3.634A1 1 0 0017 4.884V16.5a1 1 0 01-1 1H4a1 1 0 01-1-1V4.884a1 1 0 00-1.003-1.002 1 1 0 00-.997 1.002v.004L10 11.25l8.997-4.09A1 1 0 0019 6.16V16.5a1 1 0 01-1 1H2a1 1 0 01-1-1V6.16a1 1 0 00.003-1.276z" />
+                        </svg>
+                        Enviar por Email
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="confirmationModal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h3 id="modalTitle" class="text-xl font-bold mb-4">Confirmação</h3>
+            <p id="modalMessage" class="mb-6 text-gray-300">Você tem certeza?</p>
+            <div class="flex justify-end gap-4">
+                <button id="modalCancelBtn"
+                    class="control-button bg-gray-500 hover:bg-gray-600 font-semibold py-2 px-6 rounded-lg">Cancelar</button>
+                <button id="modalConfirmBtn"
+                    class="control-button bg-red-600 hover:bg-red-700 font-semibold py-2 px-6 rounded-lg">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== TEMPLATES OCULTOS ===== -->
+    <template id="ticketFormTemplate">
+        <div class="ticket-form p-6 rounded-xl shadow-lg bg-slate-700 bg-opacity-40">
+            <div class="flex justify-between items-center mb-5 border-b border-gray-500 pb-2">
+                <div class="flex items-center gap-4">
+                    <h3 class="text-xl font-semibold text-white">Detalhes do Ticket</h3>
+                    <div class="sla-indicator flex items-center gap-2" title="Tempo de atendimento (SLA)">
+                        <div class="sla-dot h-3 w-3 rounded-full bg-gray-400"></div>
+                        <span class="sla-timer-text text-xs font-medium text-gray-300">--</span>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button type="button"
+                        class="remove-ticket-btn bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-3 rounded-full text-xs transition-transform hover:scale-110"
+                        title="Remover este ticket">&times; Remover</button>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 mb-4">
+                <div>
+                    <label class="block text-sm font-medium text-white">Número do Ticket:</label>
+                    <input type="text" data-field="number"
+                        class="ticket-number saveable-field mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 sm:text-sm"
+                        placeholder="Ex: 881968542" maxlength="9" inputmode="numeric" pattern="\d{9}">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-white">Status do Ticket:</label>
+                    <select data-field="status"
+                        class="ticket-status saveable-field mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 sm:text-sm">
+                        <option value="" disabled>Selecione um status</option>
+                        <option value="Pendente Cliente">Pendente Cliente</option>
+                        <option value="Pendente Parceiro">Pendente Parceiro</option>
+                        <option value="Pendente GN">Pendente GN</option>
+                        <option value="Pendente N2">Pendente N2</option>
+                        <option value="Pendente N3">Pendente N3</option>
+                        <option value="Agendado">Agendado</option>
+                        <option value="Monitorando Voltagem da Bateria">Monitorando Voltagem da Bateria</option>
+                        <option value="Monitorando Perdas de Pacotes">Monitorando Perdas de Pacotes</option>
+                        <option value="Monitorando Latência">Monitorando Latência</option>
+                        <option value="Resolvido">Resolvido</option>
+                        <option value="Redução de Prioridade">Redução de Prioridade</option>
+                        <option value="Pendente CIA Eletrica">Pendente CIA Eletrica</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-white">Data de Abertura:</label>
+                    <input type="date" data-field="openingDate"
+                        class="opening-date saveable-field mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 sm:text-sm">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-white">Hora de Abertura:</label>
+                    <input type="time" data-field="openingHour"
+                        class="opening-hour saveable-field mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 sm:text-sm">
+                </div>
+                <div class="md:col-span-1">
+                    <label class="block text-sm font-medium text-white">Cliente:</label>
+                    <input type="text" data-field="client"
+                        class="client saveable-field mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 sm:text-sm"
+                        placeholder="Ex: DROGACENTER - CD RESENDE">
+                </div>
+                <div class="md:col-span-1">
+                    <label class="block text-sm font-medium text-white">Ocorrência:</label>
+                    <input type="text" data-field="occurrence"
+                        class="occurrence saveable-field mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 sm:text-sm"
+                        placeholder="Ex: Indisponibilidade no Link">
+                </div>
+            </div>
+            <div class="flex justify-between items-center pt-3 border-t border-gray-500 mt-4">
+                <h4 class="text-lg font-medium text-white">Atualizações:</h4>
+                <button type="button"
+                    class="toggle-updates-btn control-button bg-gray-600 hover:bg-gray-500 text-white font-semibold py-1 px-2 rounded-md text-xs flex items-center"
+                    title="Minimizar/Maximizar Atualizações">
+                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                    <span>Minimizar</span>
+                </button>
+            </div>
+            <div class="updates-container space-y-3 mb-3 mt-2"></div>
+            <div class="flex flex-wrap gap-2 mt-3">
+                <button type="button"
+                    class="add-update-btn control-button bg-blue-500 hover:bg-blue-600 text-white font-semibold py-1 px-3 rounded-md text-xs flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20"
+                        fill="currentColor">
+                        <path fill-rule="evenodd"
+                            d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
+                            clip-rule="evenodd"></path>
+                    </svg>
+                    Nova Atualização
+                </button>
+                <!-- BOTÃO ADICIONADO -->
+                <button type="button"
+                    class="generate-single-report-btn control-button bg-cyan-600 hover:bg-cyan-700 text-white font-semibold py-1 px-3 rounded-md text-xs flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20"
+                        fill="currentColor">
+                        <path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" />
+                        <path fill-rule="evenodd"
+                            d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"
+                            clip-rule="evenodd" />
+                    </svg>
+                    Gerar Relatório Avulso
+                </button>
+                <!-- FIM DO BOTÃO ADICIONADO -->
+            </div>
+        </div>
+    </template>
+    <template id="updateEntryTemplate">
+        <div
+            class="update-entry p-3 border border-gray-500 rounded-lg bg-slate-600 bg-opacity-50 hover:border-indigo-400 transition-colors relative">
+            <button type="button"
+                class="remove-update-btn absolute top-2 right-2 bg-red-500 hover:bg-red-700 text-white font-bold p-1 rounded-full text-xs leading-none"
+                style="width: 20px; height: 20px;" title="Remover esta atualização">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mx-auto" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor" stroke-width="3">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+            <label class="update-label block text-xs font-semibold text-gray-300 mb-1">Atualização X:</label>
+            <div class="grid grid-cols-1 gap-2">
+                <div class="grid grid-cols-2 gap-2">
+                    <div><input type="date"
+                            class="update-date saveable-field w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 sm:text-sm">
+                    </div>
+                    <div><input type="time"
+                            class="update-hour saveable-field w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 sm:text-sm">
+                    </div>
+                </div>
+                <div class="relative">
+                    <textarea
+                        class="update-text saveable-field w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 sm:text-sm"
+                        rows="4" placeholder="Texto da atualização"></textarea>
+                </div>
+            </div>
+        </div>
+    </template>
+</body>
+<script type="module" src="/relatorio/relatorio.js"></script>
+</html>

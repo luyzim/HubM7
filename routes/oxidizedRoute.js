@@ -59,7 +59,7 @@ router.post("/generate", (req, res) => {
 
   if (!apiData || typeof apiData !== "object" || !apiData.template_principal || !apiData.dados) {
     return res.status(400).json({ 
-      error: "Corpo da requisição inválido. 'template_principal' e 'dados' são obrigatórios." 
+      error: "[ERROR]Corpo da requisição inválido. 'template_principal' e 'dados' são obrigatórios." 
     });
   }
 
@@ -82,11 +82,11 @@ router.post("/generate", (req, res) => {
 
   child.on("close", (code) => {
     if (code !== 0) {
-      console.error(`Erro ao executar script bkpOxidized.py: ${stderr}`);
+      console.error(`[ERROR]Erro ao executar script bkpOxidized.py: ${stderr}`);
       return res.status(500).json({ 
         ok: false, 
         code, 
-        error: "Erro no servidor ao executar o script de automação.",
+        error: "[ERROR]Erro no servidor ao executar o script de automação.",
         details: stderr 
       });
     }
@@ -97,14 +97,14 @@ router.post("/generate", (req, res) => {
       message: "Configuração gerada e salva com sucesso.",
       generated_config: stdout.trim()
     });
-    console.log("Configuração Oxidized gerada com sucesso para template:", apiData.template_principal, "| Dados:", apiData.dados);
+    console.log("[OK]",res.message , apiData.template_principal, "| Dados:", apiData.dados);
   });
 
   child.on("error", (err) => {
-    console.error(`Falha ao iniciar o processo do script: ${err.message}`);
+    console.error(`[ERROR]Falha ao iniciar o processo do script: ${err.message}`);
     res.status(500).json({
       ok: false,
-      error: "Falha ao iniciar o processo do script.",
+      error: "[ERROR]Falha ao iniciar o processo do script.",
       details: err.message
     });
   });
