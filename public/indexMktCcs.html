@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8" />
@@ -208,15 +208,15 @@
       <div class="md:col-span-2 flex flex-wrap gap-3 mt-2">
         <button id="btn-config" type="submit" class="py-3 px-4">Gerar Configuracao</button>
         <button id="btn-mensagem" type="button" class="py-3 px-4">Gerar Mensagem (OTRS)</button>
-        <button id="btn-wiki" type="button" class="py-3 px-4">Gerar Documentação (Wiki)</button>
+        <button id="btn-wiki" type="button" class="py-3 px-4">Gerar DocumentaÃ§Ã£o (Wiki)</button>
       </div>
     </form>
 
     <h3 class="text-2xl font-semibold mt-8 mb-3">Preview Configuracao</h3>
     <pre id="out" class="full">Nenhum arquivo gerado.</pre>
 
-    <h3 class="text-2xl font-semibold mt-6 mb-3">Documentação Wiki</h3>
-    <pre id="msg-out" class="full">Nenhuma Documentação gerada.</pre>
+    <h3 class="text-2xl font-semibold mt-6 mb-3">DocumentaÃ§Ã£o Wiki</h3>
+    <pre id="msg-out" class="full">Nenhuma DocumentaÃ§Ã£o gerada.</pre>
 
     
 
@@ -228,7 +228,7 @@
   const btnWiki = document.getElementById("btn-wiki");
   const btnMensagem = document.getElementById("btn-mensagem");
 
-  const btnConfig = document.getElementById("btn-config"); // Adicionar esta linha para obter o botão de configuração
+  const btnConfig = document.getElementById("btn-config"); // Adicionar esta linha para obter o botÃ£o de configuraÃ§Ã£o
 
   // Removed local showToast definition as it's now imported
 
@@ -236,7 +236,7 @@
 
   const callApi = async (url, outId, labels = {}) => {
     const data = collectData();
-    // Adicionado log para depuração
+    // Adicionado log para depuraÃ§Ã£o
     console.log(`Chamando API: ${url} com dados:`, data);
     const response = await fetch(url, {
       method: "POST",
@@ -244,7 +244,7 @@
       body: JSON.stringify({ data })
     });
     const payload = await response.json();
-    // Adicionado log para depuração
+    // Adicionado log para depuraÃ§Ã£o
     console.log(`Resposta da API ${url}:`, payload);
     
     // Get IDENTIFICACAO and NUM_PA for wiki path
@@ -261,9 +261,9 @@
     });
   };
 
-    // Event listener para o formulário (para o botão "Gerar Configuracao" que é tipo submit)
+    // Event listener para o formulÃ¡rio (para o botÃ£o "Gerar Configuracao" que Ã© tipo submit)
     form.addEventListener("submit", async (e) => {
-        e.preventDefault(); // Previne o envio padrão do formulário
+        e.preventDefault(); // Previne o envio padrÃ£o do formulÃ¡rio
         
         btnConfig.disabled = true;
         const originalText = btnConfig.textContent;
@@ -273,6 +273,8 @@
           await callApi("/api/mkt", "out", {
             previewLabel: "Pre-visualizar configuracao",
             downloadLabel: "Baixar Configuracao",
+            enableCopy: true,
+            copyLabel: "Copiar Configuracao",
           });
         } finally {
           btnConfig.disabled = false;
@@ -291,6 +293,8 @@
       await callApi("/api/mkt/gerawiki", "msg-out", {
         previewLabel: "Pre-visualizar Documentação",
         downloadLabel: "Subir para Wiki",
+        enableCopy: true,
+        copyLabel: "Copiar Documentação",
       });
     } finally {
       btnWiki.disabled = false;
@@ -309,6 +313,8 @@
       await callApi("/api/mkt/mensagem", "msg-out", {
         previewLabel: "Pre-visualizar Documentação",
         downloadLabel: "Baixar Documentação",
+        enableCopy: true,
+        copyLabel: "Copiar Documentação",
       });
     } finally {
       btnMensagem.disabled = false;
@@ -380,7 +386,7 @@
 <button class="help-fab" id="helpFab" aria-controls="helpBubble" aria-expanded="false" title="Instrucoes">?</button>
 
   <div class="help-bubble" id="helpBubble" role="dialog" aria-labelledby="helpTitle" aria-modal="false">
-    <button class="close" id="helpClose" aria-label="Fechar">×</button>
+    <button class="close" id="helpClose" aria-label="Fechar">Ã—</button>
     <h4 id="helpTitle">Instrucoes rapidas</h4>
     <p>- Utilize <code>IP-Valido</code> com o barramento desejado para o calculo automatico.</p>
     <p>- <code>IP_UNIDADE</code> nao precisa de barramento "/".</p>
@@ -394,3 +400,4 @@
   <script src="/js/sessionReminder.js"></script>
 </body>
 </html>
+

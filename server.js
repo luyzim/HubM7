@@ -37,6 +37,7 @@ import loginOtrsRouter from "./routes/loginOtrsRoute.js";
 import wikiRouter from "./routes/wikiRoute.js";
 import workSessionRouter from "./routes/workSessionRoute.js";
 import adminDashboardRouter from "./routes/adminDashboardRoute.js";
+import relatorioCcoRouter from "./routes/relatorioCcoRoute.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -100,6 +101,10 @@ app.get("/admin", (req, res) => {
 });
 app.get("/home", ensureAuth, (req, res) => {
   res.sendFile(path.join(__dirname, "public", "home.html"));
+});
+
+app.get("/hub-insights", ensureAuth, (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "hub.html"));
 });
 
 app.get("/homeAdmin", ensureAdmin, (req, res) => {
@@ -170,8 +175,8 @@ app.get("/api/wiki", ensureN2, (req, res) => {
   res.sendFile(path.join(__dirname, "public", "wiki.html"));
 });
 
-app.get("/api/relatorio", ensureN2, (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "relatorio.html"));
+app.get("/api/relatorio", ensureN1, (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "relatorioCco.html"));
 });
 
 
@@ -200,6 +205,7 @@ app.use("/api/loginOtrs", ensureN2, loginOtrsRouter);
 app.use("/api/wiki", ensureN2, wikiRouter);
 app.use("/api/work-session", ensureAuth, workSessionRouter);
 app.use("/api/admin", ensureAdmin, adminDashboardRouter);
+app.use("/api/relatorio", ensureN1, relatorioCcoRouter);
 
 
 const PORT = process.env.PORT;

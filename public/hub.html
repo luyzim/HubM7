@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <title>Portal de Insights HUB</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" type="image/png" href="https://i.imgur.com/8qVGalo.png">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #111827; margin:0; }
+    main { max-width: 1200px; margin: 0 auto; padding: 1.5rem; }
+    .card { background: white; border: 1px solid #e5e7eb; border-radius: 0.75rem; padding: 1rem; }
+    .section { margin-top: 2rem; }
+    .section-title { font-size: 1.3rem; margin-bottom: 0.85rem; font-weight: 700; }
+    .kpi-grid { display:grid; gap: 12px; grid-template-columns: repeat(auto-fit,minmax(170px,1fr)); }
+    .kpi-card { background: #e0f2fe; color: #0c4a6e; border:1px solid #bae6fd; border-radius:0.6rem; padding:0.9rem; }
+    .kpi-card strong { font-size:1.25rem; display:block; margin-top:0.35rem; }
+    .chart-box { background:#f1f5f9; border:1px solid #cbd5e1; border-radius:0.65rem; padding:0.85rem; }
+    .small-table th, .small-table td { padding:0.5rem; border:1px solid #e2e8f0;}
+    table{width:100%; border-collapse:collapse; margin-top:0.5rem;}
+    th,td{padding:0.55rem;border:1px solid #e5e7eb;} th{background:#e2e8f0;font-weight:700;}
+    .chart-box canvas {
+        max-height: 280px !important;
+        width: 100% !important;
+        }
+  </style>
+</head>
+<body>
+  <main>
+    <header class="mb-6">
+      <h1 class="text-3xl font-bold">Portal de Insights HUB</h1>
+      <p class="text-slate-500">Fevereiro de 2026 - Análise de Produtividade</p>
+      <a href="/home" class="text-blue-600 hover:text-blue-800">← Voltar para Hub</a>
+    </header>
+
+    <section class="card">
+      <h2 class="section-title">Resumo Executivo</h2>
+      <p class="text-sm text-slate-600 mb-4">KPIs do período - Fevereiro/2026</p>
+      <div id="kpi-target" class="kpi-grid"></div>
+    </section>
+
+    <section class="section card">
+      <h2 class="section-title">Economia de Tempo Gerada</h2>
+      <div class="grid md:grid-cols-2 gap-4">
+        <div class="kpi-card">
+          <span class="text-sm">Minutos Economizados</span>
+          <strong id="economy-min"></strong>
+        </div>
+        <div class="kpi-card">
+          <span class="text-sm">Horas Economizadas</span>
+          <strong id="economy-hours"></strong>
+        </div>
+      </div>
+    </section>
+
+    <section class="section card">
+      <h2 class="section-title">Ranking de Usuários por Economia</h2>
+      <div class="grid md:grid-cols-2 gap-4">
+        <div class="chart-box"><canvas id="userPieChart" height="260"></canvas></div>
+        <div class="chart-box"><canvas id="endpointPieChart" height="260"></canvas></div>
+      </div>
+    </section>
+
+    <section class="section card">
+      <h2 class="section-title">Top 5 Usuários por Economia de Tempo</h2>
+      <div id="top-users" class="grid md:grid-cols-1 gap-3"></div>
+    </section>
+
+    <section class="section card">
+      <h2 class="section-title">Ranking de Endpoints por Economia de Tempo</h2>
+      <table>
+        <thead><tr><th>#</th><th>Endpoint</th><th>Frequência</th><th>Economia (min)</th><th>Economia (h)</th></tr></thead>
+        <tbody id="endpoints-table"></tbody>
+      </table>
+    </section>
+
+    <section class="section card">
+      <h2 class="section-title">Resumo de Métricas</h2>
+      <table>
+        <tbody id="summary-metrics"></tbody>
+      </table>
+    </section>
+
+    <section class="section card">
+      <h2 class="section-title">Atividade Diária</h2>
+      <div class="chart-box"><canvas id="dailyChart" height="200"></canvas></div>
+    </section>
+
+  </main>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="/reportData.js"></script>
+  <script src="/js/hubInsights.js"></script>
+</body>
+</html>

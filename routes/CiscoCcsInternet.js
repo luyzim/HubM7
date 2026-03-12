@@ -55,14 +55,14 @@ function runTemplate(res, data, templateName, cmd) {
 router.post("/", (req, res) => {
   const data = req.body?.data || req.body;
   runTemplate(res, data, "ciscoModelo.txt", "cisco");
-    console.log('Gerado Script Cisco:', data.IDENTIFICACAO, data.NUM_PA, data.VRF, data.IP_VALIDO);
+    console.log('[OK]Gerado Script Cisco:', data.IDENTIFICACAO, data.NUM_PA, data.VRF, data.IP_VALIDO);
 
 });
 
 router.post("/mensagem", (req, res) => {
   const data = req.body?.data || req.body;
   runTemplate(res, data, "mensagemInternet.txt", "mensagem");
-  console.log('Gerado Script Mensagem') ;
+  console.log('[OK]Gerado Script Mensagem') ;
 });
 
 export default router;

@@ -144,3 +144,37 @@ model WorkSession {
   @@index([userEmail, status])
   @@index([taskType, startedAt])
 }
+
+model RelatorioCcoTicket {
+  id           Int                  @id @default(autoincrement())
+  ownerType    String               @db.VarChar(30)
+  ownerId      Int
+  number       String?              @db.VarChar(30)
+  status       String?              @db.VarChar(120)
+  openingDate  String?              @db.VarChar(20)
+  openingHour  String?              @db.VarChar(10)
+  client       String?              @db.VarChar(255)
+  occurrence   String?              @db.VarChar(500)
+  createdAt    DateTime             @default(now()) @db.Timestamptz(6)
+  updatedAt    DateTime             @updatedAt @db.Timestamptz(6)
+
+  updates      RelatorioCcoUpdate[]
+
+  @@index([ownerType, ownerId])
+  @@index([status])
+  @@map("relatorio_cco_ticket")
+}
+
+model RelatorioCcoUpdate {
+  id         Int                @id @default(autoincrement())
+  ticketId   Int
+  updateDate String?            @db.VarChar(20)
+  updateHour String?            @db.VarChar(10)
+  text       String?            @db.Text
+  createdAt  DateTime           @default(now()) @db.Timestamptz(6)
+
+  ticket     RelatorioCcoTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  @@index([ticketId])
+  @@map("relatorio_cco_update")
+}

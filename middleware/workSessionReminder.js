@@ -16,6 +16,7 @@ const AUTOMATION_PREFIXES = [
   "/api/comandos-mkt",
   "/api/ccsFortgate",
   "/api/wiki",
+  "/api/relatorio/reminder",
 ];
 
 function isWhitelistedAutomationPath(pathname) {

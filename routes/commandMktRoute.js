@@ -217,7 +217,7 @@ router.post("/run", (req, res) => {
   let stderrBuf = "";
 
   // logs “padrão” do python
-  const logRegex = /\s-\s(INFO|ERROR|DEBUG|WARNING)\s-\s/;
+  const logRegex = /\s-\s(INFO|ERROR|DEBUG|WARNING|OK)\s-\s/;
 
   py.stdout.on("data", (data) => {
     stdoutBuf += data.toString("utf-8");
@@ -227,7 +227,7 @@ router.post("/run", (req, res) => {
       stdoutBuf = stdoutBuf.slice(idx + 1);
 
       if (logRegex.test(line)) {
-        console.log(`[Python LOG] ${line}`);
+        //console.log(`[Python LOG] ${line}`);
       } else {
         res.write(line + "\n");
       }
@@ -240,22 +240,24 @@ router.post("/run", (req, res) => {
     while ((idx = stderrBuf.indexOf("\n")) >= 0) {
       const line = stderrBuf.slice(0, idx).replace(/\r$/, "");
       stderrBuf = stderrBuf.slice(idx + 1);
-
       if (logRegex.test(line)) {
-        console.log(`[Python LOG] ${line}`);
+        //console.log(`[Python LOG] ${line}`);
+
       } else {
         console.error(`[Python STDERR] ${line}`);
         res.write(`[ERRO] ${line}\n`);
       }
     }
+
   });
 
   py.on("close", (code) => {
+    console.log(``);
     // flush buffers
     if (stdoutBuf.trim()) {
       const line = stdoutBuf.trim();
       if (!logRegex.test(line)) res.write(line + "\n");
-      else console.log(`[Python LOG] ${line}`);
+      //else console.log(`[Python LOG] ${line}`);
     }
 
     if (stderrBuf.trim()) {
@@ -264,17 +266,19 @@ router.post("/run", (req, res) => {
         console.error(`[Python STDERR] ${line}`);
         res.write(`[ERRO] ${line}\n`);
       } else {
-        console.log(`[Python LOG] ${line}`);
+        console.log(`[ERROR] ${line}`);
       }
     }
 
     if (code !== 0) {
-      const finalMessage = `\nScript finalizado com código de erro ${code}\n`;
+      const finalMessage = `\n[ERROR]Script finalizado com código de erro ${code}\n`;
       console.error(finalMessage.trim());
       res.write(finalMessage);
     }
 
+    console.log('[OK] executado comando', command, 'na unidade', ip);
     res.end();
+
   });
 });
 

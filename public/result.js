@@ -21,6 +21,36 @@ export function showToast(message, type = 'success') {
   }, 5000);
 }
 
+async function copyToClipboard(text) {
+  if (navigator.clipboard?.writeText) {
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch (error) {
+      console.warn("Clipboard API indisponivel, tentando fallback:", error);
+    }
+  }
+
+  try {
+    const temp = document.createElement("textarea");
+    temp.value = text;
+    temp.setAttribute("readonly", "");
+    temp.style.position = "fixed";
+    temp.style.opacity = "0";
+    temp.style.pointerEvents = "none";
+    document.body.appendChild(temp);
+    temp.focus();
+    temp.select();
+    temp.setSelectionRange(0, temp.value.length);
+    const copied = document.execCommand("copy");
+    document.body.removeChild(temp);
+    return copied;
+  } catch (error) {
+    console.warn("Fallback de copia falhou:", error);
+    return false;
+  }
+}
+
 
 export function renderResult(j, opts = {}) {
   const outId = opts.outId || "out";
@@ -29,6 +59,8 @@ export function renderResult(j, opts = {}) {
   const previewLabel = opts.previewLabel || "Pre-visualizar";
   const downloadLabel = opts.downloadLabel || `Baixar ${j.filename || "arquivo"}`;
   const onlyDownload = opts.onlyDownload || false;
+  const enableCopy = opts.enableCopy || false;
+  const copyLabel = opts.copyLabel || "Copiar";
   const wikiAction = opts.wikiAction || false; // New option for wiki upload
   const identifier = opts.identifier || ""; // New option for wiki path
   const numPa = opts.numPa || ""; // New option for wiki path
@@ -45,6 +77,7 @@ export function renderResult(j, opts = {}) {
   container.style.display = "flex";
   container.style.gap = "10px";
   container.style.marginBottom = "10px";
+  container.style.alignItems = "center";
 
   if (!onlyDownload) {
     const previewButton = document.createElement("button");
@@ -53,6 +86,43 @@ export function renderResult(j, opts = {}) {
       out.textContent = j.preview || j.raw || JSON.stringify(j, null, 2);
     };
     container.appendChild(previewButton);
+  }
+
+  let copyButton = null;
+  if (enableCopy) {
+    copyButton = document.createElement("button");
+    copyButton.type = "button";
+    copyButton.title = copyLabel;
+    copyButton.setAttribute("aria-label", copyLabel);
+    copyButton.style.width = "42px";
+    copyButton.style.minWidth = "42px";
+    copyButton.style.maxWidth = "42px";
+    copyButton.style.padding = "0.5rem";
+    copyButton.style.display = "inline-flex";
+    copyButton.style.alignItems = "center";
+    copyButton.style.justifyContent = "center";
+    copyButton.innerHTML = `
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+      </svg>
+    `;
+    copyButton.onclick = async () => {
+      const content = (out.textContent && out.textContent.trim())
+        ? out.textContent
+        : (j.preview || j.raw || JSON.stringify(j, null, 2));
+      if (!content) {
+        showToast("Nada para copiar.", "error");
+        return;
+      }
+
+      const copied = await copyToClipboard(content);
+      if (copied) {
+        showToast("Conteudo copiado!", "success");
+      } else {
+        showToast("Erro ao copiar conteudo.", "error");
+      }
+    };
   }
 
   const actionButton = document.createElement("button");
@@ -108,6 +178,10 @@ export function renderResult(j, opts = {}) {
   };
 
   if (j.preview || j.raw || onlyDownload) container.appendChild(actionButton);
+  if (copyButton) {
+    copyButton.style.marginLeft = "auto";
+    container.appendChild(copyButton);
+  }
 
   out.before(container);
 }

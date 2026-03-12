@@ -204,7 +204,11 @@
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
-    await callApi("/api/cisco", "out", { downloadLabel: "Baixar configuracao" });
+    await callApi("/api/cisco", "out", {
+      downloadLabel: "Baixar configuracao",
+      enableCopy: true,
+      copyLabel: "Copiar Configuracao",
+    });
   });
 
 

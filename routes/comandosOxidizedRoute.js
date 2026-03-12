@@ -15,12 +15,12 @@ router.post("/run", (req, res) => {
 
   if (!template_name || !texto_para_inserir) {
     return res.status(400).json({ 
-      error: "Corpo da requisição inválido. 'template_name' e 'texto_para_inserir' são obrigatórios." 
+      error: "[ERROR]Corpo da requisição inválido. 'template_name' e 'texto_para_inserir' são obrigatórios." 
     });
   }
 
   // Log de governança p/ saber o que está chegando
-  console.log("Bkp Inserido no Oxidized:", template_name, texto_para_inserir);
+  console.log("[OK] Bkp Inserido no Oxidized:", template_name, texto_para_inserir);
 
   const pythonCmd = process.platform === "win32" ? "python" : "python3";
   const scriptPath = path.join(__dirname, "..", "scripts", "comandosOxidized.py");
@@ -46,7 +46,7 @@ router.post("/run", (req, res) => {
     console.error(`[Script] Falhou (code ${code}): ${err}`); // log rico no servidor
     return res.status(500).json({ 
       ok: false, 
-      error: "Ocorreu uma falha ao processar a solicitação." // mensagem genérica pro cliente
+      error: "[ERROR]Ocorreu uma falha ao processar a solicitação." // mensagem genérica pro cliente
     });
   }
 
@@ -60,10 +60,10 @@ router.post("/run", (req, res) => {
 
 
   child.on("error", (err) => {
-    console.error(`Falha ao iniciar o processo do script: ${err.message}`);
+    console.error(`[ERROR]Falha ao iniciar o processo do script: ${err.message}`);
     res.status(500).json({
       ok: false,
-      error: "Falha ao iniciar o processo do script.",
+      error: "[ERROR]Falha ao iniciar o processo do script.",
       details: err.message,
     });
   });

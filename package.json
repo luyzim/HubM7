@@ -20,8 +20,9 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js",
-    "prisma:seed": "node prisma/seed.js"
+    "prisma:seed": "node prisma/seed.js",
+    "gen-report": "python scripts/generate_report_data.py --log \"C:\\Users\\User\\.pm2\\logs\\hub-out.log\" --out \"C:\\Users\\User\\Desktop\\Projetos\\Hub\\reportData.ts\" --as-date 2026-03-01",
+    "start": "node server.js"
   },
   "dependencies": {
     "@prisma/client": "^6.19.1",
