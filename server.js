@@ -15,7 +15,6 @@ import ensureN1 from "./middleware/ensureN1.js";
 import workSessionReminder from "./middleware/workSessionReminder.js";
 
 // Imports de rotas
-
 import loginRouter from "./routes/loginRoute.js";
 import aboutRouter from "./routes/aboutRoute.js";
 import unimedRouter from "./routes/unimedRoute.js";
@@ -103,7 +102,7 @@ app.get("/home", ensureAuth, (req, res) => {
   res.sendFile(path.join(__dirname, "public", "home.html"));
 });
 
-app.get("/hub-insights", ensureAuth, (req, res) => {
+app.get("/admin/hub-relatorio", ensureAuth, (req, res) => {
   res.sendFile(path.join(__dirname, "public", "hub.html"));
 });
 

@@ -1,0 +1,42 @@
+{
+  "version": 5,
+  "updatedAt": "2026-03-17T13:30:57.545Z",
+  "tickets": [
+    {
+      "id": "79189858-102e-4641-adb9-d24532ed57e8",
+      "number": "123456",
+      "status": "Pendente Cliente",
+      "openingDate": "2026-03-17",
+      "openingHour": "10:30",
+      "client": "",
+      "occurrence": "",
+      "updates": [
+        {
+          "updateDate": "2026-03-17",
+          "updateHour": "10:30",
+          "text": ""
+        }
+      ],
+      "createdAt": "2026-03-17T13:30:13.196Z",
+      "updatedAt": "2026-03-17T13:30:21.944Z"
+    },
+    {
+      "id": "3a632c58-5a20-419e-b102-40ee68ee79ba",
+      "number": "654321",
+      "status": "",
+      "openingDate": "2026-03-17",
+      "openingHour": "10:30",
+      "client": "",
+      "occurrence": "",
+      "updates": [
+        {
+          "updateDate": "2026-03-17",
+          "updateHour": "10:30",
+          "text": ""
+        }
+      ],
+      "createdAt": "2026-03-17T13:30:47.233Z",
+      "updatedAt": "2026-03-17T13:30:57.545Z"
+    }
+  ]
+}

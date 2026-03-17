@@ -3,13 +3,19 @@ const REQUIRED_FIELDS = ["number", "status", "openingDate", "openingHour", "clie
 const App = {
     config: {
         maxUpdates: 4,
-        minimizedStateKey: "ccoReportMinimizedStates"
+        minimizedStateKey: "ccoReportMinimizedStates",
+        syncPollIntervalMs: 5000
     },
     state: {
         user: null,
         onConfirmCallback: null,
         localTickets: new Map(),
-        slaUpdateIntervalId: null
+        slaUpdateIntervalId: null,
+        syncPollIntervalId: null,
+        syncVersion: 0,
+        syncUpdatedAt: null,
+        pendingExternalReload: false,
+        reloadPromise: null
     },
     elements: {},
     templates: {},
@@ -31,6 +37,7 @@ const App = {
                 this.ui.showToast("Erro ao carregar tickets.", "error");
             }
             this.ui.startSlaUpdater();
+            this.db.startSyncPolling();
         } catch (error) {
             console.error("[relatorio] sessao invalida:", error);
             this.elements.appContainer?.classList.remove("hidden");
@@ -90,18 +97,35 @@ const App = {
 
             return payload;
         },
-        async reload() {
-            App.ui.updateSyncStatus("syncing", "Carregando tickets...");
-            App.elements.ticketsContainer.innerHTML = "";
-            App.state.localTickets.clear();
+        async reload({ silent = false } = {}) {
+            if (App.state.reloadPromise) return App.state.reloadPromise;
 
-            const response = await this.request("/api/relatorio/tickets", { method: "GET" });
-            this.sort(response.tickets || []).forEach((ticket, index) => {
-                App.ui.addTicketFormDOM(ticket, ticket.id, index);
-            });
+            const reloadPromise = (async () => {
+                if (!silent) App.ui.updateSyncStatus("syncing", "Carregando tickets...");
 
-            App.ui.filterTickets();
-            App.ui.updateSyncStatus("connected");
+                const response = await this.request("/api/relatorio/tickets", { method: "GET" });
+                App.helpers.updateSyncMetadata(response);
+                App.state.pendingExternalReload = false;
+
+                App.elements.ticketsContainer.innerHTML = "";
+                App.state.localTickets.clear();
+
+                this.sort(response.tickets || []).forEach((ticket, index) => {
+                    App.ui.addTicketFormDOM(ticket, ticket.id, index);
+                });
+
+                App.ui.filterTickets();
+                App.ui.updateSyncStatus("connected");
+                return response;
+            })();
+
+            App.state.reloadPromise = reloadPromise;
+
+            try {
+                return await reloadPromise;
+            } finally {
+                if (App.state.reloadPromise === reloadPromise) App.state.reloadPromise = null;
+            }
         },
         async addTicket() {
             try {
@@ -117,10 +141,11 @@ const App = {
                 };
 
                 App.ui.updateSyncStatus("syncing", "Criando ticket...");
-                await this.request("/api/relatorio/tickets", {
+                const response = await this.request("/api/relatorio/tickets", {
                     method: "POST",
                     body: JSON.stringify(data)
                 });
+                App.helpers.updateSyncMetadata(response);
                 await this.reload();
                 App.ui.showToast("Novo ticket adicionado.", "success");
                 return true;
@@ -135,10 +160,12 @@ const App = {
             if (!ticketId) return;
             try {
                 App.ui.updateSyncStatus("syncing", "Salvando...");
-                await this.request(`/api/relatorio/tickets/${encodeURIComponent(ticketId)}`, {
+                const response = await this.request(`/api/relatorio/tickets/${encodeURIComponent(ticketId)}`, {
                     method: "PUT",
                     body: JSON.stringify(ticketData)
                 });
+                App.helpers.updateSyncMetadata(response);
+                App.state.pendingExternalReload = false;
                 App.ui.updateSyncStatus("connected");
             } catch (error) {
                 console.error("[relatorio] erro ao atualizar ticket:", error);
@@ -150,9 +177,11 @@ const App = {
             if (!ticketId) return false;
             try {
                 App.ui.updateSyncStatus("syncing", "Removendo ticket...");
-                await this.request(`/api/relatorio/tickets/${encodeURIComponent(ticketId)}`, {
+                const response = await this.request(`/api/relatorio/tickets/${encodeURIComponent(ticketId)}`, {
                     method: "DELETE"
                 });
+                App.helpers.updateSyncMetadata(response);
+                App.state.pendingExternalReload = false;
                 App.ui.updateSyncStatus("connected");
                 App.ui.showToast("Ticket removido com sucesso.", "success");
                 return true;
@@ -162,6 +191,45 @@ const App = {
                 App.ui.showToast("Erro ao remover ticket.", "error");
                 return false;
             }
+        },
+        startSyncPolling() {
+            if (App.state.syncPollIntervalId) clearInterval(App.state.syncPollIntervalId);
+            App.state.syncPollIntervalId = setInterval(() => {
+                this.checkForExternalUpdates().catch((error) => {
+                    console.warn("[relatorio] falha ao verificar atualizacoes externas:", error);
+                    App.ui.updateSyncStatus("error", "Falha na sincronizacao.");
+                });
+            }, App.config.syncPollIntervalMs);
+        },
+        stopSyncPolling() {
+            if (!App.state.syncPollIntervalId) return;
+            clearInterval(App.state.syncPollIntervalId);
+            App.state.syncPollIntervalId = null;
+        },
+        async checkForExternalUpdates() {
+            if (document.hidden || App.state.reloadPromise) return;
+
+            const response = await this.request("/api/relatorio/sync", { method: "GET" });
+            const nextVersion = App.helpers.getSyncVersion(response.syncVersion);
+
+            if (!App.helpers.hasNewerSyncVersion(nextVersion)) {
+                if (App.state.pendingExternalReload) await this.flushPendingExternalReload();
+                return;
+            }
+
+            if (App.helpers.isEditingTicketField()) {
+                App.state.pendingExternalReload = true;
+                App.ui.updateSyncStatus("syncing", "Atualizacao externa pendente...");
+                return;
+            }
+
+            await this.reload({ silent: true });
+            App.ui.showToast("Tickets atualizados por outro perfil.", "info");
+        },
+        async flushPendingExternalReload() {
+            if (!App.state.pendingExternalReload || App.state.reloadPromise || App.helpers.isEditingTicketField()) return;
+            await this.reload({ silent: true });
+            App.ui.showToast("Sincronizacao aplicada com alteracoes externas.", "info");
         }
     },
 
@@ -372,6 +440,13 @@ const App = {
                 if (e.target === App.elements.confirmationModal) App.ui.hideConfirmationModal();
             });
             App.elements.ticketsContainer.addEventListener("click", this.handleTicketActions);
+            App.elements.ticketsContainer.addEventListener("focusout", () => {
+                window.setTimeout(() => {
+                    App.db.flushPendingExternalReload().catch((error) => {
+                        console.warn("[relatorio] falha ao aplicar atualizacao pendente:", error);
+                    });
+                }, 0);
+            }, true);
             const onChange = (event) => {
                 if (!event.target.classList.contains("saveable-field")) return;
                 const form = event.target.closest(".ticket-form");
@@ -388,6 +463,14 @@ const App = {
             App.elements.ticketsContainer.addEventListener("input", (e) => {
                 if (e.target.matches('[data-field="number"]')) e.target.value = e.target.value.replace(/[^0-9]/g, "");
             });
+            document.addEventListener("visibilitychange", () => {
+                if (!document.hidden) {
+                    App.db.checkForExternalUpdates().catch((error) => {
+                        console.warn("[relatorio] falha ao sincronizar ao retornar para a aba:", error);
+                    });
+                }
+            });
+            window.addEventListener("beforeunload", () => App.db.stopSyncPolling());
         },
         handleTicketActions(event) {
             const button = event.target.closest("button");
@@ -611,6 +694,21 @@ const App = {
             const states = this.getMinimizedStates();
             states[id] = isMin;
             localStorage.setItem(App.config.minimizedStateKey, JSON.stringify(states));
+        },
+        getSyncVersion(value) {
+            const parsed = Number(value);
+            return Number.isFinite(parsed) ? parsed : 0;
+        },
+        updateSyncMetadata(payload = {}) {
+            if (payload.syncVersion !== undefined) App.state.syncVersion = this.getSyncVersion(payload.syncVersion);
+            if (payload.syncUpdatedAt) App.state.syncUpdatedAt = payload.syncUpdatedAt;
+        },
+        hasNewerSyncVersion(nextVersion) {
+            return nextVersion > this.getSyncVersion(App.state.syncVersion);
+        },
+        isEditingTicketField() {
+            const active = document.activeElement;
+            return Boolean(active?.classList?.contains("saveable-field"));
         }
     }
 };

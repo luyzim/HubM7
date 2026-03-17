@@ -5,9 +5,9 @@ import 'dotenv/config';
 const prisma = new PrismaClient();
 
 async function createUser() {
-  const email = 'diogo@microset.com'; 
+  const email = 'diogo2@microset.com'; 
   const password = 'NocUsersN1@'; 
-  const name = 'Diogo';
+  const name = 'Diogo2';
 
   try {
     const salt = await bcrypt.genSalt(10);

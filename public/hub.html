@@ -8,86 +8,484 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #111827; margin:0; }
-    main { max-width: 1200px; margin: 0 auto; padding: 1.5rem; }
-    .card { background: white; border: 1px solid #e5e7eb; border-radius: 0.75rem; padding: 1rem; }
-    .section { margin-top: 2rem; }
-    .section-title { font-size: 1.3rem; margin-bottom: 0.85rem; font-weight: 700; }
-    .kpi-grid { display:grid; gap: 12px; grid-template-columns: repeat(auto-fit,minmax(170px,1fr)); }
-    .kpi-card { background: #e0f2fe; color: #0c4a6e; border:1px solid #bae6fd; border-radius:0.6rem; padding:0.9rem; }
-    .kpi-card strong { font-size:1.25rem; display:block; margin-top:0.35rem; }
-    .chart-box { background:#f1f5f9; border:1px solid #cbd5e1; border-radius:0.65rem; padding:0.85rem; }
-    .small-table th, .small-table td { padding:0.5rem; border:1px solid #e2e8f0;}
-    table{width:100%; border-collapse:collapse; margin-top:0.5rem;}
-    th,td{padding:0.55rem;border:1px solid #e5e7eb;} th{background:#e2e8f0;font-weight:700;}
+    :root {
+      color-scheme: dark;
+      --panel-bg: rgba(30, 41, 59, 0.78);
+      --panel-border: rgba(148, 163, 184, 0.22);
+      --card-bg: rgba(15, 23, 42, 0.88);
+      --card-border: rgba(100, 116, 139, 0.35);
+      --muted: #cbd5e1;
+      --muted-strong: #e2e8f0;
+      --accent: #3b82f6;
+      --accent-soft: rgba(59, 130, 246, 0.16);
+      --success-soft: rgba(16, 185, 129, 0.14);
+      --warning-soft: rgba(245, 158, 11, 0.14);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      font-family: "Inter", sans-serif;
+      background-image:
+        linear-gradient(rgba(2, 6, 23, 0.72), rgba(15, 23, 42, 0.82)),
+        url("https://images.unsplash.com/photo-1749150270018-1dee5a5e4b88?q=80&w=1170&auto=format&fit=crop&ixlibrb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D");
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-position: center;
+      background-attachment: fixed;
+      min-height: 100vh;
+      margin: 0;
+      color: #fff;
+    }
+
+    main {
+      width: min(1200px, calc(100% - 2rem));
+      margin: 2rem auto;
+    }
+
+    .content-box {
+      background-color: var(--panel-bg);
+      backdrop-filter: blur(4px);
+      border-radius: 0.75rem;
+      padding: 2rem;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
+      border: 1px solid var(--panel-border);
+    }
+
+    .btn-voltar {
+      background-color: #4b5563;
+      color: white;
+      padding: 0.6rem 1.1rem;
+      border-radius: 0.5rem;
+      font-weight: 600;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      border: 0;
+      cursor: pointer;
+      transition: background-color 0.2s ease-in-out, transform 0.2s ease-in-out;
+    }
+
+    .btn-voltar:hover {
+      background-color: #6b7280;
+      transform: translateY(-1px);
+    }
+
+    .hero-card {
+      display: grid;
+      gap: 1rem;
+      grid-template-columns: minmax(0, 1.5fr) minmax(280px, 0.9fr);
+      margin-bottom: 1.5rem;
+    }
+
+    .hero-panel,
+    .highlight-panel,
+    .section-card,
+    .chart-box,
+    .top-user-card {
+      background-color: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 0.75rem;
+    }
+
+    .hero-panel,
+    .highlight-panel,
+    .section-card {
+      padding: 1.25rem;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.3rem 0.7rem;
+      border-radius: 9999px;
+      background: var(--accent-soft);
+      color: #bfdbfe;
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-bottom: 0.85rem;
+    }
+
+    .hero-title {
+      font-size: clamp(1.8rem, 4vw, 2.4rem);
+      line-height: 1.1;
+      font-weight: 700;
+      margin: 0 0 0.55rem;
+    }
+
+    .hero-subtitle,
+    .section-subtitle,
+    .muted-text {
+      color: var(--muted);
+    }
+
+    .hero-subtitle {
+      margin: 0;
+      font-size: 0.98rem;
+      max-width: 58ch;
+      line-height: 1.6;
+    }
+
+    .highlight-grid,
+    .kpi-grid,
+    .two-up-grid,
+    .top-users-grid {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .highlight-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .highlight-stat {
+      padding: 0.95rem;
+      border-radius: 0.7rem;
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      background: rgba(15, 23, 42, 0.55);
+    }
+
+    .highlight-stat.emphasis {
+      background: var(--success-soft);
+      border-color: rgba(16, 185, 129, 0.35);
+    }
+
+    .highlight-stat.warning {
+      background: var(--warning-soft);
+      border-color: rgba(245, 158, 11, 0.35);
+    }
+
+    .highlight-label {
+      font-size: 0.8rem;
+      color: #cbd5e1;
+      display: block;
+      margin-bottom: 0.35rem;
+    }
+
+    .highlight-value {
+      font-size: 1.45rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .section-stack {
+      display: grid;
+      gap: 1.5rem;
+    }
+
+    .section-card {
+      margin-top: 0;
+    }
+
+    .section-heading {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .section-title {
+      font-size: 1.3rem;
+      margin: 0;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .kpi-grid {
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    }
+
+    .kpi-card {
+      background: linear-gradient(145deg, rgba(30, 41, 59, 0.94), rgba(15, 23, 42, 0.96));
+      border: 1px solid rgba(96, 165, 250, 0.22);
+      border-radius: 0.75rem;
+      padding: 1rem;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    }
+
+    .kpi-card .label {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #93c5fd;
+      margin-bottom: 0.45rem;
+    }
+
+    .kpi-card strong {
+      font-size: 1.35rem;
+      display: block;
+      color: #fff;
+    }
+
+    .two-up-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .chart-box {
+      padding: 1rem;
+      background: rgba(15, 23, 42, 0.74);
+    }
+
+    .chart-title {
+      margin: 0 0 0.85rem;
+      font-weight: 600;
+      color: #e2e8f0;
+    }
+
     .chart-box canvas {
-        max-height: 280px !important;
-        width: 100% !important;
-        }
+      max-height: 280px !important;
+      width: 100% !important;
+    }
+
+    .top-users-grid {
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    }
+
+    .top-user-card {
+      padding: 1rem;
+      background: rgba(15, 23, 42, 0.68);
+    }
+
+    .top-user-rank {
+      font-size: 0.82rem;
+      color: #93c5fd;
+      margin-bottom: 0.3rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .top-user-name {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 0.4rem;
+    }
+
+    .top-user-meta {
+      color: #cbd5e1;
+      font-size: 0.86rem;
+      line-height: 1.5;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 0.5rem;
+      overflow: hidden;
+      border-radius: 0.65rem;
+    }
+
+    th,
+    td {
+      padding: 0.8rem 0.9rem;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.14);
+      text-align: left;
+    }
+
+    th {
+      background: rgba(30, 41, 59, 0.95);
+      color: #e2e8f0;
+      font-weight: 700;
+      font-size: 0.84rem;
+    }
+
+    td {
+      color: #e5e7eb;
+      font-size: 0.92rem;
+      background: rgba(15, 23, 42, 0.25);
+    }
+
+    tbody tr:nth-child(even) td {
+      background: rgba(15, 23, 42, 0.45);
+    }
+
+    tbody tr:hover td {
+      background: rgba(30, 41, 59, 0.76);
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    .empty-state {
+      color: var(--muted);
+      padding: 1rem 0;
+    }
+
+    @media (max-width: 900px) {
+      .hero-card,
+      .two-up-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .section-heading {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+    }
+
+    @media (max-width: 640px) {
+      main {
+        width: min(100% - 1rem, 1200px);
+        margin: 1rem auto;
+      }
+
+      .content-box {
+        padding: 1.1rem;
+      }
+
+      .highlight-grid {
+        grid-template-columns: 1fr;
+      }
+
+      th,
+      td {
+        padding: 0.72rem 0.65rem;
+      }
+    }
   </style>
 </head>
 <body>
-  <main>
-    <header class="mb-6">
-      <h1 class="text-3xl font-bold">Portal de Insights HUB</h1>
-      <p class="text-slate-500">Fevereiro de 2026 - Análise de Produtividade</p>
-      <a href="/home" class="text-blue-600 hover:text-blue-800">← Voltar para Hub</a>
-    </header>
-
-    <section class="card">
-      <h2 class="section-title">Resumo Executivo</h2>
-      <p class="text-sm text-slate-600 mb-4">KPIs do período - Fevereiro/2026</p>
-      <div id="kpi-target" class="kpi-grid"></div>
-    </section>
-
-    <section class="section card">
-      <h2 class="section-title">Economia de Tempo Gerada</h2>
-      <div class="grid md:grid-cols-2 gap-4">
-        <div class="kpi-card">
-          <span class="text-sm">Minutos Economizados</span>
-          <strong id="economy-min"></strong>
-        </div>
-        <div class="kpi-card">
-          <span class="text-sm">Horas Economizadas</span>
-          <strong id="economy-hours"></strong>
-        </div>
+  <main id="root">
+    <div class="content-box">
+      <div class="flex items-center justify-between gap-4 flex-wrap mb-6">
+        <button type="button" id="back-button" class="btn-voltar">
+          <span aria-hidden="true">←</span>
+          <span>Voltar</span>
+        </button>
+        <span class="muted-text text-sm">Insights operacionais do HUB</span>
       </div>
-    </section>
 
-    <section class="section card">
-      <h2 class="section-title">Ranking de Usuários por Economia</h2>
-      <div class="grid md:grid-cols-2 gap-4">
-        <div class="chart-box"><canvas id="userPieChart" height="260"></canvas></div>
-        <div class="chart-box"><canvas id="endpointPieChart" height="260"></canvas></div>
+      <section class="hero-card">
+        <div class="hero-panel">
+          <span class="eyebrow">Painel Analítico</span>
+          <h1 class="hero-title">Portal de Insights HUB</h1>
+          <p class="hero-subtitle">Visão consolidada de produtividade, economia de tempo e uso das automações do HUB, no mesmo estilo visual dos demais módulos da aplicação.</p>
+        </div>
+
+        <div class="highlight-panel">
+          <div class="section-heading">
+            <div>
+              <h2 class="section-title">Resumo do período</h2>
+              <p class="section-subtitle text-sm">Fevereiro de 2026</p>
+            </div>
+          </div>
+          <div class="highlight-grid">
+            <div class="highlight-stat emphasis">
+              <span class="highlight-label">Horas economizadas</span>
+              <div id="economy-hours" class="highlight-value">0h</div>
+            </div>
+            <div class="highlight-stat">
+              <span class="highlight-label">Minutos economizados</span>
+              <div id="economy-min" class="highlight-value">0</div>
+            </div>
+            <div class="highlight-stat warning">
+              <span class="highlight-label">Ações produtivas</span>
+              <div id="productive-actions" class="highlight-value">0</div>
+            </div>
+            <div class="highlight-stat">
+              <span class="highlight-label">Usuários únicos</span>
+              <div id="unique-users" class="highlight-value">0</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="section-stack">
+        <section class="section-card">
+          <div class="section-heading">
+            <div>
+              <h2 class="section-title">Resumo Executivo</h2>
+              <p class="section-subtitle text-sm">KPIs consolidados do período</p>
+            </div>
+          </div>
+          <div id="kpi-target" class="kpi-grid"></div>
+        </section>
+
+        <section class="section-card">
+          <div class="section-heading">
+            <div>
+              <h2 class="section-title">Distribuição de Economia</h2>
+              <p class="section-subtitle text-sm">Quem mais economizou tempo e quais endpoints puxaram o resultado</p>
+            </div>
+          </div>
+          <div class="two-up-grid">
+            <div class="chart-box">
+              <h3 class="chart-title">Usuários por economia</h3>
+              <canvas id="userPieChart" height="260"></canvas>
+            </div>
+            <div class="chart-box">
+              <h3 class="chart-title">Endpoints por economia</h3>
+              <canvas id="endpointPieChart" height="260"></canvas>
+            </div>
+          </div>
+        </section>
+
+        <section class="section-card">
+          <div class="section-heading">
+            <div>
+              <h2 class="section-title">Top 5 Usuários</h2>
+              <p class="section-subtitle text-sm">Usuários com maior economia de tempo no período</p>
+            </div>
+          </div>
+          <div id="top-users" class="top-users-grid"></div>
+        </section>
+
+        <section class="section-card">
+          <div class="section-heading">
+            <div>
+              <h2 class="section-title">Ranking de Endpoints</h2>
+              <p class="section-subtitle text-sm">Economia gerada por endpoint produtivo</p>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Endpoint</th>
+                  <th>Frequência</th>
+                  <th>Economia (min)</th>
+                  <th>Economia (h)</th>
+                </tr>
+              </thead>
+              <tbody id="endpoints-table"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="section-card">
+          <div class="section-heading">
+            <div>
+              <h2 class="section-title">Métricas Consolidadas</h2>
+              <p class="section-subtitle text-sm">Resumo de volume e retorno operacional</p>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <tbody id="summary-metrics"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="section-card">
+          <div class="section-heading">
+            <div>
+              <h2 class="section-title">Atividade Diária</h2>
+              <p class="section-subtitle text-sm">Distribuição de requisições ao longo dos dias analisados</p>
+            </div>
+          </div>
+          <div class="chart-box">
+            <h3 class="chart-title">Requisições por dia</h3>
+            <canvas id="dailyChart" height="200"></canvas>
+          </div>
+        </section>
       </div>
-    </section>
-
-    <section class="section card">
-      <h2 class="section-title">Top 5 Usuários por Economia de Tempo</h2>
-      <div id="top-users" class="grid md:grid-cols-1 gap-3"></div>
-    </section>
-
-    <section class="section card">
-      <h2 class="section-title">Ranking de Endpoints por Economia de Tempo</h2>
-      <table>
-        <thead><tr><th>#</th><th>Endpoint</th><th>Frequência</th><th>Economia (min)</th><th>Economia (h)</th></tr></thead>
-        <tbody id="endpoints-table"></tbody>
-      </table>
-    </section>
-
-    <section class="section card">
-      <h2 class="section-title">Resumo de Métricas</h2>
-      <table>
-        <tbody id="summary-metrics"></tbody>
-      </table>
-    </section>
-
-    <section class="section card">
-      <h2 class="section-title">Atividade Diária</h2>
-      <div class="chart-box"><canvas id="dailyChart" height="200"></canvas></div>
-    </section>
-
+    </div>
   </main>
+
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="/reportData.js"></script>
   <script src="/js/hubInsights.js"></script>
