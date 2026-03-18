@@ -21,7 +21,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "prisma:seed": "node prisma/seed.js",
-    "gen-report": "python scripts/generate_report_data.py --log \"C:\\Users\\User\\.pm2\\logs\\hub-out.log\" --out \"C:\\Users\\User\\Desktop\\Projetos\\Hub\\reportData.ts\" --as-date 2026-03-01",
+    "gen-report": "node scripts/run-gen-report.mjs",
+    "warm-hub-cache": "node scripts/run-prewarm-hub-cache.mjs",
     "start": "node server.js"
   },
   "dependencies": {

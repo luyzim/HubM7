@@ -1,0 +1,171 @@
+{
+  "schemaVersion": 2,
+  "date": "2026-02-02",
+  "generatedAt": "2026-03-18T18:35:02",
+  "sourceLog": "C:\\Users\\aloys\\OneDrive\\Documentos\\Logs\\Hub\\Log Geral.txt",
+  "sourceLogMtimeNs": 1773787817220586600,
+  "stats": {
+    "kpis": {
+      "totalRequests": 272,
+      "distinctUsers": [
+        "aloysio@microset.com",
+        "ana.costa@microset.net.br",
+        "davi.sousa@microset.net.br",
+        "davi.souza@microset.net.br",
+        "deiver@microset.com",
+        "luan.tonetto@microset.com.br",
+        "mateus.rosario@microset.com.br",
+        "nando@microset.com"
+      ],
+      "productiveActions": 25,
+      "navigationActions": 96,
+      "totalEconomyMin": 757,
+      "pythonLogs": 0,
+      "bridgeLogs": 0
+    },
+    "statusDistribution": {
+      "200": 96,
+      "304": 101,
+      "302": 16,
+      "500": 3,
+      "404": 17,
+      "401": 36,
+      "403": 3
+    },
+    "endpoints": {
+      "POST /api/4g": {
+        "frequency": 5,
+        "economyMin": 125,
+        "timePerCallMin": 25,
+        "users": {
+          "deiver@microset.com": 1,
+          "davi.souza@microset.net.br": 4
+        }
+      },
+      "POST /api/mkt": {
+        "frequency": 7,
+        "economyMin": 357,
+        "timePerCallMin": 51,
+        "users": {
+          "nando@microset.com": 1,
+          "luan.tonetto@microset.com.br": 6
+        }
+      },
+      "POST /api/ccsFortgate": {
+        "frequency": 4,
+        "economyMin": 92,
+        "timePerCallMin": 23,
+        "users": {
+          "nando@microset.com": 2,
+          "luan.tonetto@microset.com.br": 2
+        }
+      },
+      "POST /api/mkt/mensagem": {
+        "frequency": 2,
+        "economyMin": 16,
+        "timePerCallMin": 8,
+        "users": {
+          "nando@microset.com": 1,
+          "luan.tonetto@microset.com.br": 1
+        }
+      },
+      "POST /api/comandos-mkt/scan-super": {
+        "frequency": 6,
+        "economyMin": 150,
+        "timePerCallMin": 25,
+        "users": {
+          "aloysio@microset.com": 4,
+          "ana.costa@microset.net.br": 2
+        }
+      },
+      "POST /api/comandos-oxidized/run": {
+        "frequency": 1,
+        "economyMin": 17,
+        "timePerCallMin": 17,
+        "users": {
+          "aloysio@microset.com": 1
+        }
+      }
+    },
+    "users": {
+      "deiver@microset.com": {
+        "totalRequests": 13,
+        "productiveActions": 1,
+        "economyMin": 25,
+        "endpoints": {
+          "POST /api/4g": 1
+        }
+      },
+      "nando@microset.com": {
+        "totalRequests": 20,
+        "productiveActions": 4,
+        "economyMin": 105,
+        "endpoints": {
+          "POST /api/mkt": 1,
+          "POST /api/ccsFortgate": 2,
+          "POST /api/mkt/mensagem": 1
+        }
+      },
+      "aloysio@microset.com": {
+        "totalRequests": 59,
+        "productiveActions": 5,
+        "economyMin": 117,
+        "endpoints": {
+          "POST /api/comandos-mkt/scan-super": 4,
+          "POST /api/comandos-oxidized/run": 1
+        }
+      },
+      "luan.tonetto@microset.com.br": {
+        "totalRequests": 18,
+        "productiveActions": 9,
+        "economyMin": 360,
+        "endpoints": {
+          "POST /api/mkt": 6,
+          "POST /api/ccsFortgate": 2,
+          "POST /api/mkt/mensagem": 1
+        }
+      },
+      "ana.costa@microset.net.br": {
+        "totalRequests": 10,
+        "productiveActions": 2,
+        "economyMin": 50,
+        "endpoints": {
+          "POST /api/comandos-mkt/scan-super": 2
+        }
+      },
+      "davi.souza@microset.net.br": {
+        "totalRequests": 60,
+        "productiveActions": 4,
+        "economyMin": 100,
+        "endpoints": {
+          "POST /api/4g": 4
+        }
+      },
+      "davi.sousa@microset.net.br": {
+        "totalRequests": 2,
+        "productiveActions": 0,
+        "economyMin": 0,
+        "endpoints": {}
+      },
+      "mateus.rosario@microset.com.br": {
+        "totalRequests": 11,
+        "productiveActions": 0,
+        "economyMin": 0,
+        "endpoints": {}
+      }
+    },
+    "dailyActivity": {
+      "2026-02-02": 272
+    },
+    "relatorio": {
+      "totalEvents": 0,
+      "distinctUsers": [],
+      "actions": {},
+      "routes": {},
+      "results": {},
+      "dailyActivity": {},
+      "maxSyncVersion": 0,
+      "users": {}
+    }
+  }
+}

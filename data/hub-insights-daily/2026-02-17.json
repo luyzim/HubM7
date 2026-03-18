@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 2,
+  "date": "2026-02-17",
+  "generatedAt": "2026-03-18T18:35:02",
+  "sourceLog": "C:\\Users\\aloys\\OneDrive\\Documentos\\Logs\\Hub\\Log Geral.txt",
+  "sourceLogMtimeNs": 1773787817220586600,
+  "stats": {
+    "kpis": {
+      "totalRequests": 6,
+      "distinctUsers": [
+        "aloysio@microset.com"
+      ],
+      "productiveActions": 0,
+      "navigationActions": 4,
+      "totalEconomyMin": 0,
+      "pythonLogs": 0,
+      "bridgeLogs": 0
+    },
+    "statusDistribution": {
+      "302": 1,
+      "200": 2,
+      "304": 3
+    },
+    "endpoints": {},
+    "users": {
+      "aloysio@microset.com": {
+        "totalRequests": 4,
+        "productiveActions": 0,
+        "economyMin": 0,
+        "endpoints": {}
+      }
+    },
+    "dailyActivity": {
+      "2026-02-17": 6
+    },
+    "relatorio": {
+      "totalEvents": 0,
+      "distinctUsers": [],
+      "actions": {},
+      "routes": {},
+      "results": {},
+      "dailyActivity": {},
+      "maxSyncVersion": 0,
+      "users": {}
+    }
+  }
+}

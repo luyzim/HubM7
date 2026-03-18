@@ -36,6 +36,7 @@ import loginOtrsRouter from "./routes/loginOtrsRoute.js";
 import wikiRouter from "./routes/wikiRoute.js";
 import workSessionRouter from "./routes/workSessionRoute.js";
 import adminDashboardRouter from "./routes/adminDashboardRoute.js";
+import adminHubInsightsRouter from "./routes/adminHubInsightsRoute.js";
 import relatorioCcoRouter from "./routes/relatorioCcoRoute.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -81,8 +82,8 @@ const flaskFormat = ':remote-addr - - [:date_flask] ":method :url HTTP/:http-ver
 
 app.use(morgan(flaskFormat, {
   skip: (req) =>
-  req.method === "POST" &&
-  req.originalUrl.startsWith("/api/work-session/ping")
+    (req.method === "POST" && req.originalUrl.startsWith("/api/work-session/ping")) ||
+    (req.method === "GET" && req.originalUrl.startsWith("/api/relatorio/sync"))
 }));
 
 // Servir arquivos estáticos da pasta 'public'
@@ -102,8 +103,18 @@ app.get("/home", ensureAuth, (req, res) => {
   res.sendFile(path.join(__dirname, "public", "home.html"));
 });
 
-app.get("/admin/hub-relatorio", ensureAuth, (req, res) => {
+app.get("/admin/hub-relatorio", ensureAdmin, (req, res) => {
+  res.set("Cache-Control", "no-store");
   res.sendFile(path.join(__dirname, "public", "hub.html"));
+});
+
+app.get("/hub.html", ensureAdmin, (req, res) => {
+  res.redirect("/admin/hub-relatorio");
+});
+
+app.get("/reportData.js", ensureAdmin, (req, res) => {
+  res.set("Cache-Control", "no-store");
+  res.sendFile(path.join(__dirname, "public", "reportData.js"));
 });
 
 app.get("/homeAdmin", ensureAdmin, (req, res) => {
@@ -203,6 +214,7 @@ app.use("/api/ccsFortgate", ensureN1, ccsFortgateRouter);
 app.use("/api/loginOtrs", ensureN2, loginOtrsRouter);
 app.use("/api/wiki", ensureN2, wikiRouter);
 app.use("/api/work-session", ensureAuth, workSessionRouter);
+app.use("/api/admin/hub-insights", ensureAdmin, adminHubInsightsRouter);
 app.use("/api/admin", ensureAdmin, adminDashboardRouter);
 app.use("/api/relatorio", ensureN1, relatorioCcoRouter);
 

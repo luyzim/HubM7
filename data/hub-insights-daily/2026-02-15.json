@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 2,
+  "date": "2026-02-15",
+  "generatedAt": "2026-03-18T18:35:02",
+  "sourceLog": "C:\\Users\\aloys\\OneDrive\\Documentos\\Logs\\Hub\\Log Geral.txt",
+  "sourceLogMtimeNs": 1773787817220586600,
+  "stats": {
+    "kpis": {
+      "totalRequests": 1,
+      "distinctUsers": [],
+      "productiveActions": 0,
+      "navigationActions": 1,
+      "totalEconomyMin": 0,
+      "pythonLogs": 0,
+      "bridgeLogs": 0
+    },
+    "statusDistribution": {
+      "304": 1
+    },
+    "endpoints": {},
+    "users": {},
+    "dailyActivity": {
+      "2026-02-15": 1
+    },
+    "relatorio": {
+      "totalEvents": 0,
+      "distinctUsers": [],
+      "actions": {},
+      "routes": {},
+      "results": {},
+      "dailyActivity": {},
+      "maxSyncVersion": 0,
+      "users": {}
+    }
+  }
+}

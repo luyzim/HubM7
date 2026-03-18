@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8" />
-  <title>Portal de Insights HUB</title>
+  <title>Portal de Utilização HUB</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="icon" type="image/png" href="https://i.imgur.com/8qVGalo.png">
   <script src="https://cdn.tailwindcss.com"></script>
@@ -70,6 +70,46 @@
     .btn-voltar:hover {
       background-color: #6b7280;
       transform: translateY(-1px);
+    }
+
+    .primary-button,
+    .preset-button {
+      border: 1px solid transparent;
+      border-radius: 0.6rem;
+      cursor: pointer;
+      font-weight: 600;
+      transition: transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+    }
+
+    .primary-button {
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      color: #fff;
+      padding: 0.78rem 1.1rem;
+      min-width: 140px;
+    }
+
+    .primary-button:hover,
+    .preset-button:hover {
+      transform: translateY(-1px);
+    }
+
+    .primary-button:disabled {
+      cursor: wait;
+      opacity: 0.7;
+      transform: none;
+    }
+
+    .preset-button {
+      background: rgba(30, 41, 59, 0.9);
+      border-color: rgba(96, 165, 250, 0.18);
+      color: #cbd5e1;
+      padding: 0.55rem 0.85rem;
+    }
+
+    .preset-button.is-active {
+      background: rgba(37, 99, 235, 0.18);
+      border-color: rgba(96, 165, 250, 0.45);
+      color: #dbeafe;
     }
 
     .hero-card {
@@ -177,6 +217,66 @@
 
     .section-card {
       margin-top: 0;
+    }
+
+    .section-card-stack {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .filter-grid {
+      display: grid;
+      gap: 1rem;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      align-items: end;
+    }
+
+    .field-group {
+      display: grid;
+      gap: 0.45rem;
+    }
+
+    .field-label {
+      color: #cbd5e1;
+      font-size: 0.84rem;
+      font-weight: 600;
+    }
+
+    .date-input {
+      width: 100%;
+      border-radius: 0.65rem;
+      border: 1px solid rgba(148, 163, 184, 0.28);
+      background: rgba(15, 23, 42, 0.72);
+      color: #f8fafc;
+      padding: 0.82rem 0.9rem;
+    }
+
+    .date-input:focus {
+      outline: 2px solid rgba(96, 165, 250, 0.34);
+      outline-offset: 1px;
+    }
+
+    .preset-row,
+    .range-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      align-items: center;
+    }
+
+    .range-meta {
+      justify-content: space-between;
+      margin-top: 1rem;
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+
+    .range-feedback[data-state="error"] {
+      color: #fca5a5;
+    }
+
+    .range-feedback[data-state="success"] {
+      color: #86efac;
     }
 
     .section-heading {
@@ -308,7 +408,7 @@
     .table-wrap {
       overflow-x: auto;
     }
-
+    
     .empty-state {
       color: var(--muted);
       padding: 1rem 0;
@@ -317,6 +417,10 @@
     @media (max-width: 900px) {
       .hero-card,
       .two-up-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .filter-grid {
         grid-template-columns: 1fr;
       }
 
@@ -352,24 +456,24 @@
     <div class="content-box">
       <div class="flex items-center justify-between gap-4 flex-wrap mb-6">
         <button type="button" id="back-button" class="btn-voltar">
-          <span aria-hidden="true">←</span>
+          <span aria-hidden="true">&larr;</span>
           <span>Voltar</span>
         </button>
-        <span class="muted-text text-sm">Insights operacionais do HUB</span>
+        <span class="muted-text text-sm">Análise de Produtividade</span>
       </div>
 
       <section class="hero-card">
         <div class="hero-panel">
-          <span class="eyebrow">Painel Analítico</span>
-          <h1 class="hero-title">Portal de Insights HUB</h1>
-          <p class="hero-subtitle">Visão consolidada de produtividade, economia de tempo e uso das automações do HUB, no mesmo estilo visual dos demais módulos da aplicação.</p>
+          <span class="eyebrow">Utilização do HUB</span>
+          <h1 class="hero-title">Portal de Utilização HUB</h1>
+          <p class="hero-subtitle">Visão de Ações e atividades dos usuarios.</p>
         </div>
 
         <div class="highlight-panel">
           <div class="section-heading">
             <div>
-              <h2 class="section-title">Resumo do período</h2>
-              <p class="section-subtitle text-sm">Fevereiro de 2026</p>
+              <h2 class="section-title">Economia de Tempo Gerada</h2>
+              <p class="section-subtitle text-sm">Resumo do período e principais ganhos operacionais</p>
             </div>
           </div>
           <div class="highlight-grid">
@@ -397,7 +501,44 @@
         <section class="section-card">
           <div class="section-heading">
             <div>
-              <h2 class="section-title">Resumo Executivo</h2>
+              <h2 class="section-title">Periodo da Analise</h2>
+              <p class="section-subtitle text-sm">O painel administrativo aceita janelas de ate 90 dias e soma os agregados diarios automaticamente.</p>
+            </div>
+          </div>
+
+          <div class="filter-grid">
+            <div class="field-group">
+              <label class="field-label" for="from-date">Data inicial</label>
+              <input id="from-date" class="date-input" type="date" />
+            </div>
+
+            <div class="field-group">
+              <label class="field-label" for="to-date">Data final</label>
+              <input id="to-date" class="date-input" type="date" />
+            </div>
+
+            <button type="button" id="apply-range-button" class="primary-button">Aplicar periodo</button>
+          </div>
+
+          <div class="preset-row mt-4">
+            <button type="button" class="preset-button" data-preset="today">Hoje</button>
+            <button type="button" class="preset-button" data-preset="last7">Ultimos 7 dias</button>
+            <button type="button" class="preset-button" data-preset="last30">Ultimos 30 dias</button>
+            <button type="button" class="preset-button" data-preset="currentMonth">Mes atual</button>
+            <button type="button" class="preset-button" data-preset="previousMonth">Mes anterior</button>
+            <button type="button" class="preset-button" data-preset="max90">Ultimos 90 dias</button>
+          </div>
+
+          <div class="range-meta">
+            <span id="period-label">Periodo carregado: aguardando dados</span>
+            <span id="range-feedback" class="range-feedback" data-state="idle">Selecione um intervalo para atualizar os insights.</span>
+          </div>
+        </section>
+
+        <section class="section-card">
+          <div class="section-heading">
+            <div>
+              <h2 class="section-title">Resumo De Uso</h2>
               <p class="section-subtitle text-sm">KPIs consolidados do período</p>
             </div>
           </div>
@@ -407,17 +548,17 @@
         <section class="section-card">
           <div class="section-heading">
             <div>
-              <h2 class="section-title">Distribuição de Economia</h2>
-              <p class="section-subtitle text-sm">Quem mais economizou tempo e quais endpoints puxaram o resultado</p>
+              <h2 class="section-title">Gráficos de Usuários e Ações</h2>
+              <p class="section-subtitle text-sm">Distribuição dos usuários e endpoints com maior impacto no período</p>
             </div>
           </div>
           <div class="two-up-grid">
             <div class="chart-box">
-              <h3 class="chart-title">Usuários por economia</h3>
+              <h3 class="chart-title">Usuários por ações</h3>
               <canvas id="userPieChart" height="260"></canvas>
             </div>
             <div class="chart-box">
-              <h3 class="chart-title">Endpoints por economia</h3>
+              <h3 class="chart-title">Ações por frequência</h3>
               <canvas id="endpointPieChart" height="260"></canvas>
             </div>
           </div>
@@ -426,8 +567,8 @@
         <section class="section-card">
           <div class="section-heading">
             <div>
-              <h2 class="section-title">Top 5 Usuários</h2>
-              <p class="section-subtitle text-sm">Usuários com maior economia de tempo no período</p>
+              <h2 class="section-title">Top 5 Usuários por Ações</h2>
+              <p class="section-subtitle text-sm">Usuários com maior volume de ações produtivas e ganho operacional</p>
             </div>
           </div>
           <div id="top-users" class="top-users-grid"></div>
@@ -436,8 +577,8 @@
         <section class="section-card">
           <div class="section-heading">
             <div>
-              <h2 class="section-title">Ranking de Endpoints</h2>
-              <p class="section-subtitle text-sm">Economia gerada por endpoint produtivo</p>
+              <h2 class="section-title">Ranking de Ações e Economia de Tempo</h2>
+              <p class="section-subtitle text-sm">Endpoints produtivos com maior impacto no período</p>
             </div>
           </div>
           <div class="table-wrap">
@@ -447,7 +588,7 @@
                   <th>#</th>
                   <th>Endpoint</th>
                   <th>Frequência</th>
-                  <th>Economia (min)</th>
+                  <th>Usuário / Requisições</th>
                   <th>Economia (h)</th>
                 </tr>
               </thead>
@@ -459,8 +600,8 @@
         <section class="section-card">
           <div class="section-heading">
             <div>
-              <h2 class="section-title">Métricas Consolidadas</h2>
-              <p class="section-subtitle text-sm">Resumo de volume e retorno operacional</p>
+              <h2 class="section-title">Resumo de Métricas</h2>
+              <p class="section-subtitle text-sm">Indicadores consolidados do período</p>
             </div>
           </div>
           <div class="table-wrap">
@@ -473,7 +614,58 @@
         <section class="section-card">
           <div class="section-heading">
             <div>
-              <h2 class="section-title">Atividade Diária</h2>
+              <h2 class="section-title">Relatório CCO</h2>
+              <p class="section-subtitle text-sm">Eventos do relatório separados da utilização principal do HUB</p>
+            </div>
+          </div>
+          <div class="section-card-stack">
+            <div id="relatorio-kpi-target" class="kpi-grid"></div>
+
+            <div class="two-up-grid">
+              <div class="chart-box">
+                <h3 class="chart-title">Ações do relatório</h3>
+                <canvas id="relatorioActionsChart" height="220"></canvas>
+              </div>
+
+              <div class="chart-box">
+                <h3 class="chart-title">Rotas do relatório</h3>
+                <div class="table-wrap">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Rota</th>
+                        <th>Eventos</th>
+                      </tr>
+                    </thead>
+                    <tbody id="relatorio-routes-table"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Usuário</th>
+                    <th>Eventos</th>
+                    <th>Criações</th>
+                    <th>Atualizações</th>
+                    <th>Exclusções</th>
+                    <th>Max Tickets</th>
+                    <th>Última Sync</th>
+                  </tr>
+                </thead>
+                <tbody id="relatorio-users-table"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <section class="section-card">
+          <div class="section-heading">
+            <div>
+              <h2 class="section-title">Atividade por Dias</h2>
               <p class="section-subtitle text-sm">Distribuição de requisições ao longo dos dias analisados</p>
             </div>
           </div>
@@ -487,7 +679,7 @@
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="/reportData.js"></script>
-  <script src="/js/hubInsights.js"></script>
+  <script src="/reportData.js?v=20260317-1"></script>
+  <script src="/js/hubInsights.js?v=20260318-2"></script>
 </body>
 </html>

@@ -1,0 +1,223 @@
+{
+  "schemaVersion": 2,
+  "date": "2026-03-17",
+  "generatedAt": "2026-03-18T18:41:17",
+  "sourceLog": "C:\\Users\\aloys\\OneDrive\\Documentos\\Logs\\Hub\\Log Geral.txt",
+  "sourceLogMtimeNs": 1773787817220586600,
+  "stats": {
+    "kpis": {
+      "totalRequests": 566,
+      "distinctUsers": [
+        "aloysio@microset.com",
+        "ana.costa@microset.net.br",
+        "davi.assuncao@microset.net.br",
+        "davi.souza@microset.net.br",
+        "deiver@microset.com",
+        "joao.martins@microset.net.br",
+        "luan.tonetto@microset.com.br",
+        "mateus.rosario@microset.com.br",
+        "saba@microset.com",
+        "tamires.santos@microset.net.br"
+      ],
+      "productiveActions": 16,
+      "navigationActions": 232,
+      "totalEconomyMin": 365,
+      "pythonLogs": 0,
+      "bridgeLogs": 0
+    },
+    "statusDistribution": {
+      "302": 13,
+      "200": 138,
+      "304": 364,
+      "401": 43,
+      "404": 4,
+      "500": 1,
+      "400": 3
+    },
+    "endpoints": {
+      "POST /api/comandos-mkt/scan-super": {
+        "frequency": 1,
+        "economyMin": 25,
+        "timePerCallMin": 25,
+        "users": {
+          "joao.martins@microset.net.br": 1
+        }
+      },
+      "POST /api/4g": {
+        "frequency": 1,
+        "economyMin": 25,
+        "timePerCallMin": 25,
+        "users": {
+          "mateus.rosario@microset.com.br": 1
+        }
+      },
+      "POST /api/mkt": {
+        "frequency": 4,
+        "economyMin": 204,
+        "timePerCallMin": 51,
+        "users": {
+          "luan.tonetto@microset.com.br": 4
+        }
+      },
+      "POST /api/mkt/mensagem": {
+        "frequency": 8,
+        "economyMin": 64,
+        "timePerCallMin": 8,
+        "users": {
+          "luan.tonetto@microset.com.br": 3,
+          "deiver@microset.com": 3,
+          "aloysio@microset.com": 2
+        }
+      },
+      "POST /api/bkpMkt": {
+        "frequency": 1,
+        "economyMin": 30,
+        "timePerCallMin": 30,
+        "users": {
+          "deiver@microset.com": 1
+        }
+      },
+      "POST /api/comandos-oxidized/run": {
+        "frequency": 1,
+        "economyMin": 17,
+        "timePerCallMin": 17,
+        "users": {
+          "aloysio@microset.com": 1
+        }
+      }
+    },
+    "users": {
+      "davi.souza@microset.net.br": {
+        "totalRequests": 39,
+        "productiveActions": 0,
+        "economyMin": 0,
+        "endpoints": {}
+      },
+      "tamires.santos@microset.net.br": {
+        "totalRequests": 2,
+        "productiveActions": 0,
+        "economyMin": 0,
+        "endpoints": {}
+      },
+      "mateus.rosario@microset.com.br": {
+        "totalRequests": 37,
+        "productiveActions": 1,
+        "economyMin": 25,
+        "endpoints": {
+          "POST /api/4g": 1
+        }
+      },
+      "joao.martins@microset.net.br": {
+        "totalRequests": 24,
+        "productiveActions": 1,
+        "economyMin": 25,
+        "endpoints": {
+          "POST /api/comandos-mkt/scan-super": 1
+        }
+      },
+      "davi.assuncao@microset.net.br": {
+        "totalRequests": 61,
+        "productiveActions": 0,
+        "economyMin": 0,
+        "endpoints": {}
+      },
+      "ana.costa@microset.net.br": {
+        "totalRequests": 18,
+        "productiveActions": 0,
+        "economyMin": 0,
+        "endpoints": {}
+      },
+      "luan.tonetto@microset.com.br": {
+        "totalRequests": 78,
+        "productiveActions": 7,
+        "economyMin": 228,
+        "endpoints": {
+          "POST /api/mkt": 4,
+          "POST /api/mkt/mensagem": 3
+        }
+      },
+      "deiver@microset.com": {
+        "totalRequests": 20,
+        "productiveActions": 4,
+        "economyMin": 54,
+        "endpoints": {
+          "POST /api/bkpMkt": 1,
+          "POST /api/mkt/mensagem": 3
+        }
+      },
+      "aloysio@microset.com": {
+        "totalRequests": 59,
+        "productiveActions": 3,
+        "economyMin": 33,
+        "endpoints": {
+          "POST /api/comandos-oxidized/run": 1,
+          "POST /api/mkt/mensagem": 2
+        }
+      },
+      "saba@microset.com": {
+        "totalRequests": 9,
+        "productiveActions": 0,
+        "economyMin": 0,
+        "endpoints": {}
+      }
+    },
+    "dailyActivity": {
+      "2026-03-17": 566
+    },
+    "relatorio": {
+      "totalEvents": 67,
+      "distinctUsers": [
+        "aloysio@microset.com",
+        "davi.assuncao@microset.net.br"
+      ],
+      "actions": {
+        "create": 4,
+        "update": 62,
+        "delete": 1
+      },
+      "routes": {
+        "POST /tickets": 4,
+        "PUT /tickets/:id": 62,
+        "DELETE /tickets/:id": 1
+      },
+      "results": {
+        "OK": 67
+      },
+      "dailyActivity": {
+        "2026-03-17": 67
+      },
+      "maxSyncVersion": 80,
+      "users": {
+        "aloysio@microset.com": {
+          "events": 4,
+          "actions": {
+            "create": 1,
+            "update": 3
+          },
+          "results": {
+            "OK": 4
+          },
+          "lastTickets": 1,
+          "maxTickets": 1,
+          "lastSyncVersion": 17,
+          "lastEventTs": "2026-03-17T14:47:19"
+        },
+        "davi.assuncao@microset.net.br": {
+          "events": 63,
+          "actions": {
+            "delete": 1,
+            "create": 3,
+            "update": 59
+          },
+          "results": {
+            "OK": 63
+          },
+          "lastTickets": 3,
+          "maxTickets": 3,
+          "lastSyncVersion": 80,
+          "lastEventTs": "2026-03-17T15:17:03"
+        }
+      }
+    }
+  }
+}

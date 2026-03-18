@@ -1,0 +1,66 @@
+{
+  "date": "2026-03-08",
+  "generatedAt": "2026-03-17T21:27:08",
+  "sourceLog": "C:\\Users\\aloys\\OneDrive\\Documentos\\Logs\\Hub\\Log Geral.txt",
+  "sourceLogMtimeNs": 1773787817220586600,
+  "stats": {
+    "kpis": {
+      "totalRequests": 41,
+      "distinctUsers": [
+        "ana.costa@microset.net.br",
+        "layla.almeida@microset.net.br"
+      ],
+      "productiveActions": 4,
+      "navigationActions": 22,
+      "totalEconomyMin": 100,
+      "pythonLogs": 0,
+      "bridgeLogs": 0
+    },
+    "statusDistribution": {
+      "302": 2,
+      "304": 18,
+      "200": 16,
+      "404": 2,
+      "401": 2,
+      "500": 1
+    },
+    "endpoints": {
+      "POST /api/comandos-mkt/scan-super": {
+        "frequency": 4,
+        "economyMin": 100,
+        "timePerCallMin": 25
+      }
+    },
+    "users": {
+      "ana.costa@microset.net.br": {
+        "totalRequests": 11,
+        "productiveActions": 1,
+        "economyMin": 25,
+        "endpoints": {
+          "POST /api/comandos-mkt/scan-super": 1
+        }
+      },
+      "layla.almeida@microset.net.br": {
+        "totalRequests": 22,
+        "productiveActions": 3,
+        "economyMin": 75,
+        "endpoints": {
+          "POST /api/comandos-mkt/scan-super": 3
+        }
+      }
+    },
+    "dailyActivity": {
+      "2026-03-08": 41
+    },
+    "relatorio": {
+      "totalEvents": 0,
+      "distinctUsers": [],
+      "actions": {},
+      "routes": {},
+      "results": {},
+      "dailyActivity": {},
+      "maxSyncVersion": 0,
+      "users": {}
+    }
+  }
+}

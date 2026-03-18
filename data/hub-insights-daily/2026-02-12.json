@@ -1,0 +1,177 @@
+{
+  "schemaVersion": 2,
+  "date": "2026-02-12",
+  "generatedAt": "2026-03-18T18:35:02",
+  "sourceLog": "C:\\Users\\aloys\\OneDrive\\Documentos\\Logs\\Hub\\Log Geral.txt",
+  "sourceLogMtimeNs": 1773787817220586600,
+  "stats": {
+    "kpis": {
+      "totalRequests": 207,
+      "distinctUsers": [
+        "aloysio@microset.com",
+        "antonio.faria@microset.com",
+        "deiver@microset.com",
+        "diego.lopes@microset.com",
+        "luan.tonetto@microset.com.br",
+        "saba@microset.com"
+      ],
+      "productiveActions": 50,
+      "navigationActions": 51,
+      "totalEconomyMin": 1049,
+      "pythonLogs": 0,
+      "bridgeLogs": 0
+    },
+    "statusDistribution": {
+      "200": 105,
+      "302": 15,
+      "304": 64,
+      "500": 2,
+      "400": 1,
+      "404": 3,
+      "401": 7,
+      "403": 10
+    },
+    "endpoints": {
+      "POST /api/comandos-oxidized/run": {
+        "frequency": 9,
+        "economyMin": 153,
+        "timePerCallMin": 17,
+        "users": {
+          "antonio.faria@microset.com": 2,
+          "aloysio@microset.com": 5,
+          "diego.lopes@microset.com": 2
+        }
+      },
+      "POST /api/mkt": {
+        "frequency": 8,
+        "economyMin": 408,
+        "timePerCallMin": 51,
+        "users": {
+          "deiver@microset.com": 2,
+          "saba@microset.com": 4,
+          "luan.tonetto@microset.com.br": 1,
+          "aloysio@microset.com": 1
+        }
+      },
+      "POST /api/ccsFortgate": {
+        "frequency": 9,
+        "economyMin": 207,
+        "timePerCallMin": 23,
+        "users": {
+          "saba@microset.com": 5,
+          "deiver@microset.com": 3,
+          "luan.tonetto@microset.com.br": 1
+        }
+      },
+      "POST /api/mkt/gerawiki": {
+        "frequency": 5,
+        "economyMin": 85,
+        "timePerCallMin": 17,
+        "users": {
+          "deiver@microset.com": 1,
+          "saba@microset.com": 4
+        }
+      },
+      "POST /api/mkt/mensagem": {
+        "frequency": 15,
+        "economyMin": 120,
+        "timePerCallMin": 8,
+        "users": {
+          "deiver@microset.com": 6,
+          "saba@microset.com": 8,
+          "luan.tonetto@microset.com.br": 1
+        }
+      },
+      "POST /api/wiki": {
+        "frequency": 3,
+        "economyMin": 51,
+        "timePerCallMin": 17,
+        "users": {
+          "saba@microset.com": 3
+        }
+      },
+      "POST /api/comandos-mkt/scan-super": {
+        "frequency": 1,
+        "economyMin": 25,
+        "timePerCallMin": 25,
+        "users": {
+          "aloysio@microset.com": 1
+        }
+      }
+    },
+    "users": {
+      "antonio.faria@microset.com": {
+        "totalRequests": 19,
+        "productiveActions": 2,
+        "economyMin": 34,
+        "endpoints": {
+          "POST /api/comandos-oxidized/run": 2
+        }
+      },
+      "luan.tonetto@microset.com.br": {
+        "totalRequests": 18,
+        "productiveActions": 3,
+        "economyMin": 82,
+        "endpoints": {
+          "POST /api/mkt": 1,
+          "POST /api/mkt/mensagem": 1,
+          "POST /api/ccsFortgate": 1
+        }
+      },
+      "saba@microset.com": {
+        "totalRequests": 46,
+        "productiveActions": 24,
+        "economyMin": 502,
+        "endpoints": {
+          "POST /api/mkt": 4,
+          "POST /api/ccsFortgate": 5,
+          "POST /api/mkt/mensagem": 8,
+          "POST /api/mkt/gerawiki": 4,
+          "POST /api/wiki": 3
+        }
+      },
+      "deiver@microset.com": {
+        "totalRequests": 23,
+        "productiveActions": 12,
+        "economyMin": 236,
+        "endpoints": {
+          "POST /api/mkt": 2,
+          "POST /api/mkt/gerawiki": 1,
+          "POST /api/ccsFortgate": 3,
+          "POST /api/mkt/mensagem": 6
+        }
+      },
+      "aloysio@microset.com": {
+        "totalRequests": 36,
+        "productiveActions": 7,
+        "economyMin": 161,
+        "endpoints": {
+          "POST /api/comandos-mkt/scan-super": 1,
+          "POST /api/comandos-oxidized/run": 5,
+          "POST /api/mkt": 1
+        }
+      },
+      "diego.lopes@microset.com": {
+        "totalRequests": 31,
+        "productiveActions": 2,
+        "economyMin": 34,
+        "endpoints": {
+          "POST /api/comandos-oxidized/run": 2
+        }
+      }
+    },
+    "dailyActivity": {
+      "2026-02-12": 207
+    },
+    "relatorio": {
+      "totalEvents": 0,
+      "distinctUsers": [],
+      "actions": {},
+      "routes": {},
+      "results": {},
+      "dailyActivity": {},
+      "maxSyncVersion": 0,
+      "users": {}
+    }
+  }
+}

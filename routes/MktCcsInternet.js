@@ -55,7 +55,7 @@ function runTemplate(res, data, templateName, cmd) {
 router.post("/", (req, res) => {
   const data = req.body?.data || req.body;
   runTemplate(res, data, "mktModelo.txt", "mkt");
-  console.log('Gerado Script MKT:', data.NOME_PA, data.NUM_PA, data.VRF, data.IP_VALIDO);
+  console.log('[OK]Gerado Script MKT:', data.NOME_PA, data.NUM_PA, data.VRF, data.IP_VALIDO);
 });
 
 router.post("/mensagem", (req, res) => {

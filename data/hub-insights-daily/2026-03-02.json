@@ -1,0 +1,150 @@
+{
+  "date": "2026-03-02",
+  "generatedAt": "2026-03-17T21:27:08",
+  "sourceLog": "C:\\Users\\aloys\\OneDrive\\Documentos\\Logs\\Hub\\Log Geral.txt",
+  "sourceLogMtimeNs": 1773787817220586600,
+  "stats": {
+    "kpis": {
+      "totalRequests": 194,
+      "distinctUsers": [
+        "aloysio@microset.com",
+        "ana.costa@microset.net.br",
+        "davi.souza@microset.net.br",
+        "deiver@microset.com",
+        "diego.lopes@microset.com",
+        "luan.tonetto@microset.com.br",
+        "saba@microset.com"
+      ],
+      "productiveActions": 27,
+      "navigationActions": 109,
+      "totalEconomyMin": 613,
+      "pythonLogs": 0,
+      "bridgeLogs": 0
+    },
+    "statusDistribution": {
+      "404": 4,
+      "302": 7,
+      "304": 82,
+      "200": 96,
+      "500": 5
+    },
+    "endpoints": {
+      "POST /api/4g": {
+        "frequency": 2,
+        "economyMin": 50,
+        "timePerCallMin": 25
+      },
+      "POST /api/mkt": {
+        "frequency": 4,
+        "economyMin": 204,
+        "timePerCallMin": 51
+      },
+      "POST /api/mkt/gerawiki": {
+        "frequency": 3,
+        "economyMin": 51,
+        "timePerCallMin": 17
+      },
+      "POST /api/mkt/mensagem": {
+        "frequency": 4,
+        "economyMin": 32,
+        "timePerCallMin": 8
+      },
+      "POST /api/wiki": {
+        "frequency": 5,
+        "economyMin": 85,
+        "timePerCallMin": 17
+      },
+      "POST /api/ccsFortgate": {
+        "frequency": 5,
+        "economyMin": 115,
+        "timePerCallMin": 23
+      },
+      "POST /api/comandos-oxidized/run": {
+        "frequency": 3,
+        "economyMin": 51,
+        "timePerCallMin": 17
+      },
+      "POST /api/comandos-mkt/scan-super": {
+        "frequency": 1,
+        "economyMin": 25,
+        "timePerCallMin": 25
+      }
+    },
+    "users": {
+      "deiver@microset.com": {
+        "totalRequests": 11,
+        "productiveActions": 1,
+        "economyMin": 25,
+        "endpoints": {
+          "POST /api/4g": 1
+        }
+      },
+      "luan.tonetto@microset.com.br": {
+        "totalRequests": 49,
+        "productiveActions": 7,
+        "economyMin": 181,
+        "endpoints": {
+          "POST /api/mkt": 2,
+          "POST /api/mkt/gerawiki": 1,
+          "POST /api/mkt/mensagem": 2,
+          "POST /api/ccsFortgate": 2
+        }
+      },
+      "saba@microset.com": {
+        "totalRequests": 38,
+        "productiveActions": 14,
+        "economyMin": 306,
+        "endpoints": {
+          "POST /api/mkt": 2,
+          "POST /api/mkt/gerawiki": 2,
+          "POST /api/wiki": 5,
+          "POST /api/mkt/mensagem": 2,
+          "POST /api/ccsFortgate": 3
+        }
+      },
+      "diego.lopes@microset.com": {
+        "totalRequests": 30,
+        "productiveActions": 3,
+        "economyMin": 51,
+        "endpoints": {
+          "POST /api/comandos-oxidized/run": 3
+        }
+      },
+      "ana.costa@microset.net.br": {
+        "totalRequests": 15,
+        "productiveActions": 1,
+        "economyMin": 25,
+        "endpoints": {
+          "POST /api/comandos-mkt/scan-super": 1
+        }
+      },
+      "aloysio@microset.com": {
+        "totalRequests": 18,
+        "productiveActions": 0,
+        "economyMin": 0,
+        "endpoints": {}
+      },
+      "davi.souza@microset.net.br": {
+        "totalRequests": 12,
+        "productiveActions": 1,
+        "economyMin": 25,
+        "endpoints": {
+          "POST /api/4g": 1
+        }
+      }
+    },
+    "dailyActivity": {
+      "2026-03-02": 194
+    },
+    "relatorio": {
+      "totalEvents": 0,
+      "distinctUsers": [],
+      "actions": {},
+      "routes": {},
+      "results": {},
+      "dailyActivity": {},
+      "maxSyncVersion": 0,
+      "users": {}
+    }
+  }
+}
